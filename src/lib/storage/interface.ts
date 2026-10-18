@@ -6,4 +6,6 @@ export interface StorageAdapter {
   saveTaste(taste: TasteProfile): void;
   getWorld(): World | null;
   saveWorld(world: World): void;
+  getBoardIntroSeen(): boolean;
+  saveBoardIntroSeen(seen: boolean): void;
 }

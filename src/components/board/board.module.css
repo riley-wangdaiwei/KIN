@@ -1,0 +1,753 @@
+.boardApp {
+  min-height: 100vh;
+  background: var(--kin-paper);
+  color: var(--kin-black);
+}
+
+.siteHeader {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  align-items: center;
+  gap: 1rem;
+  border-bottom: 1px solid var(--kin-mid-gray);
+  padding: 0.55rem var(--kin-page-gutter) 0.65rem;
+}
+
+.wordmark {
+  width: fit-content;
+  font-family: var(--kin-display-serif);
+  font-size: clamp(2rem, 3.6vw, 3.5rem);
+  line-height: 0.8;
+  letter-spacing: -0.07em;
+  text-decoration: none;
+}
+
+.headerCaption,
+.headerIssue,
+.microLabel {
+  color: var(--kin-charcoal);
+  font-family: var(--kin-micro-mono);
+  font-size: var(--kin-caption-size);
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.headerCaption {
+  justify-self: center;
+}
+
+.headerIssue {
+  justify-self: end;
+}
+
+.boardIntro {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(15rem, 5fr);
+  align-items: end;
+  gap: var(--kin-column-gap);
+  padding: 1.1rem var(--kin-page-gutter) 1rem;
+}
+
+.boardIntro h1 {
+  max-width: 18ch;
+  margin: 0.3rem 0 0;
+  font-family: var(--kin-display-serif);
+  font-size: clamp(1.8rem, 3.3vw, 3.6rem);
+  font-weight: 400;
+  line-height: 0.9;
+  letter-spacing: -0.03em;
+}
+
+.boardIntro > p {
+  max-width: 34ch;
+  justify-self: end;
+  margin: 0;
+  color: var(--kin-charcoal);
+  font-family: var(--kin-reading-serif);
+  font-size: 0.92rem;
+  line-height: 1.18;
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(17rem, 22rem);
+  gap: var(--kin-column-gap);
+  padding: 0 var(--kin-page-gutter) var(--kin-page-gutter);
+}
+
+.canvasColumn {
+  min-width: 0;
+}
+
+.canvasWrap {
+  position: relative;
+  min-height: 43rem;
+  isolation: isolate;
+  overflow: hidden;
+  border: 1px solid var(--kin-mid-gray);
+  background-color: var(--kin-paper);
+  background-image:
+    linear-gradient(var(--kin-white-wash) 1px, transparent 1px),
+    linear-gradient(90deg, var(--kin-white-wash) 1px, transparent 1px);
+  background-position: -1px -1px;
+  background-size: 24px 24px;
+}
+
+.canvas {
+  position: relative;
+  min-height: 43rem;
+  overflow: hidden;
+}
+
+.canvasDimmed::after {
+  position: absolute;
+  z-index: 20;
+  background: var(--kin-overlay-heavy);
+  content: "";
+  inset: 0;
+  pointer-events: none;
+}
+
+.canvasEmpty {
+  position: absolute;
+  top: 44%;
+  left: 50%;
+  width: min(20rem, 75%);
+  transform: translate(-50%, -50%);
+  color: var(--kin-mid-gray);
+  pointer-events: none;
+}
+
+.canvasEmpty p {
+  margin: 0.5rem 0 0;
+  font-family: var(--kin-reading-serif);
+  font-size: 1.1rem;
+  line-height: 1.1;
+}
+
+.canvasIndex {
+  position: absolute;
+  right: 0.45rem;
+  bottom: 0.4rem;
+  color: var(--kin-mid-gray);
+  font-family: var(--kin-micro-mono);
+  font-size: 0.5rem;
+  pointer-events: none;
+}
+
+.boardFrame {
+  position: absolute;
+  z-index: 1;
+  border: 1px solid var(--kin-mid-gray);
+  background: rgb(255 255 255 / 22%);
+  touch-action: none;
+}
+
+.frameHeader {
+  display: flex;
+  min-height: 1.75rem;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.28rem 0.35rem 0.2rem 0.45rem;
+  cursor: move;
+}
+
+.frameTitle {
+  color: var(--kin-charcoal);
+  font-family: var(--kin-micro-mono);
+  font-size: 0.59rem;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.elementDelete {
+  display: inline-grid;
+  width: 1.4rem;
+  height: 1.4rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--kin-mid-gray);
+  cursor: pointer;
+  font-family: var(--kin-ui-sans);
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.frameControl {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.elementDelete:hover {
+  background: var(--kin-black);
+  color: var(--kin-white);
+}
+
+.elementDelete:focus-visible,
+.smallAction:focus-visible,
+.presetFrame:focus-visible,
+.stickerSource:focus-visible {
+  outline: 2px solid var(--kin-black);
+  outline-offset: 2px;
+}
+
+.resizeHandle {
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  width: 1rem;
+  height: 1rem;
+  border: 0;
+  border-right: 2px solid var(--kin-black);
+  border-bottom: 2px solid var(--kin-black);
+  padding: 0;
+  background: transparent;
+  cursor: nwse-resize;
+  touch-action: none;
+}
+
+.boardLabel {
+  position: absolute;
+  z-index: 4;
+  display: flex;
+  width: max-content;
+  max-width: 16rem;
+  align-items: flex-start;
+  gap: 0.3rem;
+  border: 1px solid var(--kin-black);
+  padding: 0.35rem 0.35rem 0.35rem 0.6rem;
+  background: var(--kin-white);
+  box-shadow: 2px 2px 0 var(--kin-light-gray);
+  cursor: move;
+  touch-action: none;
+}
+
+.boardLabelText {
+  max-width: 13rem;
+  border: 0;
+  padding: 0.12rem 0;
+  background: transparent;
+  color: var(--kin-black);
+  cursor: move;
+  font-family: var(--kin-reading-serif);
+  font-size: 0.9rem;
+  line-height: 1.08;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+
+.boardSticker {
+  position: absolute;
+  z-index: 5;
+  display: grid;
+  min-width: 3.3rem;
+  min-height: 3.3rem;
+  place-items: center;
+  border: 1px solid var(--kin-black);
+  padding: 0.35rem;
+  background: var(--kin-white);
+  color: var(--kin-black);
+  cursor: move;
+  font-family: var(--kin-micro-mono);
+  font-size: 0.45rem;
+  text-align: center;
+  touch-action: none;
+}
+
+.boardSticker_ticket {
+  width: 5.3rem;
+  height: 2.5rem;
+  border-style: dashed;
+}
+
+.boardSticker_paperclip {
+  width: 2rem;
+  min-width: 2rem;
+  height: 4rem;
+  min-height: 4rem;
+  border: 2px solid var(--kin-black);
+  border-radius: 1rem;
+  background: transparent;
+  font-size: 1.8rem;
+  transform: rotate(20deg);
+}
+
+.boardSticker_photo {
+  width: 4.5rem;
+  height: 3.6rem;
+  box-shadow: 4px 4px 0 var(--kin-light-gray);
+  font-size: 1.5rem;
+}
+
+.boardSidebar {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  border-top: 2px solid var(--kin-black);
+}
+
+.toolSection,
+.tray {
+  border-bottom: 1px solid var(--kin-mid-gray);
+  padding: 0.65rem 0 0.8rem;
+}
+
+.toolHeading {
+  margin: 0 0 0.55rem;
+  font-family: var(--kin-display-serif);
+  font-size: 1.4rem;
+  font-weight: 400;
+  line-height: 0.95;
+}
+
+.toolHint {
+  margin: -0.2rem 0 0.5rem;
+  color: var(--kin-charcoal);
+  font-family: var(--kin-reading-serif);
+  font-size: 0.76rem;
+  line-height: 1.15;
+}
+
+.createForm {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.textInput {
+  width: 100%;
+  min-width: 0;
+  min-height: 2.35rem;
+  border: 1px solid var(--kin-mid-gray);
+  border-radius: 0;
+  padding: 0.45rem 0.5rem;
+  background: transparent;
+  color: var(--kin-black);
+  font-family: var(--kin-reading-serif);
+  font-size: 0.85rem;
+}
+
+.textInput::placeholder {
+  color: var(--kin-mid-gray);
+}
+
+.textInput:focus-visible {
+  outline: 2px solid var(--kin-black);
+  outline-offset: 1px;
+}
+
+.smallAction {
+  min-height: 2.35rem;
+  flex: 0 0 auto;
+  border: 1px solid var(--kin-black);
+  border-radius: 0;
+  padding: 0.4rem 0.6rem;
+  background: var(--kin-black);
+  color: var(--kin-white);
+  cursor: pointer;
+  font-family: var(--kin-ui-sans);
+  font-size: 0.72rem;
+}
+
+.smallAction:hover {
+  background: var(--kin-charcoal);
+}
+
+.presetList {
+  display: grid;
+  gap: 0;
+  margin-bottom: 0.55rem;
+}
+
+.presetFrame {
+  display: grid;
+  grid-template-columns: 1rem 1fr;
+  align-items: center;
+  gap: 0.35rem;
+  border: 0;
+  border-bottom: 1px solid var(--kin-light-gray);
+  padding: 0.42rem 0;
+  background: transparent;
+  color: var(--kin-black);
+  cursor: grab;
+  font-family: var(--kin-reading-serif);
+  font-size: 0.83rem;
+  line-height: 1.1;
+  text-align: left;
+}
+
+.presetFrame:active {
+  cursor: grabbing;
+}
+
+.presetFrame:hover {
+  background: var(--kin-white-wash);
+}
+
+.presetFrameMark {
+  font-family: var(--kin-micro-mono);
+  font-size: 0.8rem;
+}
+
+.tray {
+  margin-top: auto;
+}
+
+.microLabel {
+  display: block;
+  margin: 0 0 0.55rem;
+  text-transform: uppercase;
+}
+
+.stickerList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.stickerSource {
+  display: flex;
+  min-height: 2.8rem;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1px solid var(--kin-light-gray);
+  padding: 0.3rem 0.45rem;
+  background: transparent;
+  color: var(--kin-charcoal);
+  cursor: grab;
+  font-family: var(--kin-micro-mono);
+  font-size: 0.58rem;
+  text-align: left;
+}
+
+.stickerSource:active {
+  cursor: grabbing;
+}
+
+.stickerSource:hover {
+  border-color: var(--kin-black);
+}
+
+.stickerGlyph {
+  display: grid;
+  width: 2rem;
+  height: 1.7rem;
+  place-items: center;
+  border: 1px solid var(--kin-mid-gray);
+  background: var(--kin-white);
+  color: var(--kin-black);
+  font-size: 0.42rem;
+}
+
+.stickerGlyph_paperclip {
+  width: 1rem;
+  height: 1.5rem;
+  border: 1px solid var(--kin-black);
+  border-radius: 1rem;
+  background: transparent;
+  font-size: 1rem;
+  transform: rotate(20deg);
+}
+
+.stickerGlyph_photo {
+  font-size: 1.1rem;
+}
+
+.welcomeOverlay {
+  position: fixed;
+  z-index: 100;
+  display: grid;
+  overflow-y: auto;
+  place-items: center;
+  padding: 1rem;
+  background: var(--kin-overlay-heavy);
+  inset: 0;
+}
+
+.welcomePanel {
+  position: relative;
+  width: min(100%, 44rem);
+  border: 1px solid var(--kin-white);
+  padding: clamp(1.1rem, 3vw, 2rem);
+  background: var(--kin-near-black);
+  color: var(--kin-white);
+  box-shadow: 12px 12px 0 rgb(0 0 0 / 32%);
+}
+
+.welcomeMeta {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  color: var(--kin-light-gray);
+  font-family: var(--kin-micro-mono);
+  font-size: var(--kin-caption-size);
+}
+
+.welcomeBarcode {
+  display: block;
+  width: fit-content;
+  margin: 1.15rem 0 0.65rem auto;
+  border: 4px solid var(--kin-paper);
+  padding: 0.1rem 0.35rem;
+  background: var(--kin-paper);
+  color: var(--kin-black);
+  font-family: var(--kin-micro-mono);
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.12em;
+  line-height: 1;
+}
+
+.welcomePanel h2 {
+  max-width: 12ch;
+  margin: -0.3rem 0 0.8rem;
+  font-family: var(--kin-display-serif);
+  font-size: clamp(2.8rem, 7.7vw, 5.8rem);
+  font-weight: 400;
+  line-height: 0.8;
+  letter-spacing: -0.045em;
+}
+
+.welcomePanel > p {
+  max-width: 52ch;
+  margin: 0 0 1rem;
+  color: var(--kin-light-gray);
+  font-family: var(--kin-reading-serif);
+  font-size: 0.96rem;
+  line-height: 1.18;
+}
+
+.welcomeExamples {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.35rem;
+  border-top: 1px solid var(--kin-mid-gray);
+  padding-top: 0.45rem;
+}
+
+.welcomeExamples span {
+  font-family: var(--kin-reading-serif);
+  font-size: 0.83rem;
+  font-style: italic;
+  line-height: 1.08;
+}
+
+.welcomeFrameNotes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.35rem;
+  margin-top: 0.55rem;
+  color: var(--kin-light-gray);
+  font-family: var(--kin-micro-mono);
+  font-size: 0.57rem;
+  line-height: 1.15;
+  text-transform: uppercase;
+}
+
+.welcomeRelation {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  color: var(--kin-white);
+  font-family: var(--kin-micro-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.04em;
+}
+
+.welcomeRelation i {
+  width: 2.5rem;
+  border-top: 1px solid var(--kin-mid-gray);
+}
+
+.welcomeActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem;
+  margin-top: 1.15rem;
+}
+
+.primaryAction,
+.secondaryAction,
+.skipAction {
+  min-height: 2.65rem;
+  border: 1px solid var(--kin-white);
+  border-radius: 0;
+  padding: 0.55rem 0.8rem;
+  background: transparent;
+  color: var(--kin-white);
+  cursor: pointer;
+  font-family: var(--kin-ui-sans);
+  font-size: 0.75rem;
+  transition:
+    background-color var(--kin-transition),
+    color var(--kin-transition);
+}
+
+.primaryAction {
+  background: var(--kin-white);
+  color: var(--kin-black);
+}
+
+.primaryAction:hover,
+.secondaryAction:hover {
+  background: var(--kin-light-gray);
+  color: var(--kin-black);
+}
+
+.skipAction {
+  min-height: 2rem;
+  margin-left: auto;
+  border-color: transparent;
+  padding-inline: 0.2rem;
+  color: var(--kin-light-gray);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.skipAction:hover {
+  color: var(--kin-white);
+}
+
+.welcomeActions button:focus-visible {
+  outline: 2px solid var(--kin-white);
+  outline-offset: 3px;
+}
+
+.errorBanner,
+.errorMessage {
+  border-left: 3px solid var(--kin-black);
+  padding: 0.5rem 0.75rem;
+  background: var(--kin-white);
+  color: var(--kin-black);
+  font-family: var(--kin-reading-serif);
+}
+
+.errorBanner {
+  margin: 0 var(--kin-page-gutter) 0.75rem;
+}
+
+.loadingBoard {
+  display: grid;
+  min-height: 100vh;
+  align-content: center;
+  justify-items: center;
+  gap: 1rem;
+  padding: 2rem;
+  background: var(--kin-paper);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+
+@media (max-width: 60rem) {
+  .workspace {
+    grid-template-columns: minmax(0, 1fr) minmax(15rem, 18rem);
+  }
+
+  .canvasWrap,
+  .canvas {
+    min-height: 40rem;
+  }
+}
+
+@media (max-width: 44rem) {
+  .siteHeader {
+    grid-template-columns: auto 1fr auto;
+  }
+
+  .headerCaption {
+    justify-self: start;
+    font-size: 0.52rem;
+  }
+
+  .headerIssue {
+    font-size: 0.52rem;
+  }
+
+  .boardIntro {
+    grid-template-columns: 1fr;
+    align-items: start;
+    gap: 0.5rem;
+  }
+
+  .boardIntro > p {
+    justify-self: start;
+  }
+
+  .workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .canvasWrap,
+  .canvas {
+    min-height: 35rem;
+  }
+
+  .boardSidebar {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    gap: 0 var(--kin-column-gap);
+  }
+
+  .toolSection:first-child,
+  .tray {
+    grid-column: 1 / -1;
+  }
+
+  .tray {
+    margin-top: 0;
+  }
+
+  .welcomePanel h2 {
+    font-size: clamp(2.5rem, 12vw, 4rem);
+  }
+}
+
+@media (max-width: 28rem) {
+  .canvasWrap,
+  .canvas {
+    min-height: 33rem;
+  }
+
+  .boardSidebar {
+    grid-template-columns: 1fr;
+  }
+
+  .toolSection:first-child,
+  .tray {
+    grid-column: auto;
+  }
+
+  .welcomePanel {
+    padding: 1rem;
+  }
+
+  .welcomeExamples,
+  .welcomeFrameNotes {
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
+  }
+
+  .welcomeActions {
+    align-items: stretch;
+  }
+
+  .primaryAction,
+  .secondaryAction {
+    flex: 1 1 100%;
+  }
+}

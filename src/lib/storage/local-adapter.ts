@@ -5,6 +5,7 @@ import type { World } from "@/features/world/types";
 const keys = {
   taste: "kin:taste",
   world: "kin:world",
+  boardIntroSeen: "kin:board-intro-seen",
 } as const;
 
 function getBrowserStorage(): Storage {
@@ -29,4 +30,6 @@ export const localAdapter: StorageAdapter = {
   saveTaste: (taste) => write(keys.taste, taste),
   getWorld: () => read<World>(keys.world),
   saveWorld: (world) => write(keys.world, world),
+  getBoardIntroSeen: () => read<boolean>(keys.boardIntroSeen) ?? false,
+  saveBoardIntroSeen: (seen) => write(keys.boardIntroSeen, seen),
 };
