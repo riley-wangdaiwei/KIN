@@ -134,15 +134,6 @@ export async function POST(request: NextRequest) {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.KIN_FROM_EMAIL;
   const ordersEmail = process.env.KIN_ORDERS_EMAIL;
-  if (!apiKey || !from || !ordersEmail) {
-    return NextResponse.json(
-      {
-        error:
-          "Order email is not configured. Set RESEND_API_KEY, KIN_FROM_EMAIL, and KIN_ORDERS_EMAIL.",
-      },
-      { status: 503 },
-    );
-  }
 
   const requestId = request.headers.get("Idempotency-Key");
   if (!requestId || !/^[0-9a-f-]{36}$/i.test(requestId)) {
@@ -207,6 +198,15 @@ export async function POST(request: NextRequest) {
     `Recipient name: ${body.recipientName || "Not provided"}`,
     `Delivery notes: ${body.deliveryNotes || "None provided"}`,
   ].join("\n\n");
+
+  if (!apiKey || !from || !ordersEmail) {
+    // Email disabled until custom domain is verified in Resend.
+    console.info("KIN order received without email delivery:", {
+      ...body,
+      packageTitle: gift.title,
+    });
+    return NextResponse.json({ orderId: body.orderId });
+  }
 
   const internalEmail = await sendEmail({
     apiKey,

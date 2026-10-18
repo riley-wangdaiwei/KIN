@@ -163,11 +163,11 @@ Page / route: /order
 
 Folder & file: Vercel Production environment configuration for src/app/api/orders/route.ts
 
-What happens vs what should happen: The live order flow reaches Contact + Delivery and the API detects its email configuration, but Resend rejects the configured sender because its gmail.com domain is not verified. The order email is not sent to KIN, no buyer confirmation is sent, and the confirmation step is not shown. Configure KIN_FROM_EMAIL with a sender on a domain verified in Resend; then verify both emails and the confirmation step.
+What happens vs what should happen: When email settings are absent, the API now logs the validated order payload server-side and returns success without sending email, so the buyer reaches Confirmation. When all settings are present, the API sends the order and buyer confirmation emails; however, the current live KIN_FROM_EMAIL uses an unverified gmail.com domain, so Resend rejects the order email. Configure a sender on a domain verified in Resend before expecting live email delivery.
 
-How to reproduce: 1. Open the live board and dismiss the first-visit popup. 2. Add a label and frame, refresh, and confirm they remain. 3. Open gift curation, create a brief, and choose Explore Gift Ideas. 4. Open Conversation Recap, continue through all order steps, and submit once with an authorized test recipient. The live order API returns 502 with Resend's unverified gmail.com sender-domain error.
+How to reproduce: 1. With all email environment variables unset, submit a valid order and confirm the API returns its order ID without calling Resend. 2. With the current live settings, submit an authorized test order; the live order API returns 502 with Resend's unverified gmail.com sender-domain error.
 
-Status: open — a verified Resend sender domain is required before the live order and buyer confirmation can succeed. The single authorized test attempt did not send either email.
+Status: open for live email delivery — the no-email fallback is implemented; a verified Resend sender domain is still required before the live order and buyer confirmation emails can succeed. The single authorized test attempt did not send either email.
 
 ----------------
 
