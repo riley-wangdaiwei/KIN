@@ -23,7 +23,7 @@ export function EditorialTextBlock({
           {label}
         </MetadataLabel>
       )}
-      <h2 className="editorial-text-block__title">{title}</h2>
+      <h2 className="editorial-text-block__title kin-editorial-title">{title}</h2>
       <div className="editorial-text-block__body">{children}</div>
     </section>
   );

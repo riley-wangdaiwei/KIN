@@ -6,7 +6,12 @@ interface SectionRuleProps {
 
 export function SectionRule({ label }: SectionRuleProps) {
   return (
-    <div className="section-rule" aria-hidden={!label}>
+    <div
+      className="section-rule kin-editorial-rule"
+      role={label ? "group" : undefined}
+      aria-label={label ? `Section rule: ${label}` : undefined}
+      aria-hidden={!label}
+    >
       <hr className="section-rule__line" />
       {label && (
         <MetadataLabel className="section-rule__label">{label}</MetadataLabel>

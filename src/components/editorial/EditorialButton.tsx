@@ -14,6 +14,7 @@ export function EditorialButton({
 }: EditorialButtonProps) {
   const classes = [
     "editorial-button",
+    "kin-ui-control",
     `editorial-button--${variant}`,
     className,
   ]

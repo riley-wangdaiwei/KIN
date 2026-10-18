@@ -17,7 +17,9 @@ export function QuestionImageBlock({
 }: QuestionImageBlockProps) {
   return (
     <section className="question-image-block" aria-label={question}>
-      <h2 className="question-image-block__question">{question}</h2>
+      <h2 className="question-image-block__question kin-editorial-title">
+        {question}
+      </h2>
       <figure>
         <div className="question-image-block__figure">
           <Image
@@ -27,7 +29,9 @@ export function QuestionImageBlock({
             fill
             sizes="(max-width: 640px) 100vw, 60vw"
           />
-          <p className="question-image-block__image-title">{imageTitle}</p>
+          <p className="question-image-block__image-title kin-editorial-title">
+            {imageTitle}
+          </p>
         </div>
         <figcaption className="question-image-block__caption">
           {caption}

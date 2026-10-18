@@ -19,11 +19,11 @@
 
 ## Visual system
 
-- Use the KIN Editorial Magazine tokens and base components; preview them at `/design-preview`.
-- Prefer editorial density, serif display headlines, compact uppercase metadata, asymmetrical image/text layouts, fine rules, and controlled whitespace.
-- Use the accent sparingly. Keep photographic foreground text readable with the dark image overlay.
-- Avoid generic SaaS layouts, repeated rounded cards, decorative gradients, and centered headlines above three equal cards.
-- Keep functional areas, especially the curation board, clear and usable; editorial expression must not compromise accessibility or touch targets.
+- Follow the current version of `docs/design-protocol.md` and use the monochrome KIN editorial tokens and base components; preview them at `/design-preview`.
+- Use documentary grayscale imagery, monumental display serif, dense narrow reading-serif columns, tiny monospaced metadata, black graphic shapes, and intentional overlaps.
+- Barcodes, marginal labels, and paperclip motifs are occasional editorial marks, not decoration for every section.
+- Avoid the previous coral/pale-beige default, generic SaaS layouts, repeated rounded cards, soft shadows, decorative gradients, and centered uniform feature grids.
+- Apply the strongest magazine treatment to publication/editorial surfaces. Keep the functional curation board clear, legible, keyboard-accessible, and easy to use.
 
 Do not add product pages until explicitly requested. Keep each change focused and preserve existing behavior.
 

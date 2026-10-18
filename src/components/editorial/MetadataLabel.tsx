@@ -11,7 +11,12 @@ export function MetadataLabel({
   className,
   ...props
 }: MetadataLabelProps) {
-  const classes = ["metadata-label", accent && "metadata-label--accent", className]
+  const classes = [
+    "metadata-label",
+    "kin-metadata",
+    accent && "metadata-label--accent",
+    className,
+  ]
     .filter(Boolean)
     .join(" ");
 
