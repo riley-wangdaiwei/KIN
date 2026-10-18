@@ -157,6 +157,20 @@ How to reproduce: 1. Finish onboarding  2. Open /gift -> items don't reflect you
 
 Status: open
 
+[3] Live order flow cannot reach confirmation
+
+Page / route: /order
+
+Folder & file: Vercel Production environment configuration for src/app/api/orders/route.ts
+
+What happens vs what should happen: The live order flow reaches Contact + Delivery, but the order endpoint returns 503 because RESEND_API_KEY, KIN_FROM_EMAIL, and KIN_ORDERS_EMAIL are not configured. It should send the order request and buyer confirmation email, then show the confirmation step.
+
+How to reproduce: 1. Open the live board and dismiss the first-visit popup. 2. Add a label and frame, refresh, and confirm they remain. 3. Open gift curation, create a brief, and choose Explore Gift Ideas. 4. Open Conversation Recap, continue through all order steps, and submit. The live order API currently reports that order email is not configured.
+
+Status: open — production email settings are required before a real submission can be safely tested.
+
+----------------
+
 ---------------- FIXED ----------------
 
 [BUG 2026-10-02] Groups & frames lost on refresh - FIXED
