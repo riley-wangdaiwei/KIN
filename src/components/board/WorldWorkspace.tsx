@@ -72,7 +72,8 @@ export default function WorldWorkspace() {
       /* eslint-disable react-hooks/set-state-in-effect */
       setWorld(nextWorld);
       setTags(nextTags);
-      setIntroOpen(!storage.getBoardIntroSeen());
+      // TEMP: popup shows on every visit for design review — restore first-visit-only before launch.
+      setIntroOpen(true);
       setCurationOpen(
         new URLSearchParams(window.location.search).get("curate") === "1",
       );
