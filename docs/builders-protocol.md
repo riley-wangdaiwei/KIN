@@ -163,11 +163,11 @@ Page / route: /order
 
 Folder & file: Vercel Production environment configuration for src/app/api/orders/route.ts
 
-What happens vs what should happen: The live order flow reaches Contact + Delivery, but the order endpoint returns 503 because RESEND_API_KEY, KIN_FROM_EMAIL, and KIN_ORDERS_EMAIL are not configured. It should send the order request and buyer confirmation email, then show the confirmation step.
+What happens vs what should happen: The live order flow reaches Contact + Delivery and the API detects its email configuration, but Resend rejects the configured sender because its gmail.com domain is not verified. The order email is not sent to KIN, no buyer confirmation is sent, and the confirmation step is not shown. Configure KIN_FROM_EMAIL with a sender on a domain verified in Resend; then verify both emails and the confirmation step.
 
-How to reproduce: 1. Open the live board and dismiss the first-visit popup. 2. Add a label and frame, refresh, and confirm they remain. 3. Open gift curation, create a brief, and choose Explore Gift Ideas. 4. Open Conversation Recap, continue through all order steps, and submit. The live order API currently reports that order email is not configured.
+How to reproduce: 1. Open the live board and dismiss the first-visit popup. 2. Add a label and frame, refresh, and confirm they remain. 3. Open gift curation, create a brief, and choose Explore Gift Ideas. 4. Open Conversation Recap, continue through all order steps, and submit once with an authorized test recipient. The live order API returns 502 with Resend's unverified gmail.com sender-domain error.
 
-Status: open — production email settings are required before a real submission can be safely tested.
+Status: open — a verified Resend sender domain is required before the live order and buyer confirmation can succeed. The single authorized test attempt did not send either email.
 
 ----------------
 
