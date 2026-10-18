@@ -1,0 +1,315 @@
+.page {
+  min-height: 100vh;
+  background: var(--kin-paper);
+  color: var(--kin-black);
+}
+
+.header,
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid var(--kin-mid-gray);
+  padding: 0.55rem var(--kin-page-gutter) 0.65rem;
+  color: var(--kin-charcoal);
+  font-family: var(--kin-micro-mono);
+  font-size: var(--kin-caption-size);
+}
+
+.wordmark {
+  color: var(--kin-black);
+  font-family: var(--kin-display-serif);
+  font-size: clamp(2rem, 3.6vw, 3.5rem);
+  line-height: 0.8;
+  letter-spacing: -0.07em;
+  text-decoration: none;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(14rem, 5fr);
+  align-items: end;
+  gap: var(--kin-column-gap);
+  border-bottom: 2px solid var(--kin-black);
+  padding: clamp(1.5rem, 4vw, 3rem) var(--kin-page-gutter) 1rem;
+}
+
+.kicker,
+.cardEyebrow,
+.sectionHeader > span,
+.cardActions > span {
+  color: var(--kin-charcoal);
+  font-family: var(--kin-micro-mono);
+  font-size: var(--kin-caption-size);
+  line-height: 1.25;
+}
+
+.hero h1 {
+  max-width: 11ch;
+  margin: 0.35rem 0 0;
+  font-family: var(--kin-display-serif);
+  font-size: clamp(3.6rem, 10vw, 8rem);
+  font-weight: 400;
+  line-height: 0.79;
+  letter-spacing: -0.05em;
+}
+
+.hero > p {
+  max-width: 32ch;
+  justify-self: end;
+  margin: 0 0 0.25rem;
+  color: var(--kin-charcoal);
+  font-family: var(--kin-reading-serif);
+  font-size: clamp(1rem, 1.8vw, 1.35rem);
+  line-height: 1.15;
+}
+
+.briefStrip {
+  display: grid;
+  grid-template-columns: 1fr 2fr auto;
+  align-items: center;
+  gap: var(--kin-column-gap);
+  border-bottom: 1px solid var(--kin-mid-gray);
+  padding: 0.65rem var(--kin-page-gutter);
+  background: var(--kin-white);
+}
+
+.briefStrip p {
+  margin: 0;
+  font-family: var(--kin-reading-serif);
+  font-size: 0.9rem;
+}
+
+.briefStrip a,
+.footer a {
+  color: var(--kin-black);
+  font-family: var(--kin-micro-mono);
+  font-size: 0.62rem;
+  text-underline-offset: 0.2em;
+}
+
+.catalogError {
+  margin: 0;
+  border-bottom: 1px solid var(--kin-mid-gray);
+  padding: 0.55rem var(--kin-page-gutter);
+  background: var(--kin-white);
+  font-family: var(--kin-reading-serif);
+}
+
+.catalog {
+  padding: 0 var(--kin-page-gutter);
+}
+
+.catalogSection {
+  padding-top: 1rem;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  border-top: 1px solid var(--kin-black);
+  padding: 0.45rem 0 0.6rem;
+}
+
+.sectionHeader h2 {
+  margin: 0;
+  font-family: var(--kin-display-serif);
+  font-size: clamp(1.7rem, 3.4vw, 3rem);
+  font-weight: 400;
+  line-height: 0.9;
+}
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--kin-column-gap);
+  padding-bottom: 1rem;
+}
+
+.card {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  border: 1px solid var(--kin-mid-gray);
+  background: var(--kin-paper);
+}
+
+.heroCard {
+  grid-column: span 2;
+  border-color: var(--kin-black);
+}
+
+.cardLink {
+  color: inherit;
+  text-decoration: none;
+}
+
+.cardLink:focus-visible {
+  outline: 2px solid var(--kin-black);
+  outline-offset: 3px;
+}
+
+.cardArt {
+  position: relative;
+  display: flex;
+  min-height: 12rem;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  border-bottom: 1px solid var(--kin-mid-gray);
+  padding: 0.55rem;
+  background:
+    linear-gradient(152deg, transparent 48%, rgb(0 0 0 / 12%) 48.2%, transparent 48.6%),
+    repeating-linear-gradient(0deg, transparent 0 22px, rgb(0 0 0 / 9%) 23px, transparent 24px),
+    var(--kin-light-gray);
+}
+
+.heroCard .cardArt {
+  min-height: 19rem;
+  background:
+    linear-gradient(125deg, transparent 50%, rgb(0 0 0 / 16%) 50.2%, transparent 50.8%),
+    repeating-linear-gradient(90deg, transparent 0 46px, rgb(0 0 0 / 10%) 47px, transparent 48px),
+    var(--kin-light-gray);
+}
+
+.cardArt > span {
+  z-index: 1;
+  align-self: flex-end;
+  font-family: var(--kin-micro-mono);
+  font-size: 0.65rem;
+}
+
+.cardArt > i {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 38%;
+  aspect-ratio: 1;
+  border: 1px solid var(--kin-black);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.cardArt > i::before,
+.cardArt > i::after {
+  position: absolute;
+  border: 1px solid var(--kin-black);
+  border-radius: 50%;
+  content: "";
+  inset: 14%;
+}
+
+.cardArt > i::after {
+  inset: 29%;
+}
+
+.cardArt > b {
+  position: relative;
+  z-index: 1;
+  max-width: 12ch;
+  font-family: var(--kin-display-serif);
+  font-size: clamp(1.7rem, 3.4vw, 3rem);
+  font-weight: 400;
+  line-height: 0.87;
+  letter-spacing: -0.03em;
+}
+
+.cardArt > small {
+  position: absolute;
+  top: 0.55rem;
+  left: 0.55rem;
+  font-family: var(--kin-micro-mono);
+  font-size: 0.52rem;
+  text-transform: uppercase;
+}
+
+.cardCopy {
+  padding: 0.65rem;
+}
+
+.cardCopy h3 {
+  margin: 0.3rem 0 0.25rem;
+  font-family: var(--kin-display-serif);
+  font-size: clamp(1.4rem, 2.3vw, 2rem);
+  font-weight: 400;
+  line-height: 0.9;
+}
+
+.cardCopy p {
+  margin: 0;
+  color: var(--kin-charcoal);
+  font-family: var(--kin-reading-serif);
+  font-size: 0.83rem;
+  line-height: 1.16;
+}
+
+.cardActions {
+  display: grid;
+  gap: 0.4rem;
+  margin-top: auto;
+  border-top: 1px solid var(--kin-light-gray);
+  padding: 0.5rem 0.65rem;
+}
+
+.cardActions a {
+  width: fit-content;
+  color: var(--kin-black);
+  font-family: var(--kin-micro-mono);
+  font-size: 0.62rem;
+  text-underline-offset: 0.2em;
+}
+
+.featuredMark {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  border: 1px solid var(--kin-black);
+  padding: 0.2rem 0.3rem;
+  background: var(--kin-paper);
+  font-family: var(--kin-micro-mono);
+  font-size: 0.52rem;
+}
+
+.footer {
+  margin-top: 0.5rem;
+  border-top: 1px solid var(--kin-black);
+  border-bottom: 0;
+}
+
+@media (max-width: 58rem) {
+  .cardGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 42rem) {
+  .hero {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+  }
+
+  .hero > p {
+    justify-self: start;
+  }
+
+  .briefStrip {
+    grid-template-columns: 1fr;
+    gap: 0.35rem;
+  }
+
+  .cardGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .heroCard {
+    grid-column: auto;
+  }
+
+  .heroCard .cardArt {
+    min-height: 15rem;
+  }
+}

@@ -1,0 +1,365 @@
+.page {
+  min-height: 100vh;
+  background: var(--kin-paper);
+  color: var(--kin-black);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid var(--kin-mid-gray);
+  padding: 0.55rem var(--kin-page-gutter) 0.65rem;
+}
+
+.wordmark,
+.footerMark {
+  flex: 0 0 auto;
+  color: var(--kin-black);
+  font-family: var(--kin-display-serif);
+  font-size: clamp(2rem, 3.6vw, 3.5rem);
+  line-height: 0.8;
+  letter-spacing: -0.07em;
+  text-decoration: none;
+}
+
+.header nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.45rem 1rem;
+}
+
+.header nav a,
+.eyebrow,
+.sectionLabel,
+.cardNumber,
+.siteFooter,
+.notice {
+  font-family: var(--kin-micro-mono);
+  font-size: var(--kin-caption-size);
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.header nav a {
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  align-items: end;
+  gap: var(--kin-column-gap);
+  border-bottom: 1px solid var(--kin-mid-gray);
+  padding: clamp(2.5rem, 7vw, 6rem) var(--kin-page-gutter) clamp(1.5rem, 4vw, 3rem);
+}
+
+.eyebrow {
+  grid-column: 1 / span 3;
+  align-self: start;
+  margin: 0.35rem 0 0;
+  color: var(--kin-charcoal);
+}
+
+.hero h1 {
+  grid-column: 4 / span 6;
+  max-width: 11ch;
+  margin: 0;
+  font-family: var(--kin-display-serif);
+  font-size: clamp(3.4rem, 9vw, 8.5rem);
+  font-weight: 400;
+  line-height: 0.78;
+  letter-spacing: -0.05em;
+}
+
+.intro {
+  grid-column: 10 / span 3;
+  max-width: 31ch;
+  margin: 0 0 0.2rem;
+  font-family: var(--kin-reading-serif);
+  font-size: clamp(1rem, 1.5vw, 1.25rem);
+  line-height: 1.12;
+}
+
+.content {
+  width: min(100%, 100rem);
+  margin-inline: auto;
+  padding: 0 var(--kin-page-gutter) clamp(2rem, 6vw, 5rem);
+}
+
+.section {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--kin-column-gap);
+  border-bottom: 1px solid var(--kin-mid-gray);
+  padding: clamp(1.5rem, 3.3vw, 3rem) 0;
+}
+
+.sectionHeading {
+  grid-column: 1 / span 3;
+  margin: 0;
+  font-family: var(--kin-display-serif);
+  font-size: clamp(1.75rem, 3.1vw, 3rem);
+  font-weight: 400;
+  line-height: 0.9;
+  letter-spacing: -0.035em;
+}
+
+.sectionBody {
+  grid-column: 4 / span 9;
+  min-width: 0;
+}
+
+.sectionLabel {
+  display: block;
+  margin-bottom: 0.7rem;
+  color: var(--kin-charcoal);
+}
+
+.sectionBody > p,
+.sectionBody li,
+.legalCopy p,
+.legalCopy li {
+  max-width: 68ch;
+  font-family: var(--kin-reading-serif);
+  font-size: var(--kin-copy-size);
+  line-height: 1.25;
+}
+
+.sectionBody > :first-child,
+.legalCopy > :first-child {
+  margin-top: 0;
+}
+
+.sectionBody > :last-child,
+.legalCopy > :last-child {
+  margin-bottom: 0;
+}
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0 var(--kin-column-gap);
+}
+
+.card {
+  position: relative;
+  min-height: 10rem;
+  border-top: 1px solid var(--kin-black);
+  padding: 0.65rem 0.3rem 1rem 0;
+}
+
+.cardNumber {
+  display: block;
+  margin-bottom: 1rem;
+  color: var(--kin-charcoal);
+}
+
+.card h3 {
+  margin: 0 0 0.4rem;
+  font-family: var(--kin-display-serif);
+  font-size: clamp(1.35rem, 2.2vw, 2.1rem);
+  font-weight: 400;
+  line-height: 0.9;
+}
+
+.card p {
+  max-width: 42ch;
+  margin: 0;
+  font-family: var(--kin-reading-serif);
+  font-size: var(--kin-copy-size);
+  line-height: 1.2;
+}
+
+.card em {
+  display: block;
+  margin-top: 0.65rem;
+  font-family: var(--kin-micro-mono);
+  font-size: 0.65rem;
+  font-style: normal;
+  line-height: 1.3;
+}
+
+.cta {
+  display: inline-flex;
+  min-height: 2.6rem;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1rem;
+  border: 1px solid var(--kin-black);
+  padding: 0.55rem 0.75rem;
+  background: var(--kin-black);
+  color: var(--kin-white);
+  font-family: var(--kin-ui-sans);
+  font-size: 0.75rem;
+  text-decoration: none;
+}
+
+.cta:hover {
+  background: var(--kin-charcoal);
+}
+
+.legalCopy {
+  max-width: 84ch;
+  padding-top: 1.5rem;
+}
+
+.legalCopy h2 {
+  margin: 2rem 0 0.55rem;
+  font-family: var(--kin-display-serif);
+  font-size: clamp(1.5rem, 2.4vw, 2.3rem);
+  font-weight: 400;
+  line-height: 0.9;
+}
+
+.legalCopy h3 {
+  margin-bottom: 0.4rem;
+  font-family: var(--kin-ui-sans);
+  font-size: 0.85rem;
+}
+
+.notice {
+  border-left: 3px solid var(--kin-black);
+  margin: 1.3rem 0;
+  padding: 0.7rem 0.9rem;
+  background: rgb(0 0 0 / 5%);
+}
+
+.siteFooter {
+  border-top: 1px solid var(--kin-black);
+  padding: 1rem var(--kin-page-gutter) 0.7rem;
+  background: var(--kin-paper);
+  color: var(--kin-charcoal);
+}
+
+.footerTop {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 1rem;
+}
+
+.footerTop p {
+  max-width: 29ch;
+  margin: 0;
+  font-family: var(--kin-reading-serif);
+  font-size: 0.9rem;
+  text-align: right;
+  text-transform: none;
+}
+
+.footerMark {
+  font-size: clamp(2.2rem, 5vw, 4rem);
+}
+
+.footerLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem 1.4rem;
+  border-top: 1px solid var(--kin-light-gray);
+  border-bottom: 1px solid var(--kin-light-gray);
+  padding: 0.7rem 0;
+}
+
+.footerLinks a {
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+.footerBottom {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 0.65rem;
+  font-size: 0.55rem;
+}
+
+@media (max-width: 760px) {
+  .header {
+    align-items: flex-start;
+  }
+
+  .header nav {
+    max-width: 19rem;
+    gap: 0.5rem 0.75rem;
+  }
+
+  .hero {
+    row-gap: 1.1rem;
+  }
+
+  .eyebrow {
+    grid-column: 1 / -1;
+  }
+
+  .hero h1 {
+    grid-column: 1 / span 8;
+  }
+
+  .intro {
+    grid-column: 9 / span 4;
+  }
+
+  .sectionHeading {
+    grid-column: 1 / span 4;
+  }
+
+  .sectionBody {
+    grid-column: 5 / span 8;
+  }
+
+  .cardGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .header {
+    display: grid;
+  }
+
+  .header nav {
+    max-width: none;
+    justify-content: flex-start;
+  }
+
+  .hero h1 {
+    grid-column: 1 / -1;
+    font-size: clamp(3.2rem, 17vw, 5.4rem);
+  }
+
+  .intro {
+    grid-column: 1 / span 9;
+  }
+
+  .section {
+    row-gap: 0.8rem;
+  }
+
+  .sectionHeading,
+  .sectionBody {
+    grid-column: 1 / -1;
+  }
+
+  .cardGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .card {
+    min-height: 0;
+  }
+
+  .footerTop,
+  .footerBottom {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .footerTop p {
+    text-align: left;
+  }
+}

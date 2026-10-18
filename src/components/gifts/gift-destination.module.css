@@ -1,0 +1,190 @@
+.page {
+  min-height: 100vh;
+  background: var(--kin-paper);
+  color: var(--kin-black);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid var(--kin-mid-gray);
+  padding: 0.55rem var(--kin-page-gutter) 0.65rem;
+  color: var(--kin-charcoal);
+  font-family: var(--kin-micro-mono);
+  font-size: var(--kin-caption-size);
+}
+
+.wordmark {
+  color: var(--kin-black);
+  font-family: var(--kin-display-serif);
+  font-size: clamp(2rem, 3.6vw, 3.5rem);
+  line-height: 0.8;
+  letter-spacing: -0.07em;
+  text-decoration: none;
+}
+
+.content {
+  width: min(100% - 2 * var(--kin-page-gutter), 68rem);
+  margin: 0 auto;
+  padding: clamp(1.5rem, 5vw, 4rem) 0;
+}
+
+.kicker,
+.briefLabel {
+  color: var(--kin-charcoal);
+  font-family: var(--kin-micro-mono);
+  font-size: var(--kin-caption-size);
+  letter-spacing: 0.04em;
+}
+
+.content > h1 {
+  max-width: 12ch;
+  margin: 0.35rem 0 0.75rem;
+  font-family: var(--kin-display-serif);
+  font-size: clamp(3rem, 8vw, 6.8rem);
+  font-weight: 400;
+  line-height: 0.82;
+  letter-spacing: -0.045em;
+}
+
+.intro {
+  max-width: 43rem;
+  margin: 0 0 1.5rem;
+  color: var(--kin-charcoal);
+  font-family: var(--kin-reading-serif);
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  line-height: 1.2;
+}
+
+.brief {
+  border-top: 2px solid var(--kin-black);
+  border-bottom: 1px solid var(--kin-mid-gray);
+  padding: 0.65rem 0;
+}
+
+.briefPart {
+  display: grid;
+  grid-template-columns: minmax(6rem, 1fr) minmax(0, 3fr);
+  gap: var(--kin-column-gap);
+  border-top: 1px solid var(--kin-light-gray);
+  padding: 0.65rem 0;
+}
+
+.briefPart h2 {
+  margin: 0;
+  font-family: var(--kin-display-serif);
+  font-size: clamp(1.25rem, 2.5vw, 2rem);
+  font-weight: 400;
+}
+
+.briefPart p {
+  margin: 0;
+  font-family: var(--kin-reading-serif);
+  font-size: clamp(0.95rem, 1.5vw, 1.15rem);
+  line-height: 1.25;
+  white-space: pre-wrap;
+}
+
+.idea {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr);
+  align-items: center;
+  gap: var(--kin-column-gap);
+  margin-top: 1rem;
+  border: 1px solid var(--kin-mid-gray);
+  padding: 0.8rem;
+}
+
+.idea h2 {
+  margin: 0;
+  font-family: var(--kin-display-serif);
+  font-size: clamp(1.5rem, 3vw, 2.7rem);
+  font-weight: 400;
+  line-height: 0.9;
+}
+
+.idea p {
+  margin: 0;
+  font-family: var(--kin-reading-serif);
+  font-size: 0.92rem;
+  line-height: 1.2;
+}
+
+.previewTag {
+  justify-self: end;
+  border: 1px solid var(--kin-mid-gray);
+  padding: 0.35rem;
+  font-family: var(--kin-micro-mono);
+  font-size: 0.55rem;
+}
+
+.previewNote,
+.status {
+  color: var(--kin-charcoal);
+  font-family: var(--kin-reading-serif);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.primary,
+.secondary {
+  display: inline-flex;
+  min-height: 2.6rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--kin-black);
+  padding: 0.5rem 0.75rem;
+  background: var(--kin-black);
+  color: var(--kin-white);
+  font-family: var(--kin-ui-sans);
+  font-size: 0.75rem;
+  text-decoration: none;
+}
+
+.secondary {
+  background: transparent;
+  color: var(--kin-black);
+}
+
+.primary:hover {
+  background: var(--kin-charcoal);
+}
+
+.secondary:hover {
+  background: var(--kin-light-gray);
+}
+
+.noBrief {
+  border-top: 1px solid var(--kin-mid-gray);
+  padding-top: 1rem;
+  font-family: var(--kin-reading-serif);
+}
+
+.error {
+  border-left: 3px solid var(--kin-black);
+  padding: 0.5rem 0.75rem;
+  background: var(--kin-white);
+  font-family: var(--kin-reading-serif);
+}
+
+@media (max-width: 44rem) {
+  .briefPart {
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
+  }
+
+  .idea {
+    grid-template-columns: 1fr;
+  }
+
+  .previewTag {
+    justify-self: start;
+  }
+}

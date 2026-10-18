@@ -1,11 +1,15 @@
 import type { StorageAdapter } from "./interface";
 import type { TasteProfile } from "@/features/taste/types";
 import type { World } from "@/features/world/types";
+import type { GiftBrief } from "@/features/brief/types";
+import type { GiftIntent } from "@/features/gifts/types";
 
 const keys = {
   taste: "kin:taste",
   world: "kin:world",
   boardIntroSeen: "kin:board-intro-seen",
+  giftBrief: "kin:gift-brief",
+  giftIntents: "kin:gift-intents",
 } as const;
 
 function getBrowserStorage(): Storage {
@@ -32,4 +36,13 @@ export const localAdapter: StorageAdapter = {
   saveWorld: (world) => write(keys.world, world),
   getBoardIntroSeen: () => read<boolean>(keys.boardIntroSeen) ?? false,
   saveBoardIntroSeen: (seen) => write(keys.boardIntroSeen, seen),
+  getGiftBrief: () => read<GiftBrief>(keys.giftBrief),
+  saveGiftBrief: (brief) => write(keys.giftBrief, brief),
+  getGiftIntents: () => read<GiftIntent[]>(keys.giftIntents) ?? [],
+  saveGiftIntent: (intent) => {
+    const existing = read<GiftIntent[]>(keys.giftIntents) ?? [];
+    if (!existing.some((saved) => saved.slug === intent.slug)) {
+      write(keys.giftIntents, [...existing, intent]);
+    }
+  },
 };

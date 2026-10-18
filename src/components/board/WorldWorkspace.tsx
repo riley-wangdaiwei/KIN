@@ -2,7 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { TasteTag } from "@/features/taste/types";
+import type { GiftBrief } from "@/features/brief/types";
 import type {
   BoardStickerKind,
   World,
@@ -19,6 +21,7 @@ import {
   updateSticker,
 } from "@/features/world/service";
 import { storage } from "@/lib/storage";
+import GiftCurationFlow from "./GiftCurationFlow";
 import CreateGroup from "./CreateGroup";
 import CreateLabel from "./CreateLabel";
 import TagGroup from "./TagGroup";
@@ -46,10 +49,12 @@ function createTag(label: string, x: number, y: number): TasteTag {
 }
 
 export default function WorldWorkspace() {
+  const router = useRouter();
   const [world, setWorld] = useState<World>(createWorld);
   const [tags, setTags] = useState<TasteTag[]>([]);
   const [isReady, setIsReady] = useState(false);
   const [introOpen, setIntroOpen] = useState(false);
+  const [curationOpen, setCurationOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const worldRef = useRef(world);
   const tagsRef = useRef(tags);
@@ -68,6 +73,9 @@ export default function WorldWorkspace() {
       setWorld(nextWorld);
       setTags(nextTags);
       setIntroOpen(!storage.getBoardIntroSeen());
+      setCurationOpen(
+        new URLSearchParams(window.location.search).get("curate") === "1",
+      );
       setIsReady(true);
       /* eslint-enable react-hooks/set-state-in-effect */
     } catch (loadError) {
@@ -79,18 +87,20 @@ export default function WorldWorkspace() {
     }
   }, []);
 
-  function saveTags(nextTags: TasteTag[]) {
+  function saveTags(nextTags: TasteTag[]): boolean {
     try {
       storage.saveTaste({ tags: nextTags });
       tagsRef.current = nextTags;
       setTags(nextTags);
       setError(null);
+      return true;
     } catch (saveError) {
       setError(
         saveError instanceof Error
           ? saveError.message
           : "Your board labels could not be saved.",
       );
+      return false;
     }
   }
 
@@ -161,14 +171,38 @@ export default function WorldWorkspace() {
     });
   }
 
-  function addLabel(label: string, x?: number, y?: number) {
-    if (tagsRef.current.some((tag) => tag.label.toLowerCase() === label.toLowerCase())) {
-      return;
+  function addLabel(label: string, x?: number, y?: number): TasteTag | null {
+    const existing = tagsRef.current.find(
+      (tag) => tag.label.toLowerCase() === label.toLowerCase(),
+    );
+    if (existing) {
+      return existing;
     }
 
     const index = tagsRef.current.length;
     const tag = createTag(label, x ?? 30 + (index % 3) * 75, y ?? 90 + index * 18);
-    saveTags([...tagsRef.current, tag]);
+    return saveTags([...tagsRef.current, tag]) ? tag : null;
+  }
+
+  function persistBrief(
+    brief: GiftBrief,
+    destination: "collect" | "/gifts" | "/publication",
+  ) {
+    try {
+      storage.saveGiftBrief(brief);
+      setError(null);
+      if (destination === "collect") {
+        setCurationOpen(false);
+      } else {
+        router.push(destination);
+      }
+    } catch (saveError) {
+      setError(
+        saveError instanceof Error
+          ? saveError.message
+          : "Your gift brief could not be saved.",
+      );
+    }
   }
 
   function addSticker(kind: BoardStickerKind, title: string, x: number, y: number) {
@@ -228,12 +262,14 @@ export default function WorldWorkspace() {
           <span className={styles.microLabel}>Collect / curate / create / give</span>
           <h1>Your little collection of things that matter.</h1>
         </div>
-        <p>Drop in a word, a memory, a link, or a sentence. Sort it later, or never.</p>
+        <div className={styles.introNote}>
+          <p>Drop in a word, a memory, a link, or a sentence. Sort it later, or never.</p>
+        </div>
       </section>
 
       {error && <p className={styles.errorBanner} role="alert">{error}</p>}
 
-      <div className={styles.workspace}>
+      <div className={styles.workspace} id="board">
         <div className={styles.canvasColumn}>
           <WorldCanvas
             tags={visibleTags}
@@ -296,6 +332,110 @@ export default function WorldWorkspace() {
           <StickerTray items={boardStickers} />
         </aside>
       </div>
+
+      <section className={styles.storyFeature} aria-labelledby="story-feature-title">
+        <header className={styles.storyFeatureHeader}>
+          <span className={styles.microLabel}>KIN / STORIES OF ATTENTION</span>
+          <h2 id="story-feature-title">The Art of Knowing Someone</h2>
+          <span className={styles.storyFeatureIndex}>FEATURE / 001—003</span>
+        </header>
+        <article className={styles.storyEntry}>
+          <span className={styles.storyNumber}>01.</span>
+          <h3 className={styles.storyWork}>
+            <span className={styles.storyArtist}>Rachel Painter</span>
+            <span className={styles.storyDash}>—</span>
+            <em>A Painting of a Shared Memory</em>
+          </h3>
+          <div className={styles.storyBody}>
+            <p>
+              Sonny wanted to give his girlfriend something that would remind
+              her of their first date. He remembered the quiet bench where they
+              had sat together, her favorite color, and a painting style he
+              knew she loved. He brought these fragments to artist Rachel
+              Painter, who transformed them into a landscape painting. A place
+              became a memory. A memory became a work of art.
+            </p>
+            <Link className={styles.storyCta} href="#board">
+              Start curating your own story →
+            </Link>
+          </div>
+        </article>
+        <article className={styles.storyEntry}>
+          <span className={styles.storyNumber}>02.</span>
+          <h3 className={styles.storyWork}>
+            <span className={styles.storyArtist}>Jonelle Summerfield</span>
+            <span className={styles.storyDash}>—</span>
+            <em>The Listener: Reconstructing a Childhood Memory</em>
+          </h3>
+          <div className={styles.storyBody}>
+            <p>
+              Josh wanted to give his mother something she couldn&apos;t find
+              in a photograph: a painting of a childhood memory she had once
+              shared with him. Artist Jonelle Summerfield recreated the scene,
+              turning a story about his mother&apos;s childhood into an artwork
+              that brought her back to a moment she thought she&apos;d left
+              behind. Sometimes, the most meaningful gift isn&apos;t something
+              new. It&apos;s something you help someone remember.
+            </p>
+            <Link className={styles.storyCta} href="#board">
+              Turn a memory into something lasting →
+            </Link>
+          </div>
+        </article>
+        <article className={styles.storyEntry}>
+          <span className={styles.storyNumber}>03.</span>
+          <h3 className={styles.storyWork}>
+            <span className={styles.storyArtist}>Virginia Woolf</span>
+            <span className={styles.storyDash}>—</span>
+            <em>Orlando: A Portrait of Vita Sackville-West</em>
+            <span className={styles.storyDate}>(1928)</span>
+          </h3>
+          <div className={styles.storyBody}>
+            <p>
+              Virginia Woolf drew inspiration from the life, family history,
+              and ancestral home of her close friend and lover, Vita
+              Sackville-West, when writing <em>Orlando</em>. In 1928, Woolf
+              gave Vita the original handwritten manuscript, inscribed
+              &quot;Vita from Virginia.&quot; She had taken fragments of a real
+              person&apos;s life and transformed them into a literary world of
+              her own. You don&apos;t have to be Virginia Woolf to see someone
+              in a way nobody else does. Sometimes, you just need a way to turn
+              what you know into something they can hold onto.
+            </p>
+            <Link className={styles.storyCta} href="/order">
+              Create something only they could receive →
+            </Link>
+          </div>
+        </article>
+        <div className={styles.storyClosing}>
+          <p>
+            Every relationship has its own collection of stories. Start with
+            yours.
+          </p>
+          <Link className={styles.storyBoardCta} href="#board">
+            Return to the board →
+          </Link>
+        </div>
+      </section>
+
+      <section className={styles.continueSection} aria-labelledby="continue-title">
+        <div>
+          <span className={styles.microLabel}>CONTINUE / YOUR COLLECTION</span>
+          <h2 id="continue-title">What will it become?</h2>
+        </div>
+        <div className={styles.continueActions}>
+          <button
+            className={styles.curationLaunch}
+            type="button"
+            onClick={() => setCurationOpen(true)}
+          >
+            Turn your curation into a gift →
+          </button>
+          <Link className={styles.boardOrderLink} href="/order?source=board">
+            Start an order →
+          </Link>
+        </div>
+      </section>
 
       {introOpen && (
         <div className={styles.welcomeOverlay}>
@@ -362,6 +502,17 @@ export default function WorldWorkspace() {
             </div>
           </section>
         </div>
+      )}
+      {curationOpen && (
+        <GiftCurationFlow
+          tags={tags}
+          frames={world.frames}
+          onCreateLabel={(label) => addLabel(label)}
+          onExploreGiftIdeas={(brief) => persistBrief(brief, "/gifts")}
+          onMakeZine={(brief) => persistBrief(brief, "/publication")}
+          onKeepCollecting={(brief) => persistBrief(brief, "collect")}
+          onClose={() => setCurationOpen(false)}
+        />
       )}
     </main>
   );
