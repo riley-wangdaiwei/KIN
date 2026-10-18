@@ -6,6 +6,7 @@
 - Read `docs/mvp-structure.md` before building product pages; it defines the sitemap and priorities.
 - Read `docs/design-protocol.md` before changing visual design.
 - Follow `docs/builders-protocol.md` for the project structure.
+- Treat `docs/design-protocol.md` and the tokens/components in `src/app/globals.css` and `src/components/editorial/` as the visual source of truth for every UI task.
 
 ## Architecture
 
@@ -15,6 +16,14 @@
 - `src/data/`: seed and demo data.
 - `src/lib/storage/`: the persistence seam. Use `StorageAdapter`; UI must never access `localStorage` directly.
 - Mantra: pages compose, features compute, components render, storage persists.
+
+## Visual system
+
+- Use the KIN Editorial Magazine tokens and base components; preview them at `/design-preview`.
+- Prefer editorial density, serif display headlines, compact uppercase metadata, asymmetrical image/text layouts, fine rules, and controlled whitespace.
+- Use the accent sparingly. Keep photographic foreground text readable with the dark image overlay.
+- Avoid generic SaaS layouts, repeated rounded cards, decorative gradients, and centered headlines above three equal cards.
+- Keep functional areas, especially the curation board, clear and usable; editorial expression must not compromise accessibility or touch targets.
 
 Do not add product pages until explicitly requested. Keep each change focused and preserve existing behavior.
 
