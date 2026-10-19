@@ -3,17 +3,17 @@
   z-index: 120;
   display: grid;
   overflow-y: auto;
-  place-items: center;
-  padding: 1rem;
+  place-items: center start;
+  padding: 1rem var(--kin-page-gutter);
   background: var(--kin-overlay-heavy);
   inset: 0;
 }
 
 .panel {
-  width: min(100%, 54rem);
+  width: min(60vw, 54rem);
   max-height: calc(100vh - 2rem);
   overflow-y: auto;
-  padding: clamp(1rem, 3vw, 2rem);
+  padding: clamp(1rem, 3vw, 2rem) 0;
   background: var(--kin-near-black);
   color: var(--kin-white);
 }
@@ -23,11 +23,11 @@
 .actions,
 .exitActions {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .header {
-  justify-content: space-between;
+  flex-direction: column;
   color: var(--kin-light-gray);
   font-family: var(--kin-micro-mono);
   font-size: var(--kin-caption-size);
@@ -46,7 +46,8 @@
 }
 
 .progress {
-  justify-content: space-between;
+  flex-direction: column;
+  align-items: flex-start;
   gap: 0.5rem;
   margin-top: 1rem;
   padding: 0.45rem 0;
@@ -107,7 +108,7 @@
 
 .materialList {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.35rem;
   margin: 0.35rem 0 0.8rem;
 }
@@ -154,7 +155,7 @@
 
 .intentChoices {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.35rem;
   margin-bottom: 0.8rem;
 }
@@ -249,12 +250,12 @@
 
 .briefFields {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.65rem;
 }
 
 .briefFields label:last-child {
-  grid-column: 1 / -1;
+  grid-column: auto;
 }
 
 .briefFields textarea {
@@ -263,7 +264,8 @@
 }
 
 .actions {
-  justify-content: space-between;
+  flex-direction: column-reverse;
+  justify-content: flex-start;
   gap: 0.75rem;
   padding-top: 0.7rem;
 }
@@ -313,7 +315,8 @@
 
 .exitActions {
   flex-wrap: wrap;
-  justify-content: flex-end;
+  flex-direction: column;
+  justify-content: flex-start;
   gap: 0.4rem;
 }
 
@@ -323,8 +326,9 @@
   }
 
   .panel {
+    width: min(60vw, 54rem);
     max-height: calc(100vh - 1rem);
-    padding: 1rem;
+    padding: 1rem 0;
   }
 
   .progress {
@@ -333,24 +337,11 @@
     gap: 0.2rem;
   }
 
-  .materialList,
-  .intentChoices,
-  .briefFields {
-    grid-template-columns: 1fr;
-  }
-
-  .briefFields label:last-child {
-    grid-column: auto;
-  }
-
   .actions {
     align-items: flex-start;
-    flex-direction: column;
   }
 
   .exitActions {
     width: 100%;
-    align-items: stretch;
-    flex-direction: column;
   }
 }

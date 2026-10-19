@@ -1,4 +1,3 @@
-import Image from "next/image";
 import type { CSSProperties } from "react";
 import { EditorialButton } from "@/components/editorial/EditorialButton";
 import { EditorialTextBlock } from "@/components/editorial/EditorialTextBlock";
@@ -49,14 +48,7 @@ export default function DesignPreviewPage() {
   return (
     <main className="design-preview">
       <section className="design-preview__cover" aria-label="KIN publication cover">
-        <Image
-          className="design-preview__cover-image"
-          src="https://images.unsplash.com/photo-1494438639946-1ebd1d20bf85?auto=format&fit=crop&w=2000&q=90"
-          alt="A collection of books and printed matter on a studio desk"
-          fill
-          priority
-          sizes="100vw"
-        />
+        <div className="design-preview__cover-image" aria-hidden="true" />
         <div className="design-preview__cover-wash" aria-hidden="true" />
         <header className="design-preview__masthead">
           <p className="design-preview__brand">KIN</p>
@@ -131,13 +123,7 @@ export default function DesignPreviewPage() {
         </div>
 
         <div className="design-preview__spread-art" aria-label="Layered image and graphic composition">
-          <Image
-            className="design-preview__spread-image"
-            src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=1100&q=85"
-            alt="Rows of books in a quiet library"
-            fill
-            sizes="(max-width: 640px) 100vw, 40vw"
-          />
+          <div className="design-preview__spread-image" aria-hidden="true" />
           <div
             className="design-preview__spread-shape design-preview__spread-shape--one"
             aria-hidden="true"
@@ -279,7 +265,7 @@ export default function DesignPreviewPage() {
               <MetadataLabel>Image + question / asymmetry + documentary crop</MetadataLabel>
               <QuestionImageBlock
                 question="What do you notice first?"
-                imageSrc="https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=1600&q=85"
+                imageSrc="/gift_conversation.jpg"
                 imageAlt="A quiet collection of books on library shelves"
                 imageTitle="A detail becomes a story."
                 caption="IMAGE 03 / NOTES FROM A PERSONAL ARCHIVE / KIN, ISSUE 01"

@@ -7,10 +7,10 @@
 
 .header,
 .footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
+  display: grid;
+  justify-items: start;
+  gap: 0.6rem;
+  width: min(60vw, 55rem);
   padding: 0.55rem var(--kin-page-gutter) 0.65rem;
   color: var(--kin-light-gray);
   font-family: var(--kin-micro-mono);
@@ -47,6 +47,7 @@
 .hero {
   display: grid;
   grid-template-columns: 1fr;
+  width: 100%;
   min-height: 100svh;
   align-items: end;
   gap: var(--kin-column-gap);
@@ -57,7 +58,7 @@
 }
 
 .heroCopy {
-  max-width: 62rem;
+  width: min(60vw, 55rem);
 }
 
 .kicker,
@@ -105,7 +106,7 @@
 .secondary {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   color: var(--kin-white);
   cursor: pointer;
   font-family: var(--kin-ui-sans);
@@ -139,10 +140,13 @@
 }
 
 .introduction {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: var(--kin-column-gap);
+  display: block;
+  width: min(60vw, 55rem);
   padding: 1rem var(--kin-page-gutter) 1.5rem;
+}
+
+.introduction > p {
+  margin-top: 0.75rem;
 }
 
 .introduction h2,
@@ -168,30 +172,37 @@
 }
 
 .example {
-  display: grid;
-  grid-template-columns: minmax(8rem, 1fr) minmax(0, 3fr);
-  gap: var(--kin-column-gap);
+  display: block;
+  width: min(60vw, 55rem);
   padding: 0.8rem var(--kin-page-gutter);
 }
 
 .example > p {
+  margin-top: 0.55rem;
   max-width: 55ch;
   font-style: italic;
 }
 
 .template {
+  width: min(60vw, 55rem);
   padding: 0 var(--kin-page-gutter);
 }
 
 .packageSection {
-  display: grid;
-  grid-template-columns: minmax(4rem, 1fr) minmax(12rem, 2fr) minmax(0, 5fr);
-  gap: var(--kin-column-gap);
+  display: block;
   padding: 1rem 0;
 }
 
 .packageNumber {
   padding-top: 0.15rem;
+}
+
+.packageSection > h2 {
+  margin-top: 0.45rem;
+}
+
+.packageContent {
+  margin-top: 0.6rem;
 }
 
 .packageSection > h2 {
@@ -229,7 +240,7 @@
 
 .fillingGrid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.5rem;
   margin-top: 0.75rem;
 }
@@ -251,16 +262,15 @@
 }
 
 .details {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
-  gap: var(--kin-column-gap);
+  display: block;
+  width: min(60vw, 55rem);
   margin-top: 1rem;
   padding: 1rem var(--kin-page-gutter);
 }
 
 .detailColumns {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.7rem var(--kin-column-gap);
 }
 
@@ -288,12 +298,10 @@
 }
 
 .orderPanel {
-  display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(12rem, 1fr);
-  align-items: center;
-  gap: var(--kin-column-gap);
+  display: block;
+  width: min(60vw, 55rem);
   margin: 0 var(--kin-page-gutter) 1rem;
-  padding: clamp(1rem, 3vw, 2rem);
+  padding: 1rem 0;
 }
 
 .orderPanel > div p {
@@ -303,7 +311,7 @@
 }
 
 .orderPanel > .primary {
-  justify-self: start;
+  margin-top: 0.65rem;
 }
 
 .footer {
@@ -320,43 +328,20 @@
 }
 
 @media (max-width: 54rem) {
-  .packageSection {
-    grid-template-columns: 4rem 1fr 2fr;
+  .header,
+  .footer,
+  .heroCopy,
+  .introduction,
+  .example,
+  .template,
+  .details,
+  .orderPanel {
+    width: min(60vw, 55rem);
   }
 }
 
 @media (max-width: 40rem) {
-  .hero {
-    grid-template-columns: 1fr;
-  }
-
-  .introduction,
-  .details {
-    grid-template-columns: 1fr;
-  }
-
-  .example {
-    grid-template-columns: 1fr;
-    gap: 0.4rem;
-  }
-
-  .packageSection {
-    grid-template-columns: 3.5rem 1fr;
-  }
-
-  .packageContent {
-    grid-column: 2;
-  }
-
-  .detailColumns {
-    grid-template-columns: 1fr;
-  }
-
-  .orderPanel {
-    grid-template-columns: 1fr;
-  }
-
   .orderPanel > .primary {
-    justify-self: start;
+    margin-top: 0.65rem;
   }
 }

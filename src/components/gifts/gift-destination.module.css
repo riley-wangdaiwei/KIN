@@ -5,10 +5,10 @@
 }
 
 .header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
+  display: grid;
+  justify-items: start;
+  gap: 0.6rem;
+  width: min(60vw, 55rem);
   padding: 0.55rem var(--kin-page-gutter) 0.65rem;
   color: var(--kin-light-gray);
   font-family: var(--kin-micro-mono);
@@ -25,8 +25,9 @@
 }
 
 .content {
-  width: min(100% - 2 * var(--kin-page-gutter), 68rem);
-  margin: 0 auto;
+  width: min(60vw, 55rem);
+  margin: 0;
+  padding-left: var(--kin-page-gutter);
   padding: clamp(1.5rem, 5vw, 4rem) 0;
 }
 
@@ -62,10 +63,12 @@
 }
 
 .briefPart {
-  display: grid;
-  grid-template-columns: minmax(6rem, 1fr) minmax(0, 3fr);
-  gap: var(--kin-column-gap);
+  display: block;
   padding: 0.65rem 0;
+}
+
+.briefPart p {
+  margin-top: 0.35rem;
 }
 
 .briefPart h2 {
@@ -123,7 +126,8 @@
 }
 
 .actions {
-  display: flex;
+  display: grid;
+  justify-items: start;
   flex-wrap: wrap;
   gap: 0.5rem;
   margin-top: 1rem;
@@ -134,7 +138,7 @@
   display: inline-flex;
   min-height: 0;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   border: 0;
   padding: 0.45rem 0;
   background: transparent;
@@ -165,9 +169,13 @@
 }
 
 @media (max-width: 44rem) {
+  .header,
+  .content {
+    width: min(60vw, 55rem);
+  }
+
   .briefPart {
-    grid-template-columns: 1fr;
-    gap: 0.25rem;
+    display: block;
   }
 
   .idea {

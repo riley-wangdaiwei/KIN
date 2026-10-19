@@ -6,10 +6,10 @@
 
 .header,
 .footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
+  display: grid;
+  justify-items: start;
+  gap: 0.6rem;
+  width: min(60vw, 55rem);
   padding: 0.55rem var(--kin-page-gutter) 0.65rem;
   color: var(--kin-light-gray);
   font-family: var(--kin-micro-mono);
@@ -27,9 +27,8 @@
 
 .hero {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(14rem, 0.6fr);
-  align-items: end;
-  gap: var(--kin-column-gap);
+  grid-template-columns: minmax(0, 1fr);
+  width: min(60vw, 55rem);
   padding: clamp(1.5rem, 4vw, 3rem) var(--kin-page-gutter);
 }
 
@@ -55,7 +54,7 @@
 
 .hero > p {
   max-width: 32ch;
-  margin: 0 0 0.25rem;
+  margin: 0.65rem 0 0;
   color: var(--kin-light-gray);
   font-family: var(--kin-reading-serif);
   font-size: clamp(1rem, 1.8vw, 1.35rem);
@@ -64,9 +63,10 @@
 
 .briefStrip {
   display: grid;
-  grid-template-columns: 1fr 2fr auto;
-  align-items: center;
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: start;
   gap: var(--kin-column-gap);
+  width: min(60vw, 55rem);
   padding: 0.65rem var(--kin-page-gutter);
 }
 
@@ -101,6 +101,7 @@
 }
 
 .catalog {
+  width: min(60vw, 55rem);
   padding: 0 var(--kin-page-gutter);
 }
 
@@ -109,9 +110,8 @@
 }
 
 .sectionHeader {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
+  display: grid;
+  justify-items: start;
   gap: 1rem;
   padding: 0.45rem 0 0.6rem;
 }
@@ -127,8 +127,8 @@
 
 .cardGrid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--kin-column-gap);
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
   padding-bottom: 1rem;
 }
 
@@ -140,7 +140,7 @@
 }
 
 .heroCard {
-  grid-column: span 2;
+  grid-column: auto;
 }
 
 .cardLink {
@@ -177,7 +177,7 @@
 .cardArt > span {
   position: relative;
   z-index: 1;
-  align-self: flex-end;
+  align-self: flex-start;
   font-family: var(--kin-micro-mono);
   font-size: 0.65rem;
 }
@@ -250,7 +250,7 @@
 .featuredMark {
   position: absolute;
   top: 0.5rem;
-  right: 0.5rem;
+  left: 0.5rem;
   color: var(--kin-white);
   font-family: var(--kin-micro-mono);
   font-size: 0.52rem;
@@ -262,34 +262,16 @@
 }
 
 @media (max-width: 58rem) {
-  .cardGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .header,
+  .footer,
+  .hero,
+  .briefStrip,
+  .catalog {
+    width: min(60vw, 55rem);
   }
 }
 
 @media (max-width: 42rem) {
-  .hero {
-    grid-template-columns: 1fr;
-    gap: 0.8rem;
-  }
-
-  .hero > p {
-    justify-self: start;
-  }
-
-  .briefStrip {
-    grid-template-columns: 1fr;
-    gap: 0.35rem;
-  }
-
-  .cardGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .heroCard {
-    grid-column: auto;
-  }
-
   .heroCard .cardArt {
     min-height: 15rem;
   }

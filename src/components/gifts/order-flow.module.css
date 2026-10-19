@@ -6,10 +6,10 @@
 
 .header,
 .footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
+  display: grid;
+  justify-items: start;
+  gap: 0.6rem;
+  width: min(60vw, 55rem);
   padding: 0.55rem var(--kin-page-gutter) 0.65rem;
   color: var(--kin-light-gray);
   font-family: var(--kin-micro-mono);
@@ -26,15 +26,15 @@
 }
 
 .layout {
-  display: grid;
+  display: block;
+  width: min(60vw, 55rem);
   min-height: calc(100vh - 6rem);
-  grid-template-columns: minmax(16rem, 4fr) minmax(0, 8fr);
 }
 
 .sidebar {
   display: flex;
   flex-direction: column;
-  padding: clamp(1rem, 3vw, 2rem);
+  padding: 1rem var(--kin-page-gutter);
 }
 
 .eyebrow,
@@ -102,13 +102,13 @@
 }
 
 .formPanel {
-  width: min(100%, 58rem);
-  padding: clamp(1rem, 4vw, 3rem);
+  width: 100%;
+  padding: 1rem var(--kin-page-gutter);
 }
 
 .stepMeta {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  justify-items: start;
   gap: 1rem;
   padding-bottom: 0.45rem;
 }
@@ -132,8 +132,8 @@
 
 .briefGrid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.5rem;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
   margin: 1rem 0;
 }
 
@@ -234,8 +234,8 @@
 
 .materialChoices {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.3rem 0.6rem;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.3rem;
   margin: 0.5rem 0;
 }
 
@@ -314,8 +314,9 @@
 
 .formActions {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  align-items: flex-start;
+  justify-content: flex-start;
+  flex-direction: column-reverse;
   gap: 1rem;
   margin-top: 1rem;
   padding-top: 0.65rem;
@@ -414,8 +415,10 @@
 }
 
 @media (max-width: 50rem) {
+  .header,
+  .footer,
   .layout {
-    grid-template-columns: 1fr;
+    width: min(60vw, 55rem);
   }
 
   .sidebar {
@@ -433,8 +436,8 @@
   }
 
   .stepList {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0 0.5rem;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
     margin-top: 0.8rem;
   }
 
@@ -453,18 +456,9 @@
 }
 
 @media (max-width: 34rem) {
-  .briefGrid,
-  .materialChoices {
-    grid-template-columns: 1fr;
-  }
-
   .stepList li {
     grid-template-columns: 1.2rem 1fr;
     font-size: 0.7rem;
   }
 
-  .footer span {
-    max-width: 15ch;
-    text-align: left;
-  }
 }

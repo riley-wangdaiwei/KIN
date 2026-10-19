@@ -12,10 +12,9 @@
 }
 
 .header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
+  display: grid;
+  justify-items: start;
+  gap: 0.7rem;
   padding: 0.55rem var(--kin-page-gutter) 0.65rem;
   color: var(--kin-white);
 }
@@ -34,8 +33,9 @@
 .header nav {
   display: flex;
   flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 0.45rem 1rem;
+  justify-content: flex-start;
+  max-width: 60%;
+  gap: 0.45rem 0.8rem;
 }
 
 .header nav a,
@@ -74,7 +74,7 @@
 }
 
 .imageHero {
-  min-height: calc(100svh - 4rem);
+  min-height: 100svh;
   padding-top: 5rem;
 }
 
@@ -91,7 +91,7 @@
 .heroCopy {
   position: relative;
   z-index: 1;
-  width: min(100%, 54rem);
+  width: min(60vw, 55rem);
   padding: 0 0 clamp(1.2rem, 4vw, 3rem);
 }
 
@@ -112,7 +112,7 @@
 }
 
 .intro {
-  max-width: 48ch;
+  max-width: 58ch;
   margin: 0.65rem 0 0;
   color: var(--kin-light-gray);
   font-family: var(--kin-reading-serif);
@@ -121,20 +121,19 @@
 }
 
 .content {
-  width: min(100%, 100rem);
-  margin-inline: auto;
-  padding: 0 var(--kin-page-gutter) clamp(2rem, 6vw, 5rem);
+  width: min(60vw, 55rem);
+  margin-left: var(--kin-page-gutter);
+  margin-right: 0;
+  padding: 0 0 clamp(2rem, 6vw, 5rem);
 }
 
 .section {
-  display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
-  gap: var(--kin-column-gap);
+  display: block;
   padding: clamp(1.3rem, 2.7vw, 2.4rem) 0;
 }
 
 .sectionHeading {
-  grid-column: 1 / span 3;
+  max-width: 15ch;
   margin: 0;
   font-family: var(--kin-display-serif);
   font-size: clamp(1.75rem, 3.1vw, 3rem);
@@ -145,8 +144,9 @@
 }
 
 .sectionBody {
-  grid-column: 4 / span 9;
+  width: 100%;
   min-width: 0;
+  margin-top: 0.7rem;
 }
 
 .sectionLabel {
@@ -178,8 +178,8 @@
 
 .cardGrid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0 var(--kin-column-gap);
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
 }
 
 .card {
@@ -224,7 +224,7 @@
 .cta {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   margin-top: 1rem;
   color: var(--kin-white);
   font-family: var(--kin-ui-sans);
@@ -265,21 +265,21 @@
 }
 
 .siteFooter {
+  width: min(60vw, 55rem);
   padding: 1rem var(--kin-page-gutter) 0.7rem;
   background: var(--kin-black);
   color: var(--kin-light-gray);
 }
 
 .footerTop {
-  display: flex;
-  align-items: end;
-  justify-content: space-between;
-  gap: 1rem;
+  display: grid;
+  justify-items: start;
+  gap: 0.8rem;
   padding-bottom: 1rem;
 }
 
 .footerTop p {
-  max-width: 29ch;
+  max-width: 58ch;
   margin: 0;
   font-family: var(--kin-reading-serif);
   font-size: 0.9rem;
@@ -313,20 +313,16 @@
 }
 
 .footerBottom {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
+  display: grid;
+  justify-items: start;
+  gap: 0.35rem;
   padding-top: 0.65rem;
   font-size: 0.55rem;
 }
 
 @media (max-width: 760px) {
-  .header {
-    align-items: flex-start;
-  }
-
   .header nav {
-    max-width: 19rem;
+    max-width: 100%;
     gap: 0.5rem 0.75rem;
   }
 
@@ -338,16 +334,20 @@
     margin-top: 0;
   }
 
-  .sectionHeading {
-    grid-column: 1 / span 4;
+  .content {
+    width: min(60vw, 55rem);
+    margin-left: var(--kin-page-gutter);
+    margin-right: var(--kin-page-gutter);
+    padding-right: 0;
+    padding-left: 0;
   }
 
-  .sectionBody {
-    grid-column: 5 / span 8;
+  .heroCopy {
+    width: min(60vw, 55rem);
   }
 
-  .cardGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .siteFooter {
+    width: min(60vw, 55rem);
   }
 }
 
@@ -365,27 +365,8 @@
     font-size: clamp(2rem, 9vw, 3.3rem);
   }
 
-  .section {
-    row-gap: 0.8rem;
-  }
-
-  .sectionHeading,
-  .sectionBody {
-    grid-column: 1 / -1;
-  }
-
-  .cardGrid {
-    grid-template-columns: 1fr;
-  }
-
   .card {
     min-height: 0;
-  }
-
-  .footerTop,
-  .footerBottom {
-    align-items: flex-start;
-    flex-direction: column;
   }
 
   .footerTop p {
