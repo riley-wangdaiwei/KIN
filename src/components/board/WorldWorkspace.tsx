@@ -252,6 +252,7 @@ export default function WorldWorkspace() {
 
   return (
     <main className={styles.boardApp}>
+      <div aria-hidden="true" className={styles.homeBg} />
       <header className={styles.siteHeader}>
         <Link className={styles.wordmark} href="/" aria-label="KIN home">KIN</Link>
         <span className={styles.headerCaption}>A SMALL ARCHIVE OF WHAT MATTERS</span>

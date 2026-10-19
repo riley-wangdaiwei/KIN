@@ -1,7 +1,17 @@
 .boardApp {
   min-height: 100vh;
-  background: var(--kin-black);
+  background: transparent;
   color: var(--kin-white);
+}
+
+/* Fixed full-page backdrop: home.jpg stays put, all content scrolls over it.
+   (Separate layer because background-attachment: fixed is ignored on iOS.) */
+.homeBg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: url("/home.jpg") center / cover no-repeat;
+  pointer-events: none;
 }
 
 .siteHeader {
@@ -77,10 +87,7 @@
   align-items: flex-end;
   overflow: hidden;
   padding: 5.5rem var(--kin-page-gutter) 0;
-  background-color: var(--kin-black);
-  background-image: url("/home.jpg");
-  background-position: center;
-  background-size: cover;
+  background: transparent;
   color: var(--kin-white);
 }
 
@@ -174,7 +181,7 @@
   min-height: 43rem;
   isolation: isolate;
   overflow: hidden;
-  background-color: var(--kin-black);
+  background-color: transparent;
 }
 
 .canvas {
