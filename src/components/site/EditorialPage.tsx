@@ -8,18 +8,30 @@ export default function EditorialPage({
   title,
   intro,
   heroImage,
+  backgroundBehavior = "fixed",
 }: {
   children: ReactNode;
   eyebrow: string;
   title: string;
   intro: string;
   heroImage?: string;
+  /** "fixed" (default): image stays as the backdrop, only text scrolls.
+      "scroll": tall image scrolls together with the content. */
+  backgroundBehavior?: "fixed" | "scroll";
 }) {
+  const isFixed = !!heroImage && backgroundBehavior === "fixed";
   return (
     <main
-      className={`${styles.page} ${heroImage ? styles.imagePage : ""}`}
-      style={heroImage ? { backgroundImage: `url("${heroImage}")` } : undefined}
+      className={`${styles.page} ${heroImage ? (isFixed ? styles.imagePage : styles.scrollImagePage) : ""}`}
+      style={!isFixed && heroImage ? { backgroundImage: `url("${heroImage}")` } : undefined}
     >
+      {isFixed && (
+        <div
+          aria-hidden="true"
+          className={styles.fixedBg}
+          style={{ backgroundImage: `url("${heroImage}")` }}
+        />
+      )}
       <SiteHeader />
       <section className={`${styles.hero} ${heroImage ? styles.imageHero : styles.textHero}`}>
         <div className={styles.heroCopy}>

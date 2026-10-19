@@ -5,6 +5,24 @@
 }
 
 .imagePage {
+  /* Fixed-backdrop variant: the backdrop is a separate fixed layer
+     (.fixedBg) so it also works on iOS (background-attachment: fixed
+     is ignored there). Main stays transparent so the layer shows through. */
+  background: transparent;
+}
+
+.fixedBg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  pointer-events: none;
+}
+
+.scrollImagePage {
+  /* Tall-image variant: image scrolls together with the content. */
   background-color: var(--kin-black);
   background-position: center top;
   background-repeat: no-repeat;
