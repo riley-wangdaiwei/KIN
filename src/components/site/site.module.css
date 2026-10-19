@@ -22,11 +22,22 @@
 }
 
 .scrollImagePage {
-  /* Tall-image variant: image scrolls together with the content. */
-  background-color: var(--kin-black);
-  background-position: center top;
-  background-repeat: no-repeat;
-  background-size: 100% auto;
+  /* Tall-image variant: the image scrolls together with the content, then
+     fades into the black background so text can continue below it. */
+  position: relative;
+  background: var(--kin-black);
+}
+
+.tallBg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  width: 100%;
+  height: auto;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(to bottom, #000 78%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 78%, transparent 100%);
 }
 
 .header {

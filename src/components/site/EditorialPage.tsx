@@ -23,7 +23,6 @@ export default function EditorialPage({
   return (
     <main
       className={`${styles.page} ${heroImage ? (isFixed ? styles.imagePage : styles.scrollImagePage) : ""}`}
-      style={!isFixed && heroImage ? { backgroundImage: `url("${heroImage}")` } : undefined}
     >
       {isFixed && (
         <div
@@ -31,6 +30,11 @@ export default function EditorialPage({
           className={styles.fixedBg}
           style={{ backgroundImage: `url("${heroImage}")` }}
         />
+      )}
+      {!isFixed && heroImage && (
+        // Decorative backdrop: plain <img> keeps natural aspect ratio for the fade-out mask.
+        // eslint-disable-next-line @next/next/no-img-element
+        <img aria-hidden="true" alt="" src={heroImage} className={styles.tallBg} />
       )}
       <SiteHeader />
       <section className={`${styles.hero} ${heroImage ? styles.imageHero : styles.textHero}`}>
