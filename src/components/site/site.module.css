@@ -25,6 +25,7 @@
   /* Tall-image variant: the image scrolls together with the content, then
      fades into the black background so text can continue below it. */
   position: relative;
+  isolation: isolate; /* keep the z-index:-1 tall image above the black bg */
   background: var(--kin-black);
 }
 
