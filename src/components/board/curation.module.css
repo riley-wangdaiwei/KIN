@@ -13,11 +13,9 @@
   width: min(100%, 54rem);
   max-height: calc(100vh - 2rem);
   overflow-y: auto;
-  border: 1px solid var(--kin-white);
   padding: clamp(1rem, 3vw, 2rem);
   background: var(--kin-near-black);
   color: var(--kin-white);
-  box-shadow: 12px 12px 0 rgb(0 0 0 / 32%);
 }
 
 .header,
@@ -40,7 +38,7 @@
   width: 2rem;
   height: 2rem;
   place-items: center;
-  border: 1px solid var(--kin-mid-gray);
+  border: 0;
   background: transparent;
   color: var(--kin-white);
   cursor: pointer;
@@ -51,8 +49,6 @@
   justify-content: space-between;
   gap: 0.5rem;
   margin-top: 1rem;
-  border-top: 1px solid var(--kin-mid-gray);
-  border-bottom: 1px solid var(--kin-mid-gray);
   padding: 0.45rem 0;
   color: var(--kin-mid-gray);
   font-family: var(--kin-micro-mono);
@@ -77,7 +73,7 @@
 .content h2 {
   margin: 0.25rem 0 0;
   font-family: var(--kin-display-serif);
-  font-size: clamp(2.8rem, 7vw, 5.2rem);
+  font-size: clamp(2rem, 4.5vw, 3.8rem);
   font-weight: 400;
   line-height: 0.85;
   letter-spacing: -0.04em;
@@ -96,7 +92,6 @@
   min-width: 0;
   margin: 0;
   border: 0;
-  border-top: 1px solid var(--kin-mid-gray);
   padding: 0.55rem 0 0;
 }
 
@@ -123,10 +118,10 @@
   min-height: 2.5rem;
   align-items: center;
   gap: 0.5rem;
-  border: 1px solid var(--kin-mid-gray);
-  padding: 0.45rem 0.55rem;
+  border: 0;
+  padding: 0.45rem 0;
   background: transparent;
-  color: var(--kin-white);
+  color: var(--kin-light-gray);
   cursor: pointer;
   font-family: var(--kin-reading-serif);
   font-size: 0.86rem;
@@ -136,13 +131,13 @@
 
 .material:hover,
 .intent:hover {
-  border-color: var(--kin-white);
+  color: var(--kin-white);
 }
 
 .materialSelected {
-  border-color: var(--kin-white);
-  background: var(--kin-paper);
-  color: var(--kin-black);
+  color: var(--kin-white);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
 }
 
 .material span {
@@ -166,11 +161,11 @@
 
 .intent,
 .intentSelected {
-  min-height: 2.35rem;
-  border: 1px solid var(--kin-mid-gray);
-  padding: 0.4rem 0.5rem;
+  min-height: 0;
+  border: 0;
+  padding: 0.4rem 0;
   background: transparent;
-  color: var(--kin-white);
+  color: var(--kin-light-gray);
   cursor: pointer;
   font-family: var(--kin-reading-serif);
   font-size: 0.82rem;
@@ -178,9 +173,9 @@
 }
 
 .intentSelected {
-  border-color: var(--kin-white);
-  background: var(--kin-white);
-  color: var(--kin-black);
+  color: var(--kin-white);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
 }
 
 .addForm {
@@ -208,7 +203,8 @@
 .briefFields textarea {
   width: 100%;
   min-width: 0;
-  border: 1px solid var(--kin-mid-gray);
+  border: 0;
+  border-bottom: 1px solid var(--kin-mid-gray);
   border-radius: 0;
   padding: 0.55rem;
   background: transparent;
@@ -238,10 +234,10 @@
 
 .addForm button {
   flex: 0 0 auto;
-  border: 1px solid var(--kin-white);
-  padding: 0.45rem 0.7rem;
-  background: var(--kin-white);
-  color: var(--kin-black);
+  border: 0;
+  padding: 0.45rem 0;
+  background: transparent;
+  color: var(--kin-white);
   cursor: pointer;
   font-family: var(--kin-ui-sans);
   font-size: 0.72rem;
@@ -269,7 +265,6 @@
 .actions {
   justify-content: space-between;
   gap: 0.75rem;
-  border-top: 1px solid var(--kin-mid-gray);
   padding-top: 0.7rem;
 }
 
@@ -277,9 +272,9 @@
 .next,
 .primary,
 .secondary {
-  min-height: 2.55rem;
-  border: 1px solid var(--kin-white);
-  padding: 0.5rem 0.75rem;
+  min-height: 0;
+  border: 0;
+  padding: 0.45rem 0;
   background: transparent;
   color: var(--kin-white);
   cursor: pointer;
@@ -295,13 +290,18 @@
 
 .next,
 .primary {
-  background: var(--kin-white);
-  color: var(--kin-black);
+  color: var(--kin-white);
+}
+
+.back:hover,
+.next:hover:not(:disabled),
+.primary:hover,
+.secondary:hover,
+.addForm button:hover {
+  color: var(--kin-light-gray);
 }
 
 .next:disabled {
-  border-color: var(--kin-mid-gray);
-  background: var(--kin-charcoal);
   color: var(--kin-mid-gray);
   cursor: not-allowed;
 }

@@ -255,16 +255,23 @@ export default function WorldWorkspace() {
       <header className={styles.siteHeader}>
         <Link className={styles.wordmark} href="/" aria-label="KIN home">KIN</Link>
         <span className={styles.headerCaption}>A SMALL ARCHIVE OF WHAT MATTERS</span>
-        <span className={styles.headerIssue}>BOARD / 001</span>
+        <nav className={styles.homeNav} aria-label="Main navigation">
+          <Link href="/how-it-works">HOW IT WORKS</Link>
+          <Link href="/gifts">GIFTS</Link>
+          <Link href="/artists">ARTISTS</Link>
+          <Link href="/integrations">INTEGRATIONS</Link>
+          <Link href="/community">COMMUNITY</Link>
+        </nav>
       </header>
 
       <section className={styles.boardIntro}>
-        <div>
+        <div className={styles.boardIntroCopy}>
+          <span className={styles.headerIssue}>BOARD / 001</span>
           <span className={styles.microLabel}>Collect / curate / create / give</span>
           <h1>Your little collection of things that matter.</h1>
-        </div>
-        <div className={styles.introNote}>
-          <p>Drop in a word, a memory, a link, or a sentence. Sort it later, or never.</p>
+          <div className={styles.introNote}>
+            <p>Drop in a word, a memory, a link, or a sentence. Sort it later, or never.</p>
+          </div>
         </div>
       </section>
 

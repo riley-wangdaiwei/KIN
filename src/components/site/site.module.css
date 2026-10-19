@@ -1,7 +1,7 @@
 .page {
   min-height: 100vh;
-  background: var(--kin-paper);
-  color: var(--kin-black);
+  background: var(--kin-black);
+  color: var(--kin-white);
 }
 
 .header {
@@ -9,14 +9,14 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  border-bottom: 1px solid var(--kin-mid-gray);
   padding: 0.55rem var(--kin-page-gutter) 0.65rem;
+  color: var(--kin-white);
 }
 
 .wordmark,
 .footerMark {
   flex: 0 0 auto;
-  color: var(--kin-black);
+  color: var(--kin-white);
   font-family: var(--kin-display-serif);
   font-size: clamp(2rem, 3.6vw, 3.5rem);
   line-height: 0.8;
@@ -44,43 +44,82 @@
 }
 
 .header nav a {
+  color: var(--kin-white);
   text-decoration-thickness: 1px;
   text-underline-offset: 0.2em;
+  text-decoration-color: transparent;
+  transition: color var(--kin-transition), text-decoration-color var(--kin-transition);
+}
+
+.header nav a:hover,
+.header nav a:focus-visible {
+  color: var(--kin-light-gray);
+  text-decoration-color: currentColor;
 }
 
 .hero {
-  display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
-  align-items: end;
-  gap: var(--kin-column-gap);
-  border-bottom: 1px solid var(--kin-mid-gray);
-  padding: clamp(2.5rem, 7vw, 6rem) var(--kin-page-gutter) clamp(1.5rem, 4vw, 3rem);
+  position: relative;
+  display: flex;
+  min-height: 0;
+  align-items: flex-end;
+  padding: 0 var(--kin-page-gutter);
+  isolation: isolate;
+}
+
+.imageHero {
+  min-height: clamp(24rem, 62vh, 46rem);
+  background-color: var(--kin-black);
+  background-position: center;
+  background-size: cover;
+}
+
+.imageHero::before {
+  position: absolute;
+  z-index: 0;
+  background: linear-gradient(0deg, rgb(0 0 0 / 38%), transparent 58%);
+  content: "";
+  inset: 0;
+}
+
+.textHero {
+  min-height: 0;
+  padding-top: clamp(1.8rem, 5vw, 4rem);
+  padding-bottom: 1rem;
+}
+
+.textHero .heroCopy {
+  padding-bottom: 0;
+}
+
+.heroCopy {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 68rem);
+  padding: 0 0 clamp(1.2rem, 4vw, 3rem);
 }
 
 .eyebrow {
-  grid-column: 1 / span 3;
-  align-self: start;
-  margin: 0.35rem 0 0;
-  color: var(--kin-charcoal);
+  margin: 0 0 0.55rem;
+  color: var(--kin-light-gray);
 }
 
 .hero h1 {
-  grid-column: 4 / span 6;
-  max-width: 11ch;
+  max-width: 18ch;
   margin: 0;
   font-family: var(--kin-display-serif);
-  font-size: clamp(3.4rem, 9vw, 8.5rem);
+  font-size: clamp(2.1rem, 4.5vw, 4.3rem);
   font-weight: 400;
-  line-height: 0.78;
-  letter-spacing: -0.05em;
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  color: var(--kin-white);
 }
 
 .intro {
-  grid-column: 10 / span 3;
-  max-width: 31ch;
-  margin: 0 0 0.2rem;
+  max-width: 48ch;
+  margin: 0.65rem 0 0;
+  color: var(--kin-light-gray);
   font-family: var(--kin-reading-serif);
-  font-size: clamp(1rem, 1.5vw, 1.25rem);
+  font-size: clamp(0.9rem, 1.3vw, 1.05rem);
   line-height: 1.12;
 }
 
@@ -94,8 +133,7 @@
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   gap: var(--kin-column-gap);
-  border-bottom: 1px solid var(--kin-mid-gray);
-  padding: clamp(1.5rem, 3.3vw, 3rem) 0;
+  padding: clamp(1.3rem, 2.7vw, 2.4rem) 0;
 }
 
 .sectionHeading {
@@ -106,6 +144,7 @@
   font-weight: 400;
   line-height: 0.9;
   letter-spacing: -0.035em;
+  color: var(--kin-white);
 }
 
 .sectionBody {
@@ -116,7 +155,7 @@
 .sectionLabel {
   display: block;
   margin-bottom: 0.7rem;
-  color: var(--kin-charcoal);
+  color: var(--kin-light-gray);
 }
 
 .sectionBody > p,
@@ -124,6 +163,7 @@
 .legalCopy p,
 .legalCopy li {
   max-width: 68ch;
+  color: var(--kin-light-gray);
   font-family: var(--kin-reading-serif);
   font-size: var(--kin-copy-size);
   line-height: 1.25;
@@ -148,14 +188,13 @@
 .card {
   position: relative;
   min-height: 10rem;
-  border-top: 1px solid var(--kin-black);
   padding: 0.65rem 0.3rem 1rem 0;
 }
 
 .cardNumber {
   display: block;
   margin-bottom: 1rem;
-  color: var(--kin-charcoal);
+  color: var(--kin-light-gray);
 }
 
 .card h3 {
@@ -164,6 +203,7 @@
   font-size: clamp(1.35rem, 2.2vw, 2.1rem);
   font-weight: 400;
   line-height: 0.9;
+  color: var(--kin-white);
 }
 
 .card p {
@@ -172,6 +212,7 @@
   font-family: var(--kin-reading-serif);
   font-size: var(--kin-copy-size);
   line-height: 1.2;
+  color: var(--kin-light-gray);
 }
 
 .card em {
@@ -185,21 +226,18 @@
 
 .cta {
   display: inline-flex;
-  min-height: 2.6rem;
   align-items: center;
   justify-content: center;
   margin-top: 1rem;
-  border: 1px solid var(--kin-black);
-  padding: 0.55rem 0.75rem;
-  background: var(--kin-black);
   color: var(--kin-white);
   font-family: var(--kin-ui-sans);
   font-size: 0.75rem;
   text-decoration: none;
+  transition: color var(--kin-transition);
 }
 
 .cta:hover {
-  background: var(--kin-charcoal);
+  color: var(--kin-light-gray);
 }
 
 .legalCopy {
@@ -213,26 +251,26 @@
   font-size: clamp(1.5rem, 2.4vw, 2.3rem);
   font-weight: 400;
   line-height: 0.9;
+  color: var(--kin-white);
 }
 
 .legalCopy h3 {
   margin-bottom: 0.4rem;
   font-family: var(--kin-ui-sans);
   font-size: 0.85rem;
+  color: var(--kin-white);
 }
 
 .notice {
-  border-left: 3px solid var(--kin-black);
   margin: 1.3rem 0;
-  padding: 0.7rem 0.9rem;
-  background: rgb(0 0 0 / 5%);
+  color: var(--kin-light-gray);
+  font-family: var(--kin-reading-serif);
 }
 
 .siteFooter {
-  border-top: 1px solid var(--kin-black);
   padding: 1rem var(--kin-page-gutter) 0.7rem;
-  background: var(--kin-paper);
-  color: var(--kin-charcoal);
+  background: var(--kin-black);
+  color: var(--kin-light-gray);
 }
 
 .footerTop {
@@ -260,14 +298,21 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.65rem 1.4rem;
-  border-top: 1px solid var(--kin-light-gray);
-  border-bottom: 1px solid var(--kin-light-gray);
   padding: 0.7rem 0;
 }
 
 .footerLinks a {
+  color: var(--kin-white);
   text-decoration-thickness: 1px;
   text-underline-offset: 0.2em;
+  text-decoration-color: transparent;
+  transition: color var(--kin-transition), text-decoration-color var(--kin-transition);
+}
+
+.footerLinks a:hover,
+.footerLinks a:focus-visible {
+  color: var(--kin-light-gray);
+  text-decoration-color: currentColor;
 }
 
 .footerBottom {
@@ -293,15 +338,7 @@
   }
 
   .eyebrow {
-    grid-column: 1 / -1;
-  }
-
-  .hero h1 {
-    grid-column: 1 / span 8;
-  }
-
-  .intro {
-    grid-column: 9 / span 4;
+    margin-top: 0;
   }
 
   .sectionHeading {
@@ -328,12 +365,7 @@
   }
 
   .hero h1 {
-    grid-column: 1 / -1;
-    font-size: clamp(3.2rem, 17vw, 5.4rem);
-  }
-
-  .intro {
-    grid-column: 1 / span 9;
+    font-size: clamp(2rem, 9vw, 3.3rem);
   }
 
   .section {

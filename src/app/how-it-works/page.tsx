@@ -45,6 +45,7 @@ export default function HowItWorksPage() {
       eyebrow="THE KIN LOOP / 01—04"
       title="A gift begins with noticing."
       intro="KIN turns the small things you remember into a thoughtful, maker-shaped gift. The board is the beginning; the loop keeps it moving."
+      heroImage="/how-it-works.jpg"
     >
       {loop.map((step, index) => (
         <section className={styles.section} key={step.title}>

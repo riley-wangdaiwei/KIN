@@ -1,7 +1,7 @@
 .page {
   min-height: 100vh;
-  background: var(--kin-paper);
-  color: var(--kin-black);
+  background: var(--kin-black);
+  color: var(--kin-white);
 }
 
 .header,
@@ -10,15 +10,14 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  border-bottom: 1px solid var(--kin-mid-gray);
   padding: 0.55rem var(--kin-page-gutter) 0.65rem;
-  color: var(--kin-charcoal);
+  color: var(--kin-light-gray);
   font-family: var(--kin-micro-mono);
   font-size: var(--kin-caption-size);
 }
 
 .wordmark {
-  color: var(--kin-black);
+  color: var(--kin-white);
   font-family: var(--kin-display-serif);
   font-size: clamp(2rem, 3.6vw, 3.5rem);
   line-height: 0.8;
@@ -35,22 +34,21 @@
 .sidebar {
   display: flex;
   flex-direction: column;
-  border-right: 1px solid var(--kin-mid-gray);
   padding: clamp(1rem, 3vw, 2rem);
 }
 
 .eyebrow,
 .stepMeta {
-  color: var(--kin-charcoal);
+  color: var(--kin-light-gray);
   font-family: var(--kin-micro-mono);
   font-size: var(--kin-caption-size);
 }
 
 .sidebar h1 {
-  max-width: 8ch;
+  max-width: 12ch;
   margin: 0.5rem 0;
   font-family: var(--kin-display-serif);
-  font-size: clamp(2.8rem, 5.3vw, 5.2rem);
+  font-size: clamp(1.8rem, 3vw, 2.8rem);
   font-weight: 400;
   line-height: 0.82;
   letter-spacing: -0.045em;
@@ -58,7 +56,7 @@
 
 .sidebar > p {
   max-width: 34ch;
-  color: var(--kin-charcoal);
+  color: var(--kin-light-gray);
   font-family: var(--kin-reading-serif);
   font-size: 0.95rem;
   line-height: 1.18;
@@ -76,9 +74,8 @@
   display: grid;
   grid-template-columns: 2rem 1fr;
   gap: 0.35rem;
-  border-top: 1px solid var(--kin-light-gray);
   padding: 0.55rem 0;
-  color: var(--kin-mid-gray);
+  color: var(--kin-light-gray);
   font-family: var(--kin-reading-serif);
 }
 
@@ -88,14 +85,13 @@
 }
 
 .stepList .activeStep {
-  color: var(--kin-black);
+  color: var(--kin-white);
 }
 
 .orderAside {
   display: grid;
   gap: 0.3rem;
   margin-top: auto;
-  border-top: 1px solid var(--kin-black);
   padding-top: 0.6rem;
 }
 
@@ -114,14 +110,13 @@
   display: flex;
   justify-content: space-between;
   gap: 1rem;
-  border-bottom: 1px solid var(--kin-mid-gray);
   padding-bottom: 0.45rem;
 }
 
 .formPanel form > h2 {
   margin: 1rem 0 0.45rem;
   font-family: var(--kin-display-serif);
-  font-size: clamp(2.4rem, 5vw, 4.3rem);
+  font-size: clamp(1.9rem, 3.8vw, 3.3rem);
   font-weight: 400;
   line-height: 0.86;
   letter-spacing: -0.04em;
@@ -129,7 +124,7 @@
 
 .lead {
   max-width: 58ch;
-  color: var(--kin-charcoal);
+  color: var(--kin-light-gray);
   font-family: var(--kin-reading-serif);
   font-size: 1rem;
   line-height: 1.2;
@@ -144,8 +139,6 @@
 
 .briefCard {
   min-width: 0;
-  border-top: 2px solid var(--kin-black);
-  border-bottom: 1px solid var(--kin-mid-gray);
   padding: 0.5rem 0;
 }
 
@@ -173,7 +166,6 @@
 .packageSummary,
 .privacyNotice {
   margin: 0.8rem 0;
-  border: 1px solid var(--kin-mid-gray);
   padding: 0.65rem;
 }
 
@@ -181,7 +173,7 @@
 .packageSummary > p,
 .privacyNotice > p {
   margin: 0.4rem 0;
-  color: var(--kin-charcoal);
+  color: var(--kin-light-gray);
   font-family: var(--kin-reading-serif);
   font-size: 0.86rem;
   line-height: 1.2;
@@ -201,11 +193,12 @@
 .field select {
   width: 100%;
   min-width: 0;
-  border: 1px solid var(--kin-mid-gray);
+  border: 0;
+  border-bottom: 1px solid var(--kin-mid-gray);
   border-radius: 0;
-  padding: 0.6rem;
+  padding: 0.6rem 0;
   background: transparent;
-  color: var(--kin-black);
+  color: var(--kin-white);
   font-family: var(--kin-reading-serif);
   font-size: 0.95rem;
   text-transform: none;
@@ -213,7 +206,7 @@
 
 .field select {
   min-height: 2.7rem;
-  background: var(--kin-paper);
+  background: var(--kin-black);
 }
 
 .field textarea {
@@ -228,12 +221,12 @@
 .secondaryAction:focus-visible,
 .partnerLink:focus-visible,
 .textLink:focus-visible {
-  outline: 2px solid var(--kin-black);
+  outline: 1px solid var(--kin-white);
   outline-offset: 2px;
 }
 
 .field > span {
-  color: var(--kin-charcoal);
+  color: var(--kin-light-gray);
   font-family: var(--kin-reading-serif);
   font-size: 0.78rem;
   text-transform: none;
@@ -251,7 +244,6 @@
   gap: 0.35rem;
   margin: 0.8rem 0;
   border: 0;
-  border-top: 1px solid var(--kin-mid-gray);
   padding: 0.5rem 0 0;
 }
 
@@ -269,13 +261,14 @@
   font-family: var(--kin-reading-serif);
   font-size: 0.88rem;
   line-height: 1.15;
+  color: var(--kin-light-gray);
 }
 
 .checkOption input {
   width: 1rem;
   height: 1rem;
   flex: 0 0 auto;
-  accent-color: var(--kin-black);
+  accent-color: var(--kin-white);
 }
 
 .packageSummary > ul,
@@ -289,7 +282,7 @@
 }
 
 .packageSummary > span {
-  color: var(--kin-charcoal);
+  color: var(--kin-light-gray);
   font-family: var(--kin-micro-mono);
   font-size: 0.59rem;
   line-height: 1.3;
@@ -298,7 +291,7 @@
 .partnerNote {
   max-width: 60ch;
   margin: 0.4rem 0;
-  color: var(--kin-charcoal);
+  color: var(--kin-light-gray);
   font-family: var(--kin-reading-serif);
   font-size: 0.8rem;
 }
@@ -306,7 +299,7 @@
 .partnerLink {
   width: fit-content;
   margin-top: 0.35rem;
-  color: var(--kin-black);
+  color: var(--kin-white);
   font-family: var(--kin-micro-mono);
   font-size: 0.68rem;
 }
@@ -325,7 +318,6 @@
   justify-content: space-between;
   gap: 1rem;
   margin-top: 1rem;
-  border-top: 1px solid var(--kin-mid-gray);
   padding-top: 0.65rem;
 }
 
@@ -333,11 +325,11 @@
 .backLink,
 .next,
 .secondaryAction {
-  min-height: 2.65rem;
-  border: 1px solid var(--kin-black);
-  padding: 0.55rem 0.75rem;
+  min-height: 0;
+  border: 0;
+  padding: 0.4rem 0;
   background: transparent;
-  color: var(--kin-black);
+  color: var(--kin-white);
   cursor: pointer;
   font-family: var(--kin-ui-sans);
   font-size: 0.73rem;
@@ -346,13 +338,12 @@
 
 .back,
 .backLink {
-  border-color: transparent;
   padding-left: 0;
-  color: var(--kin-charcoal);
+  color: var(--kin-light-gray);
 }
 
 .next {
-  background: var(--kin-black);
+  background: transparent;
   color: var(--kin-white);
 }
 
@@ -362,9 +353,8 @@
 }
 
 .error {
-  border-left: 3px solid var(--kin-black);
-  padding: 0.5rem 0.65rem;
-  background: var(--kin-white);
+  padding: 0.5rem 0;
+  color: var(--kin-white);
   font-family: var(--kin-reading-serif);
   font-size: 0.85rem;
 }
@@ -373,10 +363,20 @@
   padding: 1.5rem 0;
 }
 
+.back:hover,
+.backLink:hover,
+.next:hover:not(:disabled),
+.secondaryAction:hover,
+.partnerLink:hover,
+.textLink:hover {
+  color: var(--kin-light-gray);
+}
+
 .confirmation > h3 {
   max-width: 13ch;
   margin: 0.45rem 0;
   font-size: clamp(2rem, 4.5vw, 3.8rem);
+  color: var(--kin-white);
 }
 
 .confirmation > p {
@@ -399,18 +399,17 @@
 .textLink {
   display: inline-block;
   margin-left: 0.8rem;
-  color: var(--kin-black);
+  color: var(--kin-white);
   font-family: var(--kin-micro-mono);
   font-size: 0.68rem;
 }
 
 .footer {
-  border-top: 1px solid var(--kin-black);
   border-bottom: 0;
 }
 
 .footer a {
-  color: var(--kin-black);
+  color: var(--kin-white);
   text-underline-offset: 0.2em;
 }
 
@@ -420,14 +419,13 @@
   }
 
   .sidebar {
-    border-right: 0;
-    border-bottom: 1px solid var(--kin-mid-gray);
+    border: 0;
     padding: 1rem var(--kin-page-gutter);
   }
 
   .sidebar h1 {
     max-width: 12ch;
-    font-size: clamp(2.4rem, 8vw, 4.2rem);
+    font-size: clamp(1.8rem, 6vw, 2.8rem);
   }
 
   .sidebar > p {

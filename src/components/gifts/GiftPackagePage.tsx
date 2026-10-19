@@ -40,11 +40,6 @@ export default function GiftPackagePage({ gift }: GiftPackagePageProps) {
       </header>
 
       <section className={styles.hero}>
-        <div className={styles.heroArt} aria-hidden="true">
-          <span>{gift.heroMark}</span>
-          <i />
-          <small>{gift.category.replace("-", " / ")}</small>
-        </div>
         <div className={styles.heroCopy}>
           <span className={styles.kicker}>{gift.eyebrow}</span>
           <h1>{gift.title}</h1>
