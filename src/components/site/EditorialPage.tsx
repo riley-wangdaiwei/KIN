@@ -16,12 +16,12 @@ export default function EditorialPage({
   heroImage?: string;
 }) {
   return (
-    <main className={styles.page}>
+    <main
+      className={`${styles.page} ${heroImage ? styles.imagePage : ""}`}
+      style={heroImage ? { backgroundImage: `url("${heroImage}")` } : undefined}
+    >
       <SiteHeader />
-      <section
-        className={`${styles.hero} ${heroImage ? styles.imageHero : styles.textHero}`}
-        style={heroImage ? { backgroundImage: `url("${heroImage}")` } : undefined}
-      >
+      <section className={`${styles.hero} ${heroImage ? styles.imageHero : styles.textHero}`}>
         <div className={styles.heroCopy}>
           <p className={styles.eyebrow}>{eyebrow}</p>
           <h1>{title}</h1>

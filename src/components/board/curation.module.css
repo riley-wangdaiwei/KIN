@@ -307,8 +307,8 @@
 }
 
 .secondary:hover {
-  background: var(--kin-white);
-  color: var(--kin-black);
+  background: transparent;
+  color: var(--kin-light-gray);
 }
 
 .exitActions {

@@ -1,15 +1,22 @@
 .boardApp {
   min-height: 100vh;
-  background: var(--kin-paper);
-  color: var(--kin-black);
+  background: var(--kin-black);
+  color: var(--kin-white);
 }
 
 .siteHeader {
+  position: absolute;
+  z-index: 5;
+  top: 0;
+  right: 0;
+  left: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+  min-height: 4rem;
   padding: 0.55rem var(--kin-page-gutter) 0.65rem;
+  color: var(--kin-white);
 }
 
 .homeNav {
@@ -23,7 +30,7 @@
 }
 
 .homeNav a {
-  color: var(--kin-black);
+  color: var(--kin-white);
   text-decoration-color: transparent;
   text-underline-offset: 0.2em;
   transition: color var(--kin-transition), text-decoration-color var(--kin-transition);
@@ -31,7 +38,7 @@
 
 .homeNav a:hover,
 .homeNav a:focus-visible {
-  color: var(--kin-mid-gray);
+  color: var(--kin-light-gray);
   text-decoration-color: currentColor;
 }
 
@@ -47,7 +54,7 @@
 .headerCaption,
 .headerIssue,
 .microLabel {
-  color: var(--kin-charcoal);
+  color: var(--kin-light-gray);
   font-family: var(--kin-micro-mono);
   font-size: var(--kin-caption-size);
   font-weight: 400;
@@ -67,10 +74,10 @@
 .boardIntro {
   position: relative;
   display: flex;
-  min-height: clamp(24rem, 60vh, 44rem);
+  min-height: 100svh;
   align-items: flex-end;
   overflow: hidden;
-  padding: 0 var(--kin-page-gutter);
+  padding: 5.5rem var(--kin-page-gutter) 0;
   background-color: var(--kin-black);
   background-image: url("/home.jpg");
   background-position: center;
@@ -94,10 +101,10 @@
 }
 
 .boardIntro h1 {
-  max-width: 15ch;
+  max-width: 18ch;
   margin: 0.3rem 0 0.5rem;
   font-family: var(--kin-display-serif);
-  font-size: clamp(2.1rem, 4.5vw, 4.3rem);
+  font-size: clamp(1.9rem, 3.6vw, 3.5rem);
   font-weight: 400;
   line-height: 0.88;
   letter-spacing: -0.04em;
@@ -139,14 +146,14 @@
 .boardOrderLink {
   display: inline-block;
   margin: 0.55rem 0 0 0.6rem;
-  color: var(--kin-black);
+  color: var(--kin-white);
   font-family: var(--kin-micro-mono);
   font-size: 0.62rem;
   text-underline-offset: 0.2em;
 }
 
 .curationLaunch:focus-visible {
-  outline: 2px solid var(--kin-black);
+  outline: 2px solid var(--kin-white);
   outline-offset: 2px;
 }
 
@@ -166,7 +173,7 @@
   min-height: 43rem;
   isolation: isolate;
   overflow: hidden;
-  background-color: var(--kin-paper);
+  background-color: var(--kin-black);
 }
 
 .canvas {
@@ -190,7 +197,7 @@
   left: 50%;
   width: min(20rem, 75%);
   transform: translate(-50%, -50%);
-  color: var(--kin-mid-gray);
+  color: var(--kin-light-gray);
   pointer-events: none;
 }
 
@@ -214,8 +221,8 @@
 .boardFrame {
   position: absolute;
   z-index: 1;
-  border: 1px solid var(--kin-mid-gray);
-  background: rgb(255 255 255 / 22%);
+  border: 1px solid rgb(255 255 255 / 48%);
+  background: rgb(0 0 0 / 12%);
   touch-action: none;
 }
 
@@ -230,7 +237,7 @@
 }
 
 .frameTitle {
-  color: var(--kin-charcoal);
+  color: var(--kin-white);
   font-family: var(--kin-micro-mono);
   font-size: 0.59rem;
   line-height: 1.2;
@@ -246,7 +253,7 @@
   border: 0;
   padding: 0;
   background: transparent;
-  color: var(--kin-mid-gray);
+  color: var(--kin-light-gray);
   cursor: pointer;
   font-family: var(--kin-ui-sans);
   font-size: 1rem;
@@ -259,15 +266,14 @@
 }
 
 .elementDelete:hover {
-  background: var(--kin-black);
-  color: var(--kin-white);
+  color: var(--kin-light-gray);
 }
 
 .elementDelete:focus-visible,
 .smallAction:focus-visible,
 .presetFrame:focus-visible,
 .stickerSource:focus-visible {
-  outline: 2px solid var(--kin-black);
+  outline: 2px solid var(--kin-white);
   outline-offset: 2px;
 }
 
@@ -278,8 +284,8 @@
   width: 1rem;
   height: 1rem;
   border: 0;
-  border-right: 2px solid var(--kin-black);
-  border-bottom: 2px solid var(--kin-black);
+  border-right: 1px solid var(--kin-white);
+  border-bottom: 1px solid var(--kin-white);
   padding: 0;
   background: transparent;
   cursor: nwse-resize;
@@ -305,7 +311,7 @@
   border: 0;
   padding: 0.12rem 0;
   background: transparent;
-  color: var(--kin-black);
+  color: var(--kin-white);
   cursor: move;
   font-family: var(--kin-reading-serif);
   font-size: 0.9rem;
@@ -324,7 +330,7 @@
   border: 0;
   padding: 0.35rem;
   background: transparent;
-  color: var(--kin-black);
+  color: var(--kin-white);
   cursor: move;
   font-family: var(--kin-micro-mono);
   font-size: 0.45rem;
@@ -376,7 +382,7 @@
 
 .toolHint {
   margin: -0.2rem 0 0.5rem;
-  color: var(--kin-charcoal);
+  color: var(--kin-light-gray);
   font-family: var(--kin-reading-serif);
   font-size: 0.76rem;
   line-height: 1.15;
@@ -392,21 +398,21 @@
   min-width: 0;
   min-height: 2.35rem;
   border: 0;
-  border-bottom: 1px solid var(--kin-mid-gray);
+  border-bottom: 1px solid var(--kin-charcoal);
   border-radius: 0;
   padding: 0.45rem 0.5rem;
   background: transparent;
-  color: var(--kin-black);
+  color: var(--kin-white);
   font-family: var(--kin-reading-serif);
   font-size: 0.85rem;
 }
 
 .textInput::placeholder {
-  color: var(--kin-mid-gray);
+  color: var(--kin-light-gray);
 }
 
 .textInput:focus-visible {
-  outline: 2px solid var(--kin-black);
+  outline: 1px solid var(--kin-white);
   outline-offset: 1px;
 }
 
@@ -417,14 +423,14 @@
   border-radius: 0;
   padding: 0.4rem 0;
   background: transparent;
-  color: var(--kin-black);
+  color: var(--kin-white);
   cursor: pointer;
   font-family: var(--kin-ui-sans);
   font-size: 0.72rem;
 }
 
 .smallAction:hover {
-  color: var(--kin-mid-gray);
+  color: var(--kin-light-gray);
 }
 
 .presetList {
@@ -442,7 +448,7 @@
   border-bottom: 0;
   padding: 0.42rem 0;
   background: transparent;
-  color: var(--kin-black);
+  color: var(--kin-white);
   cursor: grab;
   font-family: var(--kin-reading-serif);
   font-size: 0.83rem;
@@ -455,7 +461,7 @@
 }
 
 .presetFrame:hover {
-  color: var(--kin-mid-gray);
+  color: var(--kin-light-gray);
 }
 
 .presetFrameMark {
@@ -487,7 +493,7 @@
   border: 0;
   padding: 0.3rem 0;
   background: transparent;
-  color: var(--kin-charcoal);
+  color: var(--kin-light-gray);
   cursor: grab;
   font-family: var(--kin-micro-mono);
   font-size: 0.58rem;
@@ -499,7 +505,7 @@
 }
 
 .stickerSource:hover {
-  color: var(--kin-mid-gray);
+  color: var(--kin-white);
 }
 
 .stickerGlyph {
@@ -509,7 +515,7 @@
   place-items: center;
   border: 0;
   background: transparent;
-  color: var(--kin-black);
+  color: var(--kin-white);
   font-size: 0.42rem;
 }
 
@@ -529,7 +535,7 @@
 
 .storyFeature {
   margin: 0 var(--kin-page-gutter);
-  color: var(--kin-black);
+  color: var(--kin-white);
 }
 
 .storyFeatureHeader {
@@ -550,7 +556,7 @@
   max-width: 13ch;
   margin: 0;
   font-family: var(--kin-display-serif);
-  font-size: clamp(2.7rem, 7.2vw, 7rem);
+  font-size: clamp(2.2rem, 4.5vw, 4.4rem);
   font-weight: 400;
   line-height: 0.8;
   letter-spacing: -0.045em;
@@ -558,12 +564,12 @@
 
 .storyFeatureIndex {
   grid-column: 11 / span 2;
-  justify-self: end;
+  justify-self: start;
   padding-bottom: 0.2rem;
-  color: var(--kin-charcoal);
+  color: var(--kin-light-gray);
   font-family: var(--kin-micro-mono);
   font-size: var(--kin-caption-size);
-  text-align: right;
+  text-align: left;
 }
 
 .storyEntry {
@@ -608,7 +614,7 @@
 .storyDate {
   display: block;
   margin-top: 0.4rem;
-  color: var(--kin-charcoal);
+  color: var(--kin-light-gray);
   font-family: var(--kin-micro-mono);
   font-size: var(--kin-caption-size);
   letter-spacing: 0;
@@ -634,7 +640,7 @@
 .storyCta {
   display: inline-block;
   margin-top: 0.8rem;
-  color: var(--kin-black);
+  color: var(--kin-white);
   font-family: var(--kin-micro-mono);
   font-size: 0.65rem;
   text-decoration-thickness: 1px;
@@ -643,7 +649,7 @@
 
 .storyCta:hover,
 .storyBoardCta:hover {
-  color: var(--kin-mid-gray);
+  color: var(--kin-light-gray);
 }
 
 .storyClosing {
@@ -668,7 +674,7 @@
   grid-column: 10 / span 3;
   justify-self: start;
   padding: 0.35rem 0;
-  color: var(--kin-black);
+  color: var(--kin-white);
   font-family: var(--kin-ui-sans);
   font-size: 0.75rem;
   text-decoration: none;
@@ -696,7 +702,7 @@
 .continueSection h2 {
   margin: 0.3rem 0 0;
   font-family: var(--kin-display-serif);
-  font-size: clamp(2.1rem, 4.8vw, 4.5rem);
+  font-size: clamp(1.9rem, 3.8vw, 3.8rem);
   font-weight: 400;
   line-height: 0.82;
   letter-spacing: -0.04em;
@@ -704,16 +710,16 @@
 
 .continueActions {
   grid-column: 9 / span 4;
-  justify-self: end;
-  text-align: right;
+  justify-self: start;
+  text-align: left;
 }
 
 .continueActions .curationLaunch {
-  color: var(--kin-black);
+  color: var(--kin-white);
 }
 
 .continueActions .curationLaunch:hover {
-  color: var(--kin-mid-gray);
+  color: var(--kin-light-gray);
 }
 
 .continueActions .boardOrderLink {
@@ -766,7 +772,7 @@
   max-width: 12ch;
   margin: -0.3rem 0 0.8rem;
   font-family: var(--kin-display-serif);
-  font-size: clamp(2.8rem, 7.7vw, 5.8rem);
+  font-size: clamp(2.2rem, 5.7vw, 4.2rem);
   font-weight: 400;
   line-height: 0.8;
   letter-spacing: -0.045em;
@@ -878,7 +884,7 @@
 .errorBanner,
 .errorMessage {
   padding: 0.5rem 0;
-  color: var(--kin-black);
+  color: var(--kin-white);
   font-family: var(--kin-reading-serif);
 }
 
@@ -893,7 +899,8 @@
   justify-items: center;
   gap: 1rem;
   padding: 2rem;
-  background: var(--kin-paper);
+  background: var(--kin-black);
+  color: var(--kin-white);
 }
 
 .srOnly {
@@ -931,7 +938,8 @@
   }
 
   .boardIntro {
-    min-height: 24rem;
+    min-height: 100svh;
+    padding-top: 8rem;
   }
 
   .introNote {
@@ -1004,7 +1012,7 @@
   }
 
   .welcomePanel h2 {
-    font-size: clamp(2.5rem, 12vw, 4rem);
+    font-size: clamp(2.2rem, 9vw, 3.5rem);
   }
 }
 

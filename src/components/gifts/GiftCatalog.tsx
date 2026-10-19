@@ -4,19 +4,9 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import type { GiftBrief } from "@/features/brief/types";
-import { giftPackages } from "@/data/gifts";
+import { giftImagePaths, giftPackages } from "@/data/gifts";
 import { storage } from "@/lib/storage";
 import styles from "./gifts.module.css";
-
-const giftImages: Record<string, string> = {
-  "conversation-recap": "/gift_conversation.jpg",
-  "the-curiosity-cabinet": "/gift_curiosity.jpg",
-  "two-places-one-sky": "/gift_cities.jpg",
-  "the-photo-archive": "/gift_photos.jpg",
-  "the-soft-landing-pack": "/gift_beginning.jpg",
-  "artist-made-rhemma-meals": "/gift_artists.jpg",
-  "supporting-gifts-fillings": "/gift_fillings.jpg",
-};
 
 export default function GiftCatalog() {
   const [brief, setBrief] = useState<GiftBrief | null>(null);
@@ -105,7 +95,7 @@ export default function GiftCatalog() {
                       <div className={styles.cardArt} aria-hidden="true">
                         <Image
                           className={styles.cardImage}
-                          src={giftImages[gift.slug]}
+                          src={giftImagePaths[gift.slug]}
                           alt=""
                           fill
                           sizes="(max-width: 42rem) 100vw, (max-width: 58rem) 50vw, 25vw"

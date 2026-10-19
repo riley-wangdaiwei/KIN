@@ -4,6 +4,13 @@
   color: var(--kin-white);
 }
 
+.imagePage {
+  background-color: var(--kin-black);
+  background-position: center top;
+  background-repeat: no-repeat;
+  background-size: 100% auto;
+}
+
 .header {
   display: flex;
   align-items: center;
@@ -67,18 +74,8 @@
 }
 
 .imageHero {
-  min-height: clamp(24rem, 62vh, 46rem);
-  background-color: var(--kin-black);
-  background-position: center;
-  background-size: cover;
-}
-
-.imageHero::before {
-  position: absolute;
-  z-index: 0;
-  background: linear-gradient(0deg, rgb(0 0 0 / 38%), transparent 58%);
-  content: "";
-  inset: 0;
+  min-height: calc(100svh - 4rem);
+  padding-top: 5rem;
 }
 
 .textHero {
@@ -94,7 +91,7 @@
 .heroCopy {
   position: relative;
   z-index: 1;
-  width: min(100%, 68rem);
+  width: min(100%, 54rem);
   padding: 0 0 clamp(1.2rem, 4vw, 3rem);
 }
 
@@ -107,7 +104,7 @@
   max-width: 18ch;
   margin: 0;
   font-family: var(--kin-display-serif);
-  font-size: clamp(2.1rem, 4.5vw, 4.3rem);
+  font-size: clamp(2rem, 3.6vw, 3.5rem);
   font-weight: 400;
   line-height: 0.9;
   letter-spacing: -0.04em;
@@ -286,7 +283,7 @@
   margin: 0;
   font-family: var(--kin-reading-serif);
   font-size: 0.9rem;
-  text-align: right;
+  text-align: left;
   text-transform: none;
 }
 

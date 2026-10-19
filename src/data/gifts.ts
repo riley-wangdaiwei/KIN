@@ -3,6 +3,16 @@ import type {
   SupportingGift,
 } from "@/features/gifts/types";
 
+export const giftImagePaths: Record<string, string> = {
+  "conversation-recap": "/gift_conversation.jpg",
+  "the-curiosity-cabinet": "/gift_curiosity.jpg",
+  "two-places-one-sky": "/gift_cities.jpg",
+  "the-photo-archive": "/gift_photos.jpg",
+  "the-soft-landing-pack": "/gift_beginning.jpg",
+  "artist-made-rhemma-meals": "/gift_artists.jpg",
+  "supporting-gifts-fillings": "/gift_fillings.jpg",
+};
+
 export const giftPackages: GiftPackage[] = [
   {
     slug: "conversation-recap",

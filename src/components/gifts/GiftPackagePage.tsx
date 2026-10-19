@@ -3,7 +3,7 @@
 import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import type { GiftPackage } from "@/features/gifts/types";
-import { supportingGifts } from "@/data/gifts";
+import { giftImagePaths, supportingGifts } from "@/data/gifts";
 import { storage } from "@/lib/storage";
 import styles from "./gift-package.module.css";
 
@@ -39,7 +39,12 @@ export default function GiftPackagePage({ gift }: GiftPackagePageProps) {
         <Link href="/gifts">GIFTS / CATALOG</Link>
       </header>
 
-      <section className={styles.hero}>
+      <section
+        className={styles.hero}
+        style={{
+          backgroundImage: `linear-gradient(0deg, rgb(0 0 0 / 28%), rgb(0 0 0 / 8%)), url("${giftImagePaths[gift.slug]}")`,
+        }}
+      >
         <div className={styles.heroCopy}>
           <span className={styles.kicker}>{gift.eyebrow}</span>
           <h1>{gift.title}</h1>
