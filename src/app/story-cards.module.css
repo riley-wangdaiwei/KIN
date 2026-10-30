@@ -1,0 +1,117 @@
+.stack {
+  display: grid;
+  width: min(100%, 46rem);
+  justify-items: start;
+  gap: 0.8rem;
+}
+
+.card {
+  width: 100%;
+  min-height: 13.5rem;
+  padding: 0;
+  border: 1px solid rgb(255 255 255 / 24%);
+  background: rgb(255 255 255 / 7%);
+  color: var(--kin-white);
+  cursor: pointer;
+  perspective: 1000px;
+  text-align: left;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+.card:focus-visible {
+  outline: 2px solid var(--kin-white);
+  outline-offset: 4px;
+}
+
+.cardInner {
+  position: relative;
+  display: block;
+  min-height: 13.5rem;
+  transform-style: preserve-3d;
+  transition: transform 450ms ease-out;
+}
+
+.isFlipped .cardInner {
+  transform: rotateY(180deg);
+}
+
+.front,
+.back {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 1.2rem clamp(1rem, 2.8vw, 2rem);
+  backface-visibility: hidden;
+}
+
+.front {
+  gap: 0.4rem;
+}
+
+.back {
+  transform: rotateY(180deg);
+}
+
+.artist,
+.backTitle,
+.hint {
+  color: var(--kin-light-gray);
+  font-family: var(--kin-micro-mono);
+  font-size: var(--kin-caption-size);
+  line-height: 1.2;
+}
+
+.title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem;
+  font-family: var(--kin-display-serif);
+  font-size: clamp(1.6rem, 3.2vw, 2.6rem);
+  line-height: 0.95;
+}
+
+.title em {
+  font-weight: 400;
+}
+
+.year {
+  font-family: var(--kin-reading-serif);
+  font-size: 0.7em;
+  font-style: normal;
+}
+
+.hint {
+  margin-top: 0.55rem;
+}
+
+.copy {
+  max-width: 76ch;
+  margin-top: 0.45rem;
+  font-family: var(--kin-reading-serif);
+  font-size: var(--kin-copy-size);
+  line-height: 1.22;
+}
+
+@media (hover: hover) {
+  .card:hover .cardInner {
+    transform: rotateY(180deg);
+  }
+}
+
+@media (max-width: 520px) {
+  .card,
+  .cardInner {
+    min-height: 16rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cardInner {
+    transition: none;
+  }
+}
