@@ -147,21 +147,24 @@ export default function HowItWorksContent() {
         </Link>
       </div>
 
-      <footer className={styles.footer}>
-        <Link className={styles.footerWordmark} href="/" aria-label="re.KIN home">
-          re.KIN
-        </Link>
-        <nav className={styles.footerLinks} aria-label="Footer navigation">
-          {footerLinks.map((item) => (
-            <Link href={item.href} key={item.href}>
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-        <span className={styles.footerNote}>
-          © {new Date().getFullYear()} KIN
-        </span>
-      </footer>
     </>
+  );
+}
+
+export function HowItWorksFooter() {
+  return (
+    <footer className={styles.footer}>
+      <Link className={styles.footerWordmark} href="/" aria-label="re.KIN home">
+        re.KIN
+      </Link>
+      <nav className={styles.footerLinks} aria-label="Footer navigation">
+        {footerLinks.map((item) => (
+          <Link href={item.href} key={item.href}>
+            {item.label}
+          </Link>
+        ))}
+      </nav>
+      <span className={styles.footerNote}>© {new Date().getFullYear()} KIN</span>
+    </footer>
   );
 }

@@ -1,3 +1,31 @@
+.page {
+  display: flex;
+  flex-direction: column;
+}
+
+.imageStage {
+  display: grid;
+  grid-template-areas: "stage";
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.imageStage > img {
+  position: relative;
+  top: auto;
+  left: auto;
+  z-index: 0;
+  grid-area: stage;
+}
+
+.pageContent {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  grid-area: stage;
+}
+
 .header {
   position: relative;
   z-index: 1;
