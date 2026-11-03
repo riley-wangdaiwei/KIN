@@ -13,6 +13,29 @@ export default function ArtistContactForm() {
 
   return (
     <form className={styles.contactForm} onSubmit={handleSubmit}>
+      <fieldset className={styles.roleField}>
+        <legend className={styles.roleLegend}>I am a…</legend>
+        <div className={styles.roleOptions}>
+          {[
+            "Artist",
+            "Florist",
+            "Bookstore",
+            "Corporate / business",
+            "Other",
+          ].map((role) => (
+            <label className={styles.roleChip} key={role}>
+              <input
+                className={styles.roleRadio}
+                name="role"
+                required
+                type="radio"
+                value={role}
+              />
+              {role}
+            </label>
+          ))}
+        </div>
+      </fieldset>
       <label className={styles.visuallyHidden} htmlFor="artist-contact-email">
         Your email
       </label>

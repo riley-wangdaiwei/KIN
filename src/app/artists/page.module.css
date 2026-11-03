@@ -30,8 +30,8 @@
   width: min(76vw, 64rem);
   flex: 1;
   flex-direction: column;
-  justify-content: space-evenly;
-  gap: clamp(2.5rem, 6vw, 5rem);
+  justify-content: flex-start;
+  gap: clamp(1.25rem, 3vw, 2.5rem);
   margin-left: var(--kin-page-gutter);
   padding: clamp(2rem, 5vw, 4rem) 0;
 }
@@ -66,7 +66,7 @@
   gap: 0.7rem;
   border: 1px solid rgb(255 255 255 / 24%);
   padding: 0.9rem 1rem;
-  background: rgb(5 5 5 / 62%);
+  background: rgb(255 255 255 / 7%);
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
 }
@@ -98,20 +98,71 @@
   gap: 0.65rem;
   border: 1px solid rgb(255 255 255 / 24%);
   padding: 0.8rem;
-  background: rgb(5 5 5 / 62%);
+  background: rgb(255 255 255 / 7%);
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
+}
+
+.roleField {
+  display: grid;
+  flex-basis: 100%;
+  gap: 0.55rem;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.roleLegend {
+  margin-bottom: 0.1rem;
+  color: var(--kin-white);
+  font: 0.9rem/1.2 var(--kin-ui-sans);
+}
+
+.roleOptions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.roleChip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1px solid rgb(255 255 255 / 24%);
+  padding: 0.55rem 0.7rem;
+  background: rgb(255 255 255 / 7%);
+  color: var(--kin-white);
+  cursor: pointer;
+  font: 0.85rem/1.2 var(--kin-ui-sans);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+.roleRadio {
+  width: 0.9rem;
+  height: 0.9rem;
+  margin: 0;
+  accent-color: var(--kin-white);
+}
+
+.roleChip:has(.roleRadio:focus-visible) {
+  outline: 2px solid var(--kin-white);
+  outline-offset: 2px;
 }
 
 .emailInput {
   min-width: 12rem;
   flex: 1;
-  border: 1px solid rgb(255 255 255 / 40%);
+  border: 1px solid rgb(255 255 255 / 24%);
   border-radius: 0;
   padding: 0.75rem;
-  background: rgb(5 5 5 / 70%);
+  background: rgb(255 255 255 / 7%);
   color: var(--kin-white);
   font: 0.95rem/1.2 var(--kin-ui-sans);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
 }
 
 .emailInput::placeholder {
@@ -119,13 +170,15 @@
 }
 
 .submitButton {
-  border: 1px solid rgb(255 255 255 / 40%);
+  border: 1px solid rgb(255 255 255 / 24%);
   border-radius: 0;
   padding: 0.75rem 1rem;
-  background: rgb(255 255 255 / 12%);
+  background: rgb(255 255 255 / 7%);
   color: var(--kin-white);
   cursor: pointer;
   font: 700 0.9rem/1.2 var(--kin-ui-sans);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
 }
 
 .emailInput:focus-visible,
