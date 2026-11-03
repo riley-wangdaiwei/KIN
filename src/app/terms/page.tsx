@@ -7,6 +7,7 @@ export default function TermsPage() {
       eyebrow="TERMS / PRE-LAUNCH DRAFT"
       title="Clear terms before a real order."
       intro="These notes explain the current order-request preview. They are not complete Terms of Sale and are not a substitute for launch-ready legal review."
+      homepageChrome
     >
       <div className={styles.legalCopy}>
         <p className={styles.notice}>

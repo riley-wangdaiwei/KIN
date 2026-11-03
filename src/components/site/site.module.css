@@ -53,7 +53,7 @@
 .footerMark {
   flex: 0 0 auto;
   color: var(--kin-white);
-  font-family: var(--kin-display-serif);
+  font-family: var(--kin-micro-mono);
   font-size: clamp(2rem, 3.6vw, 3.5rem);
   line-height: 0.8;
   letter-spacing: -0.07em;
@@ -295,8 +295,8 @@
 }
 
 .siteFooter {
-  width: min(60vw, 55rem);
-  padding: 1rem var(--kin-page-gutter) 0.7rem;
+  width: 100%;
+  padding: 3rem var(--kin-page-gutter) 2.5rem;
   background: var(--kin-black);
   color: var(--kin-light-gray);
 }
@@ -324,8 +324,8 @@
 .footerLinks {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.65rem 1.4rem;
-  padding: 0.7rem 0;
+  gap: 1.3rem 2.8rem;
+  padding: 1.4rem 0;
 }
 
 .footerLinks a {
@@ -333,6 +333,7 @@
   text-decoration-thickness: 1px;
   text-underline-offset: 0.2em;
   text-decoration-color: transparent;
+  letter-spacing: 0.06em;
   transition: color var(--kin-transition), text-decoration-color var(--kin-transition);
 }
 

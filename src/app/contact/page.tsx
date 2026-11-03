@@ -8,6 +8,7 @@ export default function ContactPage() {
       eyebrow="CONTACT / KIN"
       title="A note is a good beginning."
       intro="For order questions, artist introductions, press, or partnership ideas, KIN will provide a monitored contact channel before opening submissions or accepting real orders."
+      homepageChrome
     >
       <section className={styles.section}>
         <h2 className={styles.sectionHeading}>Reach the right place</h2>

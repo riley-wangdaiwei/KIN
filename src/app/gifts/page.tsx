@@ -100,7 +100,6 @@ export default function GiftsPage() {
             { href: "/artist-terms", label: "Artist Terms" },
             { href: "/contact", label: "Contact" },
             { href: "/partner-with-kin", label: "Partner with Kin" },
-            { href: "/impressum", label: "Impressum" },
           ].map((item) => (
             <Link href={item.href} key={item.href}>
               {item.label}

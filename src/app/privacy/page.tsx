@@ -8,6 +8,7 @@ export default function PrivacyPage() {
       eyebrow="PRIVACY / DRAFT FOR REVIEW"
       title="Your board is yours."
       intro="This draft describes the current KIN preview. It must be reviewed against the live hosting, email, and data-retention settings before broader launch."
+      homepageChrome
     >
       <div className={styles.legalCopy}>
         <p className={styles.notice}>

@@ -53,7 +53,7 @@
 
 .wordmark {
   width: fit-content;
-  font-family: var(--kin-display-serif);
+  font-family: var(--kin-micro-mono);
   font-size: clamp(2rem, 3.6vw, 3.5rem);
   line-height: 0.8;
   letter-spacing: -0.07em;

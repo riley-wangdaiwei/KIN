@@ -7,6 +7,7 @@ export default function AboutPage() {
       eyebrow="ABOUT / KIN"
       title="A place for the things you notice."
       intro="KIN helps people gather the small details that make a relationship particular, then turn that curation into a thoughtful gift."
+      homepageChrome
     >
       <section className={styles.section}>
         <h2 className={styles.sectionHeading}>The idea</h2>

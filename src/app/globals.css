@@ -14,7 +14,8 @@
 
   --kin-display-serif: "Times New Roman", "Bodoni MT", Didot, Georgia, serif;
   --kin-reading-serif: "Times New Roman", Georgia, serif;
-  --kin-micro-mono: "Courier New", "Liberation Mono", monospace;
+  --kin-micro-mono: "ITC Avant Garde Gothic", "Avant Garde", Futura,
+    "Century Gothic", sans-serif;
   --kin-ui-sans: Arial, Helvetica, sans-serif;
 
   --kin-title-cover: clamp(2.8rem, 7vw, 6.5rem);

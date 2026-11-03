@@ -8,6 +8,7 @@ export default function PartnerWithKinPage() {
       eyebrow="PARTNER WITH KIN / EARLY CONVERSATIONS"
       title="Bring another kind of meaning."
       intro="KIN can complement a partner's existing offer with relationship-led curation. Start with a clear hand-off; build more only when it helps both sides."
+      homepageChrome
     >
       <section className={styles.section}>
         <h2 className={styles.sectionHeading}>A florist, both ways</h2>

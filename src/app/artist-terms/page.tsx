@@ -7,6 +7,7 @@ export default function ArtistTermsPage() {
       eyebrow="ARTIST TERMS / WORKING DRAFT"
       title="Good work deserves clear terms."
       intro="This outline is a starting point for artist conversations, not a contract. No artist work is commissioned, licensed, or listed for sale through this draft."
+      homepageChrome
     >
       <div className={styles.legalCopy}>
         <p className={styles.notice}>

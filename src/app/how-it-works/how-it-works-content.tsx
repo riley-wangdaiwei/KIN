@@ -18,7 +18,6 @@ const footerLinks = [
   { href: "/artist-terms", label: "Artist Terms" },
   { href: "/contact", label: "Contact" },
   { href: "/partner-with-kin", label: "Partner with Kin" },
-  { href: "/impressum", label: "Impressum" },
 ];
 
 const steps = [

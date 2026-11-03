@@ -16,7 +16,7 @@
 
 .wordmark {
   color: var(--kin-white);
-  font-family: var(--kin-display-serif);
+  font-family: var(--kin-micro-mono);
   font-size: clamp(3rem, 6vw, 5rem);
   letter-spacing: -0.075em;
   line-height: 0.8;

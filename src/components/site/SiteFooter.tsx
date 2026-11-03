@@ -21,7 +21,6 @@ export default function SiteFooter() {
         {links.map((link) => (
           <Link href={link.href} key={link.href}>{link.label}</Link>
         ))}
-        <Link href="/impressum">Impressum</Link>
       </nav>
       <div className={styles.footerBottom}>
         <span>© {new Date().getFullYear()} KIN</span>
