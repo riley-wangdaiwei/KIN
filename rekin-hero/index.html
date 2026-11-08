@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>re.KIN</title>
+<style>
+  :root { --bg: #050608; --fg: #E3E3E0; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--fg); font-family: Inter, system-ui, sans-serif; }
+
+  /* ---------- Hero ---------- */
+  .rk-hero { position: relative; min-height: 100vh; display: grid; place-items: center; overflow: hidden; }
+  .rk-hero__video { width: min(100%, 1542px); height: auto; display: block; }
+  /* soften the frame edges into the page background */
+  .rk-hero::after { content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse at center, transparent 55%, var(--bg) 100%); }
+  .rk-hero__logo { position: absolute; top: 32px; left: 50%; transform: translateX(-50%);
+    width: clamp(140px, 18vw, 260px); z-index: 2; }
+
+  /* ---------- Scroll-scrub variant ---------- */
+  .rk-scrub { height: 400vh; }                 /* scroll distance for one full turn */
+  .rk-scrub__sticky { position: sticky; top: 0; height: 100vh; display: grid; place-items: center; }
+
+  @media (prefers-reduced-motion: reduce) { .rk-hero__video { display: none; } .rk-hero { background: url(assets/hero-poster.jpg) center/contain no-repeat var(--bg); } }
+</style>
+</head>
+<body>
+
+<!-- Variant A: autoplay loop (default) -->
+<section class="rk-hero" aria-label="re.KIN">
+  <img class="rk-hero__logo" src="assets/rekin-logo.png" alt="re.KIN">
+  <video class="rk-hero__video" src="assets/hero.mp4" poster="assets/hero-poster.jpg"
+         autoplay muted loop playsinline preload="auto" aria-hidden="true"></video>
+</section>
+
+<!-- Variant B: the vase turns as the visitor scrolls. Delete this section if you only want the loop. -->
+<section class="rk-scrub" aria-label="re.KIN scroll animation">
+  <div class="rk-scrub__sticky">
+    <video class="rk-hero__video" data-scrub src="assets/hero.mp4" poster="assets/hero-poster.jpg"
+           muted playsinline preload="auto" aria-hidden="true"></video>
+  </div>
+</section>
+
+<script>
+  // Scroll-scrub: map the section's scroll progress to the video's time.
+  document.querySelectorAll('video[data-scrub]').forEach((video) => {
+    const section = video.closest('.rk-scrub');
+    let target = 0, ticking = false;
+    const update = () => {
+      ticking = false;
+      if (!video.duration) return;
+      const r = section.getBoundingClientRect();
+      const p = Math.min(1, Math.max(0, -r.top / (r.height - innerHeight)));
+      target = p * (video.duration - 0.05);
+      if (Math.abs(video.currentTime - target) > 0.01) video.currentTime = target;
+    };
+    const onScroll = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
+    video.addEventListener('loadedmetadata', update);
+    addEventListener('scroll', onScroll, { passive: true });
+    addEventListener('resize', onScroll);
+  });
+</script>
+</body>
+</html>

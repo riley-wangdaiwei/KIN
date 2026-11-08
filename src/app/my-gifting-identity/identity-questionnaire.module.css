@@ -1,82 +1,71 @@
 .form {
   display: grid;
-  max-width: 42rem;
-  gap: 1.65rem;
+  max-width: 48rem;
+  gap: clamp(1.8rem, 4vw, 3rem);
   margin-top: 2.5rem;
 }
 
-.field,
-.fieldGroup {
-  display: grid;
+.question {
   min-width: 0;
-  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
 }
 
-.field span {
+.question legend {
+  width: 100%;
+  margin-bottom: 0.9rem;
+  color: var(--kin-white);
+  font-family: var(--kin-reading-serif);
+  font-size: clamp(1.15rem, 2vw, 1.55rem);
+  line-height: 1.15;
+}
+
+.number {
+  margin-right: 0.8rem;
   color: var(--kin-light-gray);
   font-family: var(--kin-micro-mono);
   font-size: var(--kin-caption-size);
-  line-height: 1.2;
 }
 
-.field input,
-.field textarea {
-  width: 100%;
-  padding: 0.35rem 0;
+.options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 1.25rem;
+}
+
+.option {
+  padding: 0.45rem 0;
   border: 0;
-  border-radius: 0;
-  outline: 0;
+  border-bottom: 1px solid transparent;
   background: transparent;
-  color: var(--kin-white);
-  font-family: var(--kin-reading-serif);
-  font-size: 1.1rem;
-  line-height: 1.3;
-  resize: vertical;
-}
-
-.field input:focus-visible,
-.field textarea:focus-visible {
-  outline: 1px solid var(--kin-white);
-  outline-offset: 0.35rem;
-}
-
-.fieldGroup {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1.5rem;
-}
-
-.submit {
-  display: inline-flex;
-  width: fit-content;
-  align-items: center;
-  gap: 0.7rem;
-  margin-top: 0.5rem;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--kin-white);
-  cursor: pointer;
-  font-family: var(--kin-ui-sans);
-  font-size: 0.95rem;
-}
-
-.submit:hover,
-.submit:focus-visible {
   color: var(--kin-light-gray);
+  cursor: pointer;
+  font-family: var(--kin-reading-serif);
+  font-size: 0.95rem;
+  text-align: left;
+  transition: color 160ms ease, border-color 160ms ease;
 }
 
+.option:hover,
+.option[aria-pressed="true"] {
+  border-bottom-color: currentColor;
+  color: var(--kin-white);
+}
+
+.option[aria-pressed="true"]::before {
+  content: "✓ ";
+}
+
+.option:focus-visible,
 .submit:focus-visible {
   outline: 1px solid var(--kin-white);
   outline-offset: 0.35rem;
 }
 
-.confirmation {
-  max-width: 42rem;
-  margin-top: 2.5rem;
-}
-
-.confirmation h2 {
-  margin: 0;
+.share { margin-top: 1rem; }
+.share h2 {
+  margin: 0 0 0.9rem;
   font-family: var(--kin-display-serif);
   font-size: clamp(2rem, 4vw, 3.5rem);
   font-weight: 400;
@@ -84,16 +73,19 @@
   line-height: 0.9;
 }
 
-.confirmation p {
-  max-width: 48ch;
+.submit {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
   color: var(--kin-light-gray);
-  font-family: var(--kin-reading-serif);
-  font-size: var(--kin-copy-size);
-  line-height: 1.25;
+  cursor: not-allowed;
+  font-family: var(--kin-ui-sans);
+  font-size: 0.85rem;
 }
 
-@media (max-width: 520px) {
-  .fieldGroup {
-    grid-template-columns: 1fr;
-  }
+@media (prefers-reduced-motion: reduce) {
+  .option { transition: none; }
 }
