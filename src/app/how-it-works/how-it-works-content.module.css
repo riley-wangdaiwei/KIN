@@ -63,6 +63,14 @@
   text-decoration: none;
 }
 
+.navigation button {
+  color: var(--kin-white);
+  font-family: var(--kin-ui-sans);
+  font-size: clamp(0.9rem, 1.3vw, 1.1rem);
+  line-height: 1.2;
+  text-decoration: none;
+}
+
 .navigation a:hover,
 .navigation a:focus-visible,
 .footerLinks a:hover,
@@ -73,15 +81,15 @@
 
 .navigation .navigationCta,
 .navigationCta {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgb(255 255 255 / 28%);
+  border: 0;
   padding: 0.82rem 1.15rem;
-  background: rgb(255 255 255 / 9%);
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
+  background: transparent;
   color: var(--kin-white);
+  cursor: pointer;
   font-family: var(--kin-accent-serif);
   font-size: clamp(1.15rem, 1.45vw, 1.35rem);
   font-weight: 500;
@@ -93,7 +101,7 @@
 .navigation .navigationCta:focus-visible,
 .navigationCta:hover,
 .navigationCta:focus-visible {
-  background: rgb(255 255 255 / 16%);
+  text-decoration: none;
 }
 
 .hero {
@@ -228,7 +236,7 @@
   justify-items: start;
   gap: 1.3rem;
   padding: 3rem var(--kin-page-gutter) 2.5rem;
-  background: rgb(5 5 5 / 88%);
+  background: rgb(3 8 13 / 88%);
 }
 
 .footerWordmark {

@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import BookingTrigger from "@/components/site/BookingTrigger";
 import styles from "./how-it-works-content.module.css";
 
 const navigation = [
-  { href: "/how-it-works", label: "What is Kin" },
+  { href: "/how-it-works", label: "What is re.KIN" },
   { href: "/gifts", label: "Gift packages" },
   { href: "/artists", label: "For artists and partners" },
   { href: "/my-gifting-identity", label: "My gifting identity" },
@@ -17,7 +18,7 @@ const footerLinks = [
   { href: "/terms", label: "Terms" },
   { href: "/artist-terms", label: "Artist Terms" },
   { href: "/contact", label: "Contact" },
-  { href: "/partner-with-kin", label: "Partner with Kin" },
+  { href: "/partner-with-kin", label: "Partner with re.KIN" },
 ];
 
 const steps = [
@@ -90,12 +91,11 @@ export default function HowItWorksContent() {
               {item.label}
             </Link>
           ))}
-          <Link
-            className={styles.navigationCta}
-            href="/my-gifting-identity#start-a-project"
+          <BookingTrigger
+            className={`${styles.navigationCta} kin-glass-hover`}
           >
-            Book a curation meeting
-          </Link>
+            book a free curation meeting
+          </BookingTrigger>
         </nav>
       </header>
 
@@ -138,12 +138,11 @@ export default function HowItWorksContent() {
       </section>
 
       <div className={styles.ctaWrap}>
-        <Link
-          className={styles.navigationCta}
-          href="/my-gifting-identity#start-a-project"
+        <BookingTrigger
+          className={`${styles.navigationCta} kin-glass-hover`}
         >
-          book a curation meeting
-        </Link>
+          book a free curation meeting
+        </BookingTrigger>
       </div>
 
     </>
@@ -163,7 +162,7 @@ export function HowItWorksFooter() {
           </Link>
         ))}
       </nav>
-      <span className={styles.footerNote}>© {new Date().getFullYear()} KIN</span>
+      <span className={styles.footerNote}>© {new Date().getFullYear()} re.KIN</span>
     </footer>
   );
 }

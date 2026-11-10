@@ -36,14 +36,14 @@ export default function GiftDestination({
   return (
     <main className={styles.page}>
       <header className={styles.header}>
-        <Link className={styles.wordmark} href="/" aria-label="KIN home">
-          KIN
+        <Link className={styles.wordmark} href="/" aria-label="re.KIN home">
+          re.KIN
         </Link>
         <span>{isPublication ? "PUBLICATION / PREVIEW" : "GIFT IDEAS / 001"}</span>
       </header>
       <section className={styles.content}>
         <span className={styles.kicker}>
-          {isPublication ? "A KIN ZINE" : "FROM YOUR BOARD"}
+          {isPublication ? "A re.KIN ZINE" : "FROM YOUR BOARD"}
         </span>
         <h1>{isPublication ? "A world, held in print." : "A gift, taking shape."}</h1>
         <p className={styles.intro}>

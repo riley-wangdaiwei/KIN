@@ -1,7 +1,7 @@
 .experience {
   position: relative;
   height: 640vh;
-  background: #050505;
+  background: var(--kin-black);
   color: #f4f3ef;
   font-family: var(--kin-ui-sans);
 }
@@ -13,7 +13,7 @@
   height: 100svh;
   min-height: 34rem;
   overflow: hidden;
-  background: #050505;
+  background: var(--kin-black);
   isolation: isolate;
 }
 
@@ -34,7 +34,7 @@
   font-family: var(--kin-accent-serif);
   font-weight: 500;
 }
-.sideNav a:hover, .ending a:hover { color: #aaa; }
+.sideNav a:hover { color: #aaa; }
 .sideNav a:focus-visible, .ending a:focus-visible { outline: 1px solid currentColor; outline-offset: 5px; }
 
 .vase {
@@ -52,7 +52,7 @@
   inset: 0;
   content: "";
   pointer-events: none;
-  background: radial-gradient(ellipse at center, transparent 55%, #050505 100%);
+  background: radial-gradient(ellipse at center, transparent 55%, var(--kin-black) 100%);
 }
 .still, .video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
 .still { animation: float 6s ease-in-out infinite; }
@@ -131,8 +131,10 @@
   gap: 0.85rem;
   transform: translateY(-50%);
   transition: opacity 450ms ease;
+  font-family: var(--kin-accent-serif);
+  font-weight: 500;
 }
-.sideNav a { position: static; justify-self: end; font-size: 1.05rem; }
+.sideNav > div { justify-self: end; font-size: 1.05rem; }
 .ending {
   position: absolute;
   z-index: 3;

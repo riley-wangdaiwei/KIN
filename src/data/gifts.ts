@@ -18,7 +18,7 @@ export const giftPackages: GiftPackage[] = [
     slug: "conversation-recap",
     title: "Conversation Recap",
     category: "hero",
-    eyebrow: "THE KIN ORIGINAL / DIGITAL PUBLICATION",
+    eyebrow: "THE re.KIN ORIGINAL / DIGITAL PUBLICATION",
     summary:
       "A personal publication made from the small things you remember about someone.",
     introduction:
@@ -55,7 +55,7 @@ export const giftPackages: GiftPackage[] = [
       "A private delivery link intended for personal, non-commercial sharing",
     ],
     provide: [
-      "A completed KIN Gift Brief",
+      "A completed re.KIN Gift Brief",
       "Three to ten notes, photos, or memories you have permission to share",
       "The recipient's first name or preferred name",
       "Your personal message and delivery email",
@@ -76,7 +76,7 @@ export const giftPackages: GiftPackage[] = [
     usageScope:
       "Personal, non-commercial use by the purchaser and recipient. Public posting, resale, commercial use, or reproduction of included third-party works requires separate permission.",
     priceAndAvailability:
-      "Order request only — no payment is collected. KIN confirms price, scope, and delivery timing before accepting the commission.",
+      "Order request only — no payment is collected. re.KIN confirms price, scope, and delivery timing before accepting the commission.",
     action: "start-brief",
     actionLabel: "Start a Gift Brief",
     heroMark: "01",
@@ -85,7 +85,7 @@ export const giftPackages: GiftPackage[] = [
     slug: "the-curiosity-cabinet",
     title: "The Curiosity Cabinet",
     category: "kin-meal",
-    eyebrow: "KIN MEAL / FOR THE COLLECTOR OF SMALL WONDERS",
+    eyebrow: "re.KIN MEAL / FOR THE COLLECTOR OF SMALL WONDERS",
     summary:
       "A cabinet of the odd, lovely things that make their mind feel like home.",
     introduction:
@@ -145,7 +145,7 @@ export const giftPackages: GiftPackage[] = [
     slug: "two-places-one-sky",
     title: "Two Places, One Sky",
     category: "kin-meal",
-    eyebrow: "KIN MEAL / FOR THE DISTANCE BETWEEN PLACES",
+    eyebrow: "re.KIN MEAL / FOR THE DISTANCE BETWEEN PLACES",
     summary:
       "A shared map for two people who keep finding their way back to each other.",
     introduction:
@@ -205,7 +205,7 @@ export const giftPackages: GiftPackage[] = [
     slug: "the-photo-archive",
     title: "The Photo Archive",
     category: "kin-meal",
-    eyebrow: "KIN MEAL / FOR THE LIFE BETWEEN THE PHOTOS",
+    eyebrow: "re.KIN MEAL / FOR THE LIFE BETWEEN THE PHOTOS",
     summary:
       "A gentle archive for photographs and the stories they cannot hold alone.",
     introduction:
@@ -265,7 +265,7 @@ export const giftPackages: GiftPackage[] = [
     slug: "the-soft-landing-pack",
     title: "The Soft Landing Pack",
     category: "kin-meal",
-    eyebrow: "KIN MEAL / FOR A CHANGE OF SEASON",
+    eyebrow: "re.KIN MEAL / FOR A CHANGE OF SEASON",
     summary:
       "A small, considered welcome for someone beginning again.",
     introduction:
@@ -329,7 +329,7 @@ export const giftPackages: GiftPackage[] = [
     summary:
       "Original gift concepts led by artists, makers, and their own ways of seeing.",
     introduction:
-      "Artist-made Meals begin with a creator's point of view. Each artist proposes a concept, defines the creative scope and base price, and works with KIN to make the offer clear, orderable, and deliverable.",
+      "Artist-made Meals begin with a creator's point of view. Each artist proposes a concept, defines the creative scope and base price, and works with re.KIN to make the offer clear, orderable, and deliverable.",
     example:
       "A printmaker might make a symbolic relationship map; a sound artist might turn shared voice notes into a listening piece. Each offer is authored and scoped by its artist.",
     heroGift:
@@ -344,7 +344,7 @@ export const giftPackages: GiftPackage[] = [
     readmeGuide: [
       "Read the artist's scope and usage terms before commissioning.",
       "Follow the delivery instructions supplied with the work.",
-      "Contact KIN for order support; contact the artist for process questions.",
+      "Contact re.KIN for order support; contact the artist for process questions.",
     ],
     artistProcessNote:
       "The process note is written by the artist and describes the choices, materials, and boundaries of the specific work.",
@@ -369,7 +369,7 @@ export const giftPackages: GiftPackage[] = [
     customization: [
       "Scope, materials, and revisions are set by each artist",
       "Licensing and personal-use terms are stated per offer",
-      "Artists can propose a new concept for KIN to productize",
+      "Artists can propose a new concept for re.KIN to productize",
     ],
     deliveryTime:
       "Set by the artist and agreed with the customer before an order is confirmed.",
@@ -393,7 +393,7 @@ export const giftPackages: GiftPackage[] = [
     example:
       "A Conversation Recap might arrive with a tiny poem, a digital card, and an optional bouquet selected from a partner florist.",
     heroGift:
-      "A carefully chosen supporting work or physical object that complements a KIN Meal without replacing its central creative piece.",
+      "A carefully chosen supporting work or physical object that complements a re.KIN Meal without replacing its central creative piece.",
     fillings: [
       "Poems, sound pieces, and digital cards",
       "Artist-made or licensed works, subject to stated rights",
@@ -415,7 +415,7 @@ export const giftPackages: GiftPackage[] = [
       "Partner fulfillment details for physical goods",
     ],
     provide: [
-      "The KIN Meal or Gift Brief the filling should complement",
+      "The re.KIN Meal or Gift Brief the filling should complement",
       "Any delivery constraints for physical partner items",
       "Confirmation that the selected work's usage fits your plans",
     ],

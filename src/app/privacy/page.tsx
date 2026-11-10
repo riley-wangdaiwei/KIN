@@ -7,7 +7,7 @@ export default function PrivacyPage() {
     <EditorialPage
       eyebrow="PRIVACY / DRAFT FOR REVIEW"
       title="Your board is yours."
-      intro="This draft describes the current KIN preview. It must be reviewed against the live hosting, email, and data-retention settings before broader launch."
+      intro="This draft describes the current re.KIN preview. It must be reviewed against the live hosting, email, and data-retention settings before broader launch."
       homepageChrome
     >
       <div className={styles.legalCopy}>
@@ -20,19 +20,31 @@ export default function PrivacyPage() {
         <h2>Information handled</h2>
         <p>
           Board labels, frames, and a saved Gift Brief are stored in local
-          browser storage on the device you use. They are not sent to KIN just
+          browser storage on the device you use. They are not sent to re.KIN just
           by using the board. Clearing browser storage or changing browsers
           can remove that local copy.
         </p>
         <p>
-          If you choose email sign-in, KIN sends your name and email address
+          If you choose email sign-in, re.KIN sends your name and email address
           to Supabase Auth to create or access your account. Supabase stores
           the email as the account identifier and the name as basic account
           metadata; its authentication session is kept in your browser so you
           can return without signing in again.
         </p>
         <p>
-          If you submit an order request, KIN receives the email address you
+          If you use My Gifting Identity, re.KIN stores the names of people,
+          notes, and images you add to your canvas in Supabase under your
+          account. Uploaded images are kept in private storage and are
+          available to your signed-in account.
+        </p>
+        <p>
+          If you submit an artist or partner inquiry, re.KIN receives your
+          email address, role, interests, optional name, website or portfolio,
+          and message. The email address is used as the reply-to address.
+          Resend sends the inquiry to the re.KIN team and a short receipt to you.
+        </p>
+        <p>
+          If you submit an order request, re.KIN receives the email address you
           provide, selected package and fillings, Gift Brief, selected board
           materials, personal message, optional recipient name, delivery
           notes, and consent confirmations. Do not include a street address
@@ -48,29 +60,33 @@ export default function PrivacyPage() {
         <h2>Why and with whom</h2>
         <p>
           Order details are used to review and respond to the request. The
-          email provider Resend is used to send the request to KIN and a
-          receipt to the buyer.           Supabase provides email authentication. Website hosting and
+          email provider Resend is used to send the request to re.KIN and a
+          receipt to the buyer. Supabase provides email authentication and
+          private canvas storage. Website hosting and
           delivery are provided through Vercel. No payment processor,
           advertising pixels, or analytics service is configured in this
           preview.
         </p>
         <p>
-          Order email is retained in KIN&apos;s inbox until staff delete it.
-          This MVP does not use a separate order database or automatic
-          deletion schedule. Ask KIN to access, correct, or delete information
-          where applicable; contact details are not yet configured, so this
-          request channel must be published before launch.
+          Inquiry and order email is retained in re.KIN&apos;s inbox until staff
+          delete it. Canvas content remains in Supabase until you delete it or
+          your account is removed. Ask re.KIN to access, correct, or delete information
+          where applicable. You can use the form on the{" "}
+          <Link href="/artists">Artists and Partners</Link> page to contact
+          the team.
         </p>
         <h2>Sharing and partner products</h2>
         <p>
-          Selected materials are not published or shared with an artist or
-          partner unless you separately approve that sharing. A florist or
-          other merchant handles its own checkout, shipping details, product
-          fulfillment, and returns under its own privacy notice.
+          Your canvas is private to your account unless you create a share link.
+          Anyone with that link can view the whole canvas or the selected
+          person&apos;s block; shared images are provided through temporary
+          signed URLs. A florist or other merchant handles its own checkout,
+          shipping details, product fulfillment, and returns under its own
+          privacy notice.
         </p>
         <h2>Children, changes, and questions</h2>
         <p>
-          KIN is not designed for children to submit personal information.
+          re.KIN is not designed for children to submit personal information.
           This notice may change when products, vendors, or legal
           requirements change. The responsible operator and contact method
           are listed as launch prerequisites on the{" "}

@@ -4,6 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { giftPackages } from "@/data/gifts";
+import { artistPartnerNames, identityExamples } from "@/data/hover-lists";
+import HoverRingMenu from "@/components/site/HoverRingMenu";
 import styles from "./playground.module.css";
 
 const twoPlaces = giftPackages.find((gift) => gift.slug === "two-places-one-sky");
@@ -21,7 +23,9 @@ const chapters: { title: string; steps: StoryStep[] }[] = [
   {
     title: "less generic gifting",
     steps: [
-      { body: "Tell us who the gift is for." },
+      {
+        body: "Collect what they love and what you love over time; when it is time to give, those details have already started shaping the gift.",
+      },
       { body: "Meet an artist who fits them." },
     ],
   },
@@ -70,7 +74,7 @@ const chapters: { title: string; steps: StoryStep[] }[] = [
     title: "a more personal identity for the way you give",
     steps: [
       {
-        body: "Partner with KIN across several gifts, and develop a way of noticing what matters to each person.",
+        body: "Partner with re.KIN across several gifts, and develop a way of noticing what matters to each person.",
       },
       {
         body: "Think of it as collaborating with artists to shape your own identity: not just a personal style, but artists you keep coming back to. Once that way of noticing is yours, you can carry it into gifts for people you haven't curated with us yet.",
@@ -204,18 +208,31 @@ export default function PlaygroundExperience() {
 
         <nav
           className={`${styles.sideNav} ${activeChapter >= 1 || showEnding ? styles.visible : styles.hidden}`}
-          aria-label="Explore KIN"
+          aria-label="Explore re.KIN"
         >
-          <Link href="/artists">artists and partners</Link>
+          <HoverRingMenu
+            href="/artists"
+            items={artistPartnerNames}
+            label="artists and partners"
+            menuSide="left"
+          />
           {(activeChapter >= 2 || showEnding) && (
-            <Link href="/my-gifting-identity">My Gifting Identity</Link>
+            <HoverRingMenu
+              href="/my-gifting-identity"
+              items={identityExamples}
+              label="My Gifting Identity"
+              menuSide="left"
+            />
           )}
         </nav>
 
         <div
           className={`${styles.ending} ${showEnding ? styles.visible : styles.hidden}`}
         >
-          <Link href="/my-gifting-identity#start-a-project">
+          <Link
+            className="kin-glass-hover"
+            href="/my-gifting-identity"
+          >
             Tell us who you have in mind.{" "}
             <span aria-hidden="true">↗</span>
           </Link>

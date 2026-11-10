@@ -32,7 +32,7 @@ export default function ArtistTermsPage() {
         <p>
           Artist compensation, platform fees, payment timing, refunds,
           cancellations, taxes, and any revenue share must be agreed in
-          writing before a product is offered. KIN has not established a
+          writing before a product is offered. re.KIN has not established a
           standard revenue split.
         </p>
         <h2>Consent and privacy</h2>

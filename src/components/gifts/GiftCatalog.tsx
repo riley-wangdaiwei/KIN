@@ -23,10 +23,10 @@ export default function GiftCatalog() {
   }, []);
 
   const groups = [
-    { id: "conversation-recap", title: "The first KIN original", slugs: ["conversation-recap"] },
+    { id: "conversation-recap", title: "The first re.KIN original", slugs: ["conversation-recap"] },
     {
       id: "kin-meals",
-      title: "KIN Meals",
+      title: "re.KIN Meals",
       slugs: [
         "the-curiosity-cabinet",
         "two-places-one-sky",
@@ -44,8 +44,8 @@ export default function GiftCatalog() {
   return (
     <main className={styles.page}>
       <header className={styles.header}>
-        <Link className={styles.wordmark} href="/" aria-label="KIN home">
-          KIN
+        <Link className={styles.wordmark} href="/" aria-label="re.KIN home">
+          re.KIN
         </Link>
         <span>GIFTS / THE CATALOG</span>
       </header>
@@ -127,7 +127,7 @@ export default function GiftCatalog() {
                             ? "Artist concept →"
                             : gift.category === "supporting-gift"
                               ? "Explore fillings →"
-                              : "View the first KIN Meal →"}
+                              : "View the first re.KIN Meal →"}
                       </Link>
                     </div>
                     {index === 0 && gift.category === "hero" && (
@@ -141,7 +141,7 @@ export default function GiftCatalog() {
         ))}
       </div>
       <footer className={styles.footer}>
-        <span>KIN / GIFTS</span>
+        <span>re.KIN / GIFTS</span>
         <Link href="/">Return to your board →</Link>
       </footer>
     </main>

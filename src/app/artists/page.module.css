@@ -1,43 +1,20 @@
 .page {
-  position: relative;
   min-height: 100vh;
-  isolation: isolate;
-  overflow: hidden;
+  padding: clamp(7rem, 12vh, 9rem) var(--kin-page-gutter)
+    clamp(6rem, 12vw, 10rem);
   background: var(--kin-black);
   color: var(--kin-white);
 }
 
-.tallBackground {
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: -1;
-  width: 100%;
-  height: auto;
-  pointer-events: none;
-  -webkit-mask-image: linear-gradient(to bottom, #000 78%, transparent 100%);
-  mask-image: linear-gradient(to bottom, #000 78%, transparent 100%);
-}
-
-.main {
-  display: flex;
-  min-height: max(100vh, 177.5vw);
-  flex-direction: column;
-}
-
 .content {
-  display: flex;
-  width: min(76vw, 64rem);
-  flex: 1;
-  flex-direction: column;
-  justify-content: flex-start;
-  gap: clamp(1.25rem, 3vw, 2.5rem);
+  display: grid;
+  width: min(78vw, 66rem);
+  gap: clamp(2.4rem, 6vw, 5rem);
   margin-left: var(--kin-page-gutter);
-  padding: clamp(2rem, 5vw, 4rem) 0;
 }
 
 .section {
-  width: 100%;
+  max-width: 62rem;
 }
 
 .sectionTitle,
@@ -52,8 +29,8 @@
 
 .points {
   display: grid;
+  gap: 0.45rem;
   max-width: 58rem;
-  gap: 0.7rem;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -62,17 +39,11 @@
 .point {
   display: grid;
   grid-template-columns: 2rem minmax(0, 1fr);
-  align-items: start;
-  gap: 0.7rem;
-  border: 1px solid rgb(255 255 255 / 24%);
-  padding: 0.9rem 1rem;
-  background: rgb(255 255 255 / 7%);
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
+  gap: 0.65rem;
 }
 
 .pointNumber {
-  padding-top: 0.15rem;
+  padding-top: 0.2rem;
   color: var(--kin-light-gray);
   font-family: var(--kin-micro-mono);
   font-size: var(--kin-caption-size);
@@ -86,138 +57,132 @@
   line-height: 1.2;
 }
 
+.contact {
+  max-width: 42rem;
+  scroll-margin-top: 6rem;
+}
+
 .contactTitle {
   font-size: clamp(1.8rem, 3.2vw, 3rem);
 }
 
 .contactForm {
-  display: flex;
-  max-width: 38rem;
-  flex-wrap: wrap;
-  align-items: stretch;
-  gap: 0.65rem;
-  border: 1px solid rgb(255 255 255 / 24%);
-  padding: 0.8rem;
-  background: rgb(255 255 255 / 7%);
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
+  display: grid;
+  justify-items: start;
+  gap: 0.85rem;
+  margin-top: 1.25rem;
 }
 
-.roleField {
-  display: grid;
-  flex-basis: 100%;
-  gap: 0.55rem;
+.choiceField {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem 1rem;
   min-width: 0;
   margin: 0;
   padding: 0;
   border: 0;
 }
 
-.roleLegend {
-  margin-bottom: 0.1rem;
-  color: var(--kin-white);
-  font: 0.9rem/1.2 var(--kin-ui-sans);
+.choiceField legend {
+  width: 100%;
+  margin-bottom: 0.3rem;
+  font-family: var(--kin-ui-sans);
+  font-size: 0.88rem;
+  font-weight: 500;
 }
 
-.roleOptions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.roleChip {
-  position: relative;
+.choice {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  border: 1px solid rgb(255 255 255 / 24%);
-  padding: 0.55rem 0.7rem;
-  background: rgb(255 255 255 / 7%);
-  color: var(--kin-white);
+  gap: 0.35rem;
+  color: var(--kin-light-gray);
   cursor: pointer;
-  font: 0.85rem/1.2 var(--kin-ui-sans);
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
+  font-family: var(--kin-ui-sans);
+  font-size: 0.8rem;
+  line-height: 1.35;
 }
 
-.roleRadio {
-  width: 0.9rem;
-  height: 0.9rem;
+.choice input {
+  width: 0.85rem;
+  height: 0.85rem;
   margin: 0;
   accent-color: var(--kin-white);
 }
 
-.roleChip:has(.roleRadio:focus-visible) {
-  outline: 2px solid var(--kin-white);
-  outline-offset: 2px;
-}
-
-.emailInput {
-  min-width: 12rem;
-  flex: 1;
-  border: 1px solid rgb(255 255 255 / 24%);
-  border-radius: 0;
-  padding: 0.75rem;
-  background: rgb(255 255 255 / 7%);
+.choice:has(input:checked) {
   color: var(--kin-white);
-  font: 0.95rem/1.2 var(--kin-ui-sans);
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
 }
 
-.emailInput::placeholder {
+.textField {
+  display: grid;
+  width: min(100%, 30rem);
+  gap: 0.2rem;
+  color: var(--kin-white);
+  font-family: var(--kin-ui-sans);
+  font-size: 0.83rem;
+}
+
+.textField > span {
+  display: inline;
   color: var(--kin-light-gray);
+}
+
+.textField input,
+.textField textarea {
+  width: 100%;
+  min-height: 2rem;
+  border: 0;
+  border-bottom: 1px solid rgb(255 255 255 / 45%);
+  border-radius: 0;
+  padding: 0.35rem 0;
+  background: transparent;
+  color: var(--kin-white);
+  font: inherit;
+}
+
+.textField textarea {
+  resize: vertical;
+}
+
+.textField input:focus-visible,
+.textField textarea:focus-visible,
+.choice input:focus-visible {
+  outline: 1px solid currentColor;
+  outline-offset: 3px;
 }
 
 .submitButton {
-  border: 1px solid rgb(255 255 255 / 24%);
-  border-radius: 0;
-  padding: 0.75rem 1rem;
-  background: rgb(255 255 255 / 7%);
+  position: relative;
+  border: 0;
+  padding: 0.35rem 0.55rem;
+  background: transparent;
   color: var(--kin-white);
   cursor: pointer;
-  font: 700 0.9rem/1.2 var(--kin-ui-sans);
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
+  font-family: var(--kin-ui-sans);
+  font-size: 0.9rem;
+  font-weight: 700;
 }
 
-.emailInput:focus-visible,
-.submitButton:focus-visible {
-  outline: 2px solid var(--kin-white);
-  outline-offset: 2px;
+.submitButton:disabled {
+  cursor: wait;
+  opacity: 0.65;
 }
 
-.confirmation {
-  flex-basis: 100%;
+.confirmation,
+.portfolioNote {
   min-height: 1.2em;
+  margin: 0;
   color: var(--kin-light-gray);
-  font-family: var(--kin-micro-mono);
-  font-size: var(--kin-caption-size);
+  font-family: var(--kin-ui-sans);
+  font-size: 0.78rem;
+  line-height: 1.35;
 }
 
-.visuallyHidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  clip-path: inset(50%);
-}
-
-.footer {
-  position: relative;
-}
-
-.footerWrapper {
-  position: relative;
+.portfolioNote {
+  margin-top: 0.65rem;
 }
 
 @media (max-width: 760px) {
-  .main {
-    min-height: max(100svh, 177.5vw);
-  }
-
   .content {
     width: auto;
     margin-right: var(--kin-page-gutter);
@@ -225,7 +190,5 @@
 
   .point {
     grid-template-columns: 1.5rem minmax(0, 1fr);
-    gap: 0.5rem;
-    padding: 0.8rem;
   }
 }

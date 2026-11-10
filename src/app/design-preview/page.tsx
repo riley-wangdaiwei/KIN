@@ -6,7 +6,7 @@ import { QuestionImageBlock } from "@/components/editorial/QuestionImageBlock";
 import { SectionRule } from "@/components/editorial/SectionRule";
 
 const colorTokens = [
-  { name: "Black", value: "#050505", variable: "--kin-black" },
+  { name: "Black", value: "#03080d", variable: "--kin-black" },
   { name: "Near black", value: "#111111", variable: "--kin-near-black" },
   { name: "Charcoal", value: "#242424", variable: "--kin-charcoal" },
   { name: "Mid gray", value: "#777777", variable: "--kin-mid-gray" },
@@ -47,11 +47,11 @@ function Barcode({ className = "" }: { className?: string }) {
 export default function DesignPreviewPage() {
   return (
     <main className="design-preview">
-      <section className="design-preview__cover" aria-label="KIN publication cover">
+      <section className="design-preview__cover" aria-label="re.KIN publication cover">
         <div className="design-preview__cover-image" aria-hidden="true" />
         <div className="design-preview__cover-wash" aria-hidden="true" />
         <header className="design-preview__masthead">
-          <p className="design-preview__brand">KIN</p>
+          <p className="design-preview__brand">re.KIN</p>
           <div className="design-preview__cover-meta kin-metadata">
             <span>COLLECTIVE / ISSUE 01</span>
             <span>OBJECTS · MEMORY · GIVING</span>
@@ -75,7 +75,7 @@ export default function DesignPreviewPage() {
         />
         <Barcode className="barcode--cover" />
         <span className="marginal-label marginal-label--cover" aria-hidden="true">
-          KIN / FIELD NOTES / 001
+          re.KIN / FIELD NOTES / 001
         </span>
         <span className="paperclip paperclip--cover" aria-hidden="true" />
         <div className="design-preview__cover-bottom">
@@ -101,7 +101,7 @@ export default function DesignPreviewPage() {
             kind of map.
           </p>
           <p>
-            KIN begins with looking closely. What colors return? Which objects
+            re.KIN begins with looking closely. What colors return? Which objects
             have gathered a story? What would make someone feel understood,
             rather than simply remembered? These are not clues to solve. They
             are invitations to notice.
@@ -119,7 +119,7 @@ export default function DesignPreviewPage() {
           <h2 className="design-preview__spread-quote" id="spread-title">
             “The little things know where to find us.”
           </h2>
-          <MetadataLabel>NOTES ON COLLECTING / KIN EDITORIAL</MetadataLabel>
+          <MetadataLabel>NOTES ON COLLECTING / re.KIN EDITORIAL</MetadataLabel>
         </div>
 
         <div className="design-preview__spread-art" aria-label="Layered image and graphic composition">
@@ -141,7 +141,7 @@ export default function DesignPreviewPage() {
           </h2>
           <Barcode className="barcode--spread" />
           <MetadataLabel className="design-preview__spread-credit">
-            FIG. 01 / A PERSONAL ARCHIVE / KIN, 2026
+            FIG. 01 / A PERSONAL ARCHIVE / re.KIN, 2026
           </MetadataLabel>
         </div>
       </section>
@@ -197,7 +197,7 @@ export default function DesignPreviewPage() {
           <div className="design-preview__type">
             <span className="design-preview__type-name">MICRO MONO / CAPTION</span>
             <p className="design-preview__type-sample design-preview__type-sample--mono">
-              KIN / ISSUE 01 / FIG. 04 / EN — 2026
+              re.KIN / ISSUE 01 / FIG. 04 / EN — 2026
             </p>
           </div>
         </div>
@@ -220,7 +220,7 @@ export default function DesignPreviewPage() {
               <MetadataLabel className="design-preview__component-label">
                 Metadata / marginalia
               </MetadataLabel>
-              <MetadataLabel>EN / 01 — Collected by KIN</MetadataLabel>
+              <MetadataLabel>EN / 01 — Collected by re.KIN</MetadataLabel>
               <MetadataLabel accent>FIG. 04 / THE PERSONAL ARCHIVE</MetadataLabel>
             </div>
 
@@ -268,14 +268,14 @@ export default function DesignPreviewPage() {
                 imageSrc="/gift_conversation.jpg"
                 imageAlt="A quiet collection of books on library shelves"
                 imageTitle="A detail becomes a story."
-                caption="IMAGE 03 / NOTES FROM A PERSONAL ARCHIVE / KIN, ISSUE 01"
+                caption="IMAGE 03 / NOTES FROM A PERSONAL ARCHIVE / re.KIN, ISSUE 01"
               />
             </div>
           </div>
         </div>
 
         <footer className="design-preview__footer">
-          <MetadataLabel>KIN / DENSE EDITORIAL PUBLICATION</MetadataLabel>
+          <MetadataLabel>re.KIN / DENSE EDITORIAL PUBLICATION</MetadataLabel>
           <MetadataLabel>BLACK · PAPER · IMAGE · WORD</MetadataLabel>
         </footer>
       </section>

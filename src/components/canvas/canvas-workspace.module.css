@@ -1,0 +1,293 @@
+.workspace {
+  width: 100%;
+}
+
+.canvasTools {
+  display: grid;
+  width: min(38rem, 100%);
+  gap: 0.9rem;
+  margin-bottom: 1.5rem;
+}
+
+.addPerson,
+.addNote {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.addPerson > label,
+.addNote > label {
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.inlineForm {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.6rem;
+}
+
+.inlineForm input,
+.inlineForm textarea,
+.renameForm input {
+  min-width: 0;
+  flex: 1;
+  border: 0;
+  border-bottom: 1px solid rgb(255 255 255 / 40%);
+  border-radius: 0;
+  padding: 0.4rem 0;
+  background: transparent;
+  color: var(--kin-white);
+  font: 400 0.8rem/1.35 var(--kin-ui-sans);
+}
+
+.inlineForm button,
+.inlineForm button,
+.renameForm button,
+.addMedia button,
+.notice button,
+.shareButton {
+  border: 0;
+  padding: 0.35rem 0.5rem;
+  background: transparent;
+  color: var(--kin-white);
+  cursor: pointer;
+  font: 500 0.75rem/1.3 var(--kin-ui-sans);
+}
+
+.inlineForm button:hover,
+.renameForm button:hover,
+.addMedia button:hover,
+.shareButton:hover {
+  color: var(--kin-light-gray);
+}
+
+.inlineForm button:disabled,
+.renameForm button:disabled,
+.addMedia button:disabled,
+.shareButton:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+.addMedia {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 0.7rem;
+}
+
+.status {
+  min-height: 1.2em;
+  margin: 0 0 0.4rem;
+  color: #ffb6b6;
+  font-size: 0.78rem;
+}
+
+.notice {
+  display: grid;
+  justify-items: start;
+  gap: 0.55rem;
+  max-width: 34rem;
+  padding: 1rem 0;
+  color: var(--kin-light-gray);
+  font-size: 0.9rem;
+}
+
+.notice p {
+  margin: 0;
+}
+
+.canvasArea {
+  width: 100%;
+}
+
+.unsorted {
+  width: min(100%, 55rem);
+  min-height: 5rem;
+  margin-bottom: 2rem;
+  border-top: 1px solid rgb(255 255 255 / 25%);
+  padding: 0.6rem 0 1rem;
+}
+
+.areaHeading,
+.personTitle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem 0.7rem;
+}
+
+.areaHeading h2 {
+  margin: 0;
+  font: 500 0.78rem/1.3 var(--kin-micro-mono);
+  text-transform: uppercase;
+}
+
+.columns {
+  display: grid;
+  width: min(80vw, 78rem);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
+  gap: clamp(0.9rem, 2.2vw, 2rem);
+}
+
+.column {
+  display: grid;
+  min-width: 0;
+  align-content: start;
+  gap: 1.4rem;
+}
+
+.person {
+  min-width: 0;
+  min-height: 5rem;
+  border-top: 1px solid rgb(255 255 255 / 25%);
+  padding: 0.55rem 0 0.85rem;
+}
+
+.personTitle h3 {
+  margin: 0;
+  font: 500 1rem/1.15 var(--kin-ui-sans);
+}
+
+.smallAction,
+.entryActions button,
+.attachImage {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--kin-light-gray);
+  cursor: pointer;
+  font: 400 0.65rem/1.3 var(--kin-ui-sans);
+}
+
+.smallAction:hover,
+.entryActions button:hover,
+.attachImage:hover {
+  color: var(--kin-white);
+}
+
+.renameForm {
+  display: flex;
+  flex: 1 1 100%;
+  gap: 0.5rem;
+}
+
+.renameForm button {
+  border: 0;
+  background: transparent;
+  color: var(--kin-white);
+  cursor: pointer;
+  font: 500 0.72rem/1.3 var(--kin-ui-sans);
+}
+
+.entries {
+  display: grid;
+  gap: 0.35rem;
+  min-height: 2rem;
+  margin-top: 0.65rem;
+}
+
+.entryLine {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.15rem 0.3rem;
+}
+
+.entry {
+  display: inline-flex;
+  max-width: 100%;
+  align-items: baseline;
+  gap: 0.25rem;
+}
+
+.entry p {
+  max-width: 38ch;
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: var(--kin-white);
+  font: 400 0.82rem/1.35 var(--kin-ui-sans);
+}
+
+.entryImage {
+  display: block;
+  width: 1.1rem;
+  height: 1.1rem;
+  object-fit: cover;
+  vertical-align: middle;
+}
+
+.entryActions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  opacity: 0.65;
+}
+
+.entry:hover .entryActions,
+.entry:focus-within .entryActions {
+  opacity: 1;
+}
+
+.moveLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  color: var(--kin-light-gray);
+  font: 400 0.58rem/1.2 var(--kin-ui-sans);
+}
+
+.moveLabel select {
+  max-width: 5rem;
+  border: 0;
+  background: var(--kin-black);
+  color: var(--kin-light-gray);
+  font: inherit;
+}
+
+.attachImage {
+  align-self: center;
+  opacity: 0;
+}
+
+.entryLine:hover .attachImage,
+.entryLine:focus-within .attachImage {
+  opacity: 1;
+}
+
+.hiddenInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.shareButton {
+  margin-top: 0.5rem;
+  color: var(--kin-light-gray);
+}
+
+.shareLink {
+  display: block;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  color: var(--kin-light-gray);
+  font-size: 0.62rem;
+}
+
+@media (max-width: 720px) {
+  .columns {
+    width: 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 500px) {
+  .columns {
+    grid-template-columns: 1fr;
+  }
+}

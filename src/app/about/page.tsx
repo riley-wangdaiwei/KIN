@@ -4,9 +4,9 @@ import styles from "@/components/site/site.module.css";
 export default function AboutPage() {
   return (
     <EditorialPage
-      eyebrow="ABOUT / KIN"
+      eyebrow="ABOUT / re.KIN"
       title="A place for the things you notice."
-      intro="KIN helps people gather the small details that make a relationship particular, then turn that curation into a thoughtful gift."
+      intro="re.KIN helps people gather the small details that make a relationship particular, then turn that curation into a thoughtful gift."
       homepageChrome
     >
       <section className={styles.section}>
@@ -15,7 +15,7 @@ export default function AboutPage() {
           <p>
             A saved phrase, a familiar route, a ticket kept for no reason:
             these details are often what make a gift feel like it could only
-            belong to one person. KIN gives them a place to collect, connect,
+            belong to one person. re.KIN gives them a place to collect, connect,
             and become a creative keepsake.
           </p>
           <p>The loop is simple: Collect → Curate → Create → Give.</p>
@@ -25,7 +25,7 @@ export default function AboutPage() {
         <h2 className={styles.sectionHeading}>Where we are</h2>
         <div className={styles.sectionBody}>
           <p>
-            KIN is an early product preview. The board, catalog, and order
+            re.KIN is an early product preview. The board, catalog, and order
             request flow are being developed; availability, artist terms,
             business contact details, and complete legal terms must be
             finalized before the service accepts paid orders.

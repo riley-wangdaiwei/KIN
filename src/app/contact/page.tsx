@@ -5,9 +5,9 @@ import styles from "@/components/site/site.module.css";
 export default function ContactPage() {
   return (
     <EditorialPage
-      eyebrow="CONTACT / KIN"
+      eyebrow="CONTACT / re.KIN"
       title="A note is a good beginning."
-      intro="For order questions, artist introductions, press, or partnership ideas, KIN will provide a monitored contact channel before opening submissions or accepting real orders."
+      intro="For order questions, artist introductions, press, or partnership ideas, re.KIN will provide a monitored contact channel before opening submissions or accepting real orders."
       homepageChrome
     >
       <section className={styles.section}>
@@ -22,13 +22,13 @@ export default function ContactPage() {
           <div className={styles.cardGrid}>
             <article className={styles.card}>
               <span className={styles.cardNumber}>FOR ARTISTS</span>
-              <h3>Make with KIN</h3>
+              <h3>Make with re.KIN</h3>
               <p>Artist submissions are not open yet; see the current program notes.</p>
               <Link className={styles.cta} href="/artists">Artist information →</Link>
             </article>
             <article className={styles.card}>
               <span className={styles.cardNumber}>FOR BUSINESSES</span>
-              <h3>Partner with KIN</h3>
+              <h3>Partner with re.KIN</h3>
               <p>Learn how referral links, widgets, or deeper integrations may work.</p>
               <Link className={styles.cta} href="/partner-with-kin">Partner information →</Link>
             </article>

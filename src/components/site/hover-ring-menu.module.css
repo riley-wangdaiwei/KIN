@@ -1,0 +1,140 @@
+.root {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.trigger {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-align: inherit;
+  white-space: nowrap;
+}
+
+.arrow {
+  opacity: 0;
+  transform: translateX(-0.2rem);
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.open .arrow {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.ring {
+  position: absolute;
+  z-index: 3;
+  top: 50%;
+  left: calc(100% + 0.8rem);
+  width: min(18rem, 42vw);
+  height: 12.5rem;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-50%);
+  visibility: hidden;
+  transition: opacity 220ms ease, visibility 220ms ease;
+  -webkit-mask-image: linear-gradient(transparent, #000 19%, #000 79%, transparent);
+  mask-image: linear-gradient(transparent, #000 19%, #000 79%, transparent);
+}
+
+.left {
+  right: calc(100% + 0.8rem);
+  left: auto;
+}
+
+.open .ring {
+  opacity: 1;
+  pointer-events: auto;
+  visibility: visible;
+}
+
+.track {
+  display: grid;
+  animation: drift 38s linear infinite;
+}
+
+.name {
+  width: fit-content;
+  max-width: 100%;
+  justify-self: start;
+  padding: 0.14rem 0;
+  border: 0;
+  background: transparent;
+  color: var(--kin-light-gray);
+  cursor: pointer;
+  font-family: var(--kin-ui-sans);
+  font-size: 0.78rem;
+  font-weight: 400;
+  line-height: 1.3;
+  opacity: 0.45;
+  text-align: left;
+  transform: scale(0.9);
+  transform-origin: left center;
+  transition: color 160ms ease, opacity 160ms ease, transform 160ms ease;
+}
+
+.name:nth-child(4n + 1),
+.name:nth-child(4n) {
+  opacity: 0.25;
+  transform: scale(0.78);
+}
+
+.name:nth-child(4n + 2),
+.name:nth-child(4n + 3) {
+  opacity: 0.7;
+  transform: scale(0.94);
+}
+
+.name:hover,
+.name:focus-visible {
+  color: var(--kin-white);
+  opacity: 1;
+  transform: scale(1);
+}
+
+.name:focus-visible,
+.trigger:focus-visible {
+  outline: 1px solid currentColor;
+  outline-offset: 0.3rem;
+}
+
+@keyframes drift {
+  to {
+    transform: translateY(-50%);
+  }
+}
+
+@media (max-width: 700px) {
+  .ring {
+    width: min(15rem, 64vw);
+    height: 10rem;
+  }
+
+  .name {
+    font-size: 0.72rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arrow,
+  .ring,
+  .name {
+    transition: none;
+  }
+
+  .track {
+    animation: none;
+  }
+}

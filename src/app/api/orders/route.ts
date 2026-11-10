@@ -201,7 +201,7 @@ export async function POST(request: NextRequest) {
 
   if (!apiKey || !from || !ordersEmail) {
     // Email disabled until custom domain is verified in Resend.
-    console.info("KIN order received without email delivery:", {
+    console.info("re.KIN order received without email delivery:", {
       ...body,
       packageTitle: gift.title,
     });
@@ -213,15 +213,15 @@ export async function POST(request: NextRequest) {
     from,
     to: ordersEmail,
     replyTo: body.purchaserEmail,
-    subject: `KIN order request ${body.orderId} — ${gift.title}`,
-    html: `<h1>New KIN order request</h1>${packageTable}<p>Rights and privacy confirmations were accepted.</p>`,
-    text: `New KIN order request\n\n${textOrder}\n\nRights and privacy confirmations were accepted.`,
+    subject: `re.KIN order request ${body.orderId} — ${gift.title}`,
+    html: `<h1>New re.KIN order request</h1>${packageTable}<p>Rights and privacy confirmations were accepted.</p>`,
+    text: `New re.KIN order request\n\n${textOrder}\n\nRights and privacy confirmations were accepted.`,
     idempotencyKey: `${body.orderId}-kin`,
   });
   if (!internalEmail.ok) {
     return NextResponse.json(
       {
-        error: `The order email could not be sent to KIN: ${internalEmail.message}`,
+        error: `The order email could not be sent to re.KIN: ${internalEmail.message}`,
         orderId: body.orderId,
       },
       { status: 502 },
@@ -232,16 +232,16 @@ export async function POST(request: NextRequest) {
     apiKey,
     from,
     to: body.purchaserEmail,
-    subject: `Your KIN order request ${body.orderId}`,
-    html: `<h1>Your order request is with KIN</h1><p>We received your request for ${escapeHtml(gift.title)}. No payment has been taken. KIN will follow up to confirm scope, price, and delivery details.</p>${packageTable}<p>Your submitted details are emailed to KIN and retained in our order inbox until staff delete them. They are used only to respond to and fulfill this request.</p>`,
-    text: `Your order request is with KIN.\n\nWe received your request for ${gift.title}. No payment has been taken. KIN will follow up to confirm scope, price, and delivery details.\n\n${textOrder}\n\nYour submitted details are emailed to KIN and retained in our order inbox until staff delete them. They are used only to respond to and fulfill this request.`,
+    subject: `Your re.KIN order request ${body.orderId}`,
+    html: `<h1>Your order request is with re.KIN</h1><p>We received your request for ${escapeHtml(gift.title)}. No payment has been taken. re.KIN will follow up to confirm scope, price, and delivery details.</p>${packageTable}<p>Your submitted details are emailed to re.KIN and retained in our order inbox until staff delete them. They are used only to respond to and fulfill this request.</p>`,
+    text: `Your order request is with re.KIN.\n\nWe received your request for ${gift.title}. No payment has been taken. re.KIN will follow up to confirm scope, price, and delivery details.\n\n${textOrder}\n\nYour submitted details are emailed to re.KIN and retained in our order inbox until staff delete them. They are used only to respond to and fulfill this request.`,
     idempotencyKey: `${body.orderId}-buyer`,
   });
   if (!buyerEmail.ok) {
     return NextResponse.json(
       {
         error:
-          `KIN received the order request ${body.orderId}, but the buyer confirmation email could not be sent: ${buyerEmail.message}. Contact ${ordersEmail} and provide the order reference.`,
+          `re.KIN received the order request ${body.orderId}, but the buyer confirmation email could not be sent: ${buyerEmail.message}. Contact ${ordersEmail} and provide the order reference.`,
         orderId: body.orderId,
       },
       { status: 502 },

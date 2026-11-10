@@ -340,7 +340,7 @@ export default function OrderFlow({
           {physicalFillings.length > 0 && (
             <p className={styles.partnerNote}>
               Physical fillings are arranged and fulfilled by the partner, not
-              KIN. Their checkout, shipping, and returns terms apply.
+              re.KIN. Their checkout, shipping, and returns terms apply.
             </p>
           )}
           {flowerPartnerUrl ? (
@@ -355,7 +355,7 @@ export default function OrderFlow({
           ) : (
             <p className={styles.partnerNote}>
               Flower partner link is not configured yet. Select flowers here
-              to include the request; KIN will confirm partner availability
+              to include the request; re.KIN will confirm partner availability
               separately.
             </p>
           )}
@@ -391,18 +391,18 @@ export default function OrderFlow({
       <>
         <p className={styles.lead}>
           Your board stays private. Only the order details and materials you
-          select here are sent to KIN for this request.
+          select here are sent to re.KIN for this request.
         </p>
         <div className={styles.privacyNotice}>
           <h3>Materials, email & privacy</h3>
           <ul>
             <li>
               Your order, contact email, selected brief, message, and chosen
-              materials are emailed to KIN and copied to you for order
+              materials are emailed to re.KIN and copied to you for order
               confirmation.
             </li>
             <li>
-              The email provider processes those messages. KIN&apos;s order
+              The email provider processes those messages. re.KIN&apos;s order
               inbox retains them until staff delete them; this MVP has no
               automatic deletion or separate order database.
             </li>
@@ -417,7 +417,7 @@ export default function OrderFlow({
             </li>
             <li>
               Physical products are ordered from the partner separately.
-              KIN does not receive or process the partner&apos;s payment,
+              re.KIN does not receive or process the partner&apos;s payment,
               shipping address, or return request.
             </li>
           </ul>
@@ -442,7 +442,7 @@ export default function OrderFlow({
         />
         <CheckOption
           checked={privacyConsent}
-          label="I understand my order details and selected materials will be emailed to KIN and to me, as described above."
+          label="I understand my order details and selected materials will be emailed to re.KIN and to me, as described above."
           onChange={() => setPrivacyConsent((current) => !current)}
         />
       </>
@@ -454,7 +454,7 @@ export default function OrderFlow({
       <>
         <p className={styles.lead}>
           We&apos;ll email your order summary and confirm next steps. No payment
-          is collected in this MVP; KIN will confirm price, scope, and timing
+          is collected in this MVP; re.KIN will confirm price, scope, and timing
           before accepting the commission.
         </p>
         <label className={styles.field}>
@@ -500,10 +500,10 @@ export default function OrderFlow({
     return (
       <section className={styles.confirmation} role="status">
         <span className={styles.eyebrow}>ORDER REQUEST / SENT</span>
-        <h3>Thank you. Your order is with KIN.</h3>
+        <h3>Thank you. Your order is with re.KIN.</h3>
         <p>
-          We sent the order details to KIN and a confirmation to{" "}
-          <strong>{purchaserEmail}</strong>. No payment has been taken. KIN
+          We sent the order details to re.KIN and a confirmation to{" "}
+          <strong>{purchaserEmail}</strong>. No payment has been taken. re.KIN
           will follow up to confirm price, creative scope, and delivery timing.
         </p>
         <p className={styles.orderNumber}>REFERENCE / {orderId}</p>
@@ -525,7 +525,7 @@ export default function OrderFlow({
   return (
     <main className={styles.page}>
       <header className={styles.header}>
-        <Link className={styles.wordmark} href="/" aria-label="KIN home">KIN</Link>
+        <Link className={styles.wordmark} href="/" aria-label="re.KIN home">re.KIN</Link>
         <span>ORDER / {normalizeSource(source).toUpperCase()}</span>
       </header>
       <section className={styles.layout}>

@@ -1,6 +1,10 @@
 import Link from "next/link";
 import styles from "./homepage.module.css";
 import StoryCards from "./story-cards";
+import PlaygroundChrome from "@/components/site/PlaygroundChrome";
+import HoverRingMenu from "@/components/site/HoverRingMenu";
+import BookingTrigger from "@/components/site/BookingTrigger";
+import { artistPartnerNames, identityExamples } from "@/data/hover-lists";
 
 const footerLinks = [
   { href: "/about", label: "About" },
@@ -8,29 +12,41 @@ const footerLinks = [
   { href: "/terms", label: "Terms" },
   { href: "/artist-terms", label: "Artist Terms" },
   { href: "/contact", label: "Contact" },
-  { href: "/partner-with-kin", label: "Partner with Kin" },
+  { href: "/partner-with-kin", label: "Partner with re.KIN" },
 ];
 
 export default function HomePage() {
   return (
-    <main className={styles.homePage} data-homepage>
+    <>
+      <PlaygroundChrome overlaysOnly />
+      <main className={styles.homePage} data-homepage>
       <div aria-hidden="true" className={styles.homeBackground} />
       <header className={styles.header}>
         <Link className={styles.wordmark} href="/" aria-label="re.KIN home">
           re.KIN
         </Link>
         <nav className={styles.navigation} aria-label="Main navigation">
-          <Link href="/how-it-works">What is Kin</Link>
+          <Link href="/how-it-works">What is re.KIN</Link>
           <Link href="/gifts">Gift packages</Link>
-          <Link href="/artists">For artists and partners</Link>
-          <Link href="/my-gifting-identity">My gifting identity</Link>
-          <Link className={styles.navigationCta} href="/my-gifting-identity#start-a-project">
-            Book a curation meeting
-          </Link>
+          <HoverRingMenu
+            href="/artists"
+            items={artistPartnerNames}
+            label="artists and partners"
+          />
+          <HoverRingMenu
+            href="/my-gifting-identity"
+            items={identityExamples}
+            label="My Gifting Identity"
+          />
+          <BookingTrigger
+            className={`${styles.navigationCta} kin-glass-hover`}
+          >
+            book a free curation meeting
+          </BookingTrigger>
         </nav>
       </header>
 
-      <section className={styles.hero} aria-label="KIN gifting">
+      <section className={styles.hero} aria-label="re.KIN gifting">
         <h1 className={styles.heroTitle}>
           <span>less generic gifting,</span>
           <span>more oddly specific art about your favorite people,</span>
@@ -40,11 +56,11 @@ export default function HomePage() {
 
       <section className={styles.stories} aria-labelledby="stories-title">
         <div className={styles.storiesHeading}>
-          <span className={styles.metadata}>KIN / STORIES OF ATTENTION</span>
+          <span className={styles.metadata}>re.KIN / STORIES OF ATTENTION</span>
           <h2 id="stories-title">The Art of Knowing Someone</h2>
         </div>
         <StoryCards />
-        <Link className={styles.projectLink} href="/my-gifting-identity#start-a-project">
+        <Link className={styles.projectLink} href="/my-gifting-identity">
           start a project <span aria-hidden="true">→</span>
         </Link>
       </section>
@@ -61,9 +77,10 @@ export default function HomePage() {
           ))}
         </nav>
         <span className={styles.footerNote}>
-          © {new Date().getFullYear()} KIN
+          © {new Date().getFullYear()} re.KIN
         </span>
       </footer>
-    </main>
+      </main>
+    </>
   );
 }

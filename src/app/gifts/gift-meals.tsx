@@ -61,7 +61,7 @@ const packageDetails: Record<string, string[]> = {
     "Artist’s process note / the choices, materials, and boundaries of the work",
   ],
   "supporting-gifts-fillings": [
-    "Hero gift / a supporting work or object paired with a KIN Meal",
+    "Hero gift / a supporting work or object paired with a re.KIN Meal",
     "Fillings / poems, sound, cards, licensed works, or partner gifts",
     "Personal message / a short note when the filling supports it",
     "README guide / delivery details, licenses, and partner terms",

@@ -1,5 +1,5 @@
-import Link from "next/link";
-import homepageStyles from "../homepage.module.css";
+import type { Metadata } from "next";
+import PlaygroundChrome from "@/components/site/PlaygroundChrome";
 import ArtistContactForm from "./artist-contact-form";
 import styles from "./page.module.css";
 
@@ -21,59 +21,22 @@ const sections = [
   {
     title: "Physical gifts, integrated",
     points: [
-      "KIN brings the meaning; physical gifts add use. We encourage artists to weave connected gifts—like flowers or perfume—into curation.",
+      "re.KIN brings the meaning; physical gifts add use. We encourage artists to weave connected gifts—like flowers or perfume—into curation.",
       "Florists, bookstores, and other shops can explore mutual storefront promotion and API integration with us.",
     ],
   },
 ];
 
-const footerLinks = [
-  { href: "/about", label: "About" },
-  { href: "/privacy", label: "Privacy Policy" },
-  { href: "/terms", label: "Terms" },
-  { href: "/artist-terms", label: "Artist Terms" },
-  { href: "/contact", label: "Contact" },
-  { href: "/partner-with-kin", label: "Partner with Kin" },
-];
+export const metadata: Metadata = {
+  title: "Artists and partners | re.KIN",
+  description: "Make thoughtful, artist-made gifts with re.KIN.",
+};
 
 export default function ArtistsPage() {
   return (
     <>
-      <main className={`${styles.page} ${styles.main}`} data-homepage>
-        {/* Decorative backdrop scrolls with the page and fades into the black field. */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          aria-hidden="true"
-          alt=""
-          className={styles.tallBackground}
-          src="/integrations.jpg"
-        />
-
-        <header className={homepageStyles.header}>
-          <Link
-            aria-label="re.KIN home"
-            className={homepageStyles.wordmark}
-            href="/"
-          >
-            re.KIN
-          </Link>
-          <nav
-            aria-label="Main navigation"
-            className={homepageStyles.navigation}
-          >
-            <Link href="/how-it-works">What is Kin</Link>
-            <Link href="/gifts">Gift packages</Link>
-            <Link href="/artists">For artists and partners</Link>
-            <Link href="/my-gifting-identity">My gifting identity</Link>
-            <Link
-              className={homepageStyles.navigationCta}
-              href="/my-gifting-identity#start-a-project"
-            >
-              Book a curation meeting
-            </Link>
-          </nav>
-        </header>
-
+      <PlaygroundChrome />
+      <main className={styles.page} data-homepage>
         <div className={styles.content}>
           {sections.map((section, sectionIndex) => (
             <section
@@ -114,34 +77,12 @@ export default function ArtistsPage() {
               Let’s work together.
             </h2>
             <ArtistContactForm />
+            <p className={styles.portfolioNote}>
+              If you join, your portfolio can be featured on re.KIN.
+            </p>
           </section>
         </div>
       </main>
-
-      <div className={styles.footerWrapper}>
-        <footer className={`${homepageStyles.footer} ${styles.footer}`}>
-          <Link
-            aria-label="re.KIN home"
-            className={homepageStyles.footerWordmark}
-            href="/"
-          >
-            re.KIN
-          </Link>
-          <nav
-            aria-label="Footer navigation"
-            className={homepageStyles.footerLinks}
-          >
-            {footerLinks.map((link) => (
-              <Link href={link.href} key={link.href}>
-                {link.label}
-              </Link>
-            ))}
-          </nav>
-          <span className={homepageStyles.footerNote}>
-            © {new Date().getFullYear()} KIN
-          </span>
-        </footer>
-      </div>
     </>
   );
 }

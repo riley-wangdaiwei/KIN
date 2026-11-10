@@ -145,7 +145,7 @@ export default function GiftCurationFlow({
         aria-describedby="curation-question"
       >
         <header className={styles.header}>
-          <span className={styles.kicker}>KIN / GIFT CURATION</span>
+          <span className={styles.kicker}>re.KIN / GIFT CURATION</span>
           <button
             className={styles.close}
             type="button"

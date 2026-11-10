@@ -1,6 +1,6 @@
 .page {
   min-height: 100vh;
-  background: #050505;
+  background: var(--kin-black);
   color: #f4f3ef;
 }
 

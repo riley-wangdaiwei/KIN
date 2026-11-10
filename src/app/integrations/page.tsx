@@ -6,7 +6,7 @@ const partners = [
   {
     title: "Florists",
     value: "Pair a thoughtful digital keepsake with the immediacy of flowers, while each business owns its own product and fulfillment.",
-    example: "A florist offers KIN after a bouquet purchase; a KIN customer can add flowers through a partner florist.",
+    example: "A florist offers re.KIN after a bouquet purchase; a re.KIN customer can add flowers through a partner florist.",
   },
   {
     title: "Bookstores",
@@ -16,7 +16,7 @@ const partners = [
   {
     title: "Record stores",
     value: "Connect a relationship's soundtrack with artist-led digital storytelling.",
-    example: "A KIN gift brief links to a record chosen for a shared road-trip memory.",
+    example: "A re.KIN gift brief links to a record chosen for a shared road-trip memory.",
   },
   {
     title: "Photo printing",
@@ -26,17 +26,17 @@ const partners = [
   {
     title: "Travel & hotels",
     value: "Turn a stay, itinerary, or shared destination into a gift that can be revisited.",
-    example: "A boutique hotel shares KIN as an optional keepsake after an anniversary stay.",
+    example: "A boutique hotel shares re.KIN as an optional keepsake after an anniversary stay.",
   },
   {
     title: "Museums & galleries",
     value: "Pair cultural discovery with a personal interpretation made for one recipient.",
-    example: "An exhibition shop recommends a KIN keepsake beside a licensed exhibition print.",
+    example: "An exhibition shop recommends a re.KIN keepsake beside a licensed exhibition print.",
   },
   {
     title: "Gift retailers",
     value: "Add a relationship-led creative layer to a well-chosen physical present.",
-    example: "A retailer links from a gift guide to a KIN digital dedication and publication.",
+    example: "A retailer links from a gift guide to a re.KIN digital dedication and publication.",
   },
   {
     title: "Corporate gifting",
@@ -50,7 +50,7 @@ export default function IntegrationsPage() {
     <EditorialPage
       eyebrow="INTEGRATIONS / PARTNER NETWORK"
       title="Good gifts travel together."
-      intro="KIN can begin as a referral link and grow into a widget or API when it serves the partner. A connection should add meaning, not complexity."
+      intro="re.KIN can begin as a referral link and grow into a widget or API when it serves the partner. A connection should add meaning, not complexity."
       heroImage="/integrations.jpg"
       backgroundBehavior="scroll"
     >
@@ -58,7 +58,7 @@ export default function IntegrationsPage() {
         <h2 className={styles.sectionHeading}>A shared loop</h2>
         <div className={styles.sectionBody}>
           <p>
-            Every partnership keeps responsibilities clear: KIN provides
+            Every partnership keeps responsibilities clear: re.KIN provides
             curation and creative gifting; the partner controls its own
             inventory, payment, shipping, and returns unless a written
             integration says otherwise.
@@ -77,7 +77,7 @@ export default function IntegrationsPage() {
                 <p>{partner.value}</p>
                 <em>EXAMPLE / {partner.example}</em>
                 <Link className={styles.cta} href="/partner-with-kin">
-                  Partner with KIN →
+                  Partner with re.KIN →
                 </Link>
               </article>
             ))}

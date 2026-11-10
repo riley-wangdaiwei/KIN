@@ -122,7 +122,7 @@ export default function WorldCanvas({
           </div>
         )}
         <span className={styles.canvasIndex} aria-hidden="true">
-          KIN / BOARD 001
+          re.KIN / BOARD 001
         </span>
       </div>
     </div>

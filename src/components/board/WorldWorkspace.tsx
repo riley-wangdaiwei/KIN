@@ -231,7 +231,7 @@ export default function WorldWorkspace() {
   if (!isReady && !error) {
     return (
       <main className={styles.loadingBoard} aria-label="Loading your board">
-        <span className={styles.microLabel}>KIN / BOARD</span>
+        <span className={styles.microLabel}>re.KIN / BOARD</span>
       </main>
     );
   }
@@ -254,7 +254,7 @@ export default function WorldWorkspace() {
     <main className={styles.boardApp}>
       <div aria-hidden="true" className={styles.homeBg} />
       <header className={styles.siteHeader}>
-        <Link className={styles.wordmark} href="/" aria-label="KIN home">KIN</Link>
+        <Link className={styles.wordmark} href="/" aria-label="re.KIN home">re.KIN</Link>
         <span className={styles.headerCaption}>A SMALL ARCHIVE OF WHAT MATTERS</span>
         <nav className={styles.homeNav} aria-label="Main navigation">
           <Link href="/how-it-works">HOW IT WORKS</Link>
@@ -344,7 +344,7 @@ export default function WorldWorkspace() {
 
       <section className={styles.storyFeature} aria-labelledby="story-feature-title">
         <header className={styles.storyFeatureHeader}>
-          <span className={styles.microLabel}>KIN / STORIES OF ATTENTION</span>
+          <span className={styles.microLabel}>re.KIN / STORIES OF ATTENTION</span>
           <h2 id="story-feature-title">The Art of Knowing Someone</h2>
           <span className={styles.storyFeatureIndex}>FEATURE / 001—003</span>
         </header>
@@ -456,7 +456,7 @@ export default function WorldWorkspace() {
             aria-describedby="welcome-description"
           >
             <div className={styles.welcomeMeta}>
-              <span className={styles.welcomeKicker}>KIN / AN INVITATION</span>
+              <span className={styles.welcomeKicker}>re.KIN / AN INVITATION</span>
               <span className={styles.welcomeIndex}>01 — 03</span>
             </div>
             <span className={styles.welcomeBarcode} aria-hidden="true">

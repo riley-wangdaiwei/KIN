@@ -4,7 +4,7 @@ import styles from "./site.module.css";
 export default function SiteHeader() {
   return (
     <header className={styles.header}>
-      <Link className={styles.wordmark} href="/" aria-label="KIN home">KIN</Link>
+      <Link className={styles.wordmark} href="/" aria-label="re.KIN home">re.KIN</Link>
       <nav aria-label="Main navigation">
         <Link href="/how-it-works">HOW IT WORKS</Link>
         <Link href="/gifts">GIFTS</Link>

@@ -1,0 +1,22 @@
+.page {
+  min-height: 100vh;
+  padding: clamp(7rem, 12vh, 9rem) var(--kin-page-gutter) 8rem;
+  background: var(--kin-black);
+  color: var(--kin-white);
+}
+
+.eyebrow {
+  margin: 0 0 0.65rem;
+  color: var(--kin-light-gray);
+  font: 400 var(--kin-caption-size)/1.2 var(--kin-micro-mono);
+}
+
+.page h1 {
+  max-width: 14ch;
+  margin: 0 0 2.2rem;
+  font-family: var(--kin-display-serif);
+  font-size: clamp(2.5rem, 5.5vw, 5rem);
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  line-height: 0.9;
+}

@@ -11,7 +11,7 @@
 .playgroundPage {
   min-height: 100vh;
   padding-bottom: 7rem;
-  background: #050505;
+  background: var(--kin-black);
 }
 
 .playgroundPage .textHero {

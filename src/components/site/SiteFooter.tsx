@@ -7,14 +7,14 @@ const links = [
   { href: "/terms", label: "Terms" },
   { href: "/artist-terms", label: "Artist Terms" },
   { href: "/contact", label: "Contact" },
-  { href: "/partner-with-kin", label: "Partner with KIN" },
+  { href: "/partner-with-kin", label: "Partner with re.KIN" },
 ];
 
 export default function SiteFooter() {
   return (
     <footer className={styles.siteFooter}>
       <div className={styles.footerTop}>
-        <Link className={styles.footerMark} href="/">KIN</Link>
+        <Link className={styles.footerMark} href="/">re.KIN</Link>
         <p>Collect what matters. Curate it with care. Give it meaning.</p>
       </div>
       <nav aria-label="Footer navigation" className={styles.footerLinks}>
@@ -23,7 +23,7 @@ export default function SiteFooter() {
         ))}
       </nav>
       <div className={styles.footerBottom}>
-        <span>© {new Date().getFullYear()} KIN</span>
+        <span>© {new Date().getFullYear()} re.KIN</span>
         <span>AN INDEPENDENT CREATIVE GIFTING PROJECT</span>
       </div>
     </footer>

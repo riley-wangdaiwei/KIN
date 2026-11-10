@@ -5,9 +5,9 @@ import styles from "@/components/site/site.module.css";
 export default function PartnerWithKinPage() {
   return (
     <EditorialPage
-      eyebrow="PARTNER WITH KIN / EARLY CONVERSATIONS"
+      eyebrow="PARTNER WITH re.KIN / EARLY CONVERSATIONS"
       title="Bring another kind of meaning."
-      intro="KIN can complement a partner's existing offer with relationship-led curation. Start with a clear hand-off; build more only when it helps both sides."
+      intro="re.KIN can complement a partner's existing offer with relationship-led curation. Start with a clear hand-off; build more only when it helps both sides."
       homepageChrome
     >
       <section className={styles.section}>
@@ -20,19 +20,19 @@ export default function PartnerWithKinPage() {
           <div className={styles.cardGrid}>
             <article className={styles.card}>
               <span className={styles.cardNumber}>DIRECTION / 01</span>
-              <h3>Florist → KIN</h3>
+              <h3>Florist → re.KIN</h3>
               <p>
-                A florist customer can discover KIN after choosing flowers,
+                A florist customer can discover re.KIN after choosing flowers,
                 through a checkout message, order confirmation, or follow-up.
-                The florist sells and fulfills flowers; KIN offers a separate
+                The florist sells and fulfills flowers; re.KIN offers a separate
                 digital creative gift.
               </p>
             </article>
             <article className={styles.card}>
               <span className={styles.cardNumber}>DIRECTION / 02</span>
-              <h3>KIN → florist</h3>
+              <h3>re.KIN → florist</h3>
               <p>
-                A KIN customer can choose flowers as an optional physical
+                A re.KIN customer can choose flowers as an optional physical
                 filling and follow a partner link. The florist handles its
                 own stock, checkout, delivery, and returns.
               </p>
@@ -66,7 +66,7 @@ export default function PartnerWithKinPage() {
             responsibilities require a separate written agreement.
           </p>
           <Link className={styles.cta} href="/contact?topic=partnership">
-            Partner with KIN →
+            Partner with re.KIN →
           </Link>
           <p>For now this opens the contact information page; it does not submit a partnership request.</p>
         </div>

@@ -35,7 +35,7 @@ export default function GiftPackagePage({ gift }: GiftPackagePageProps) {
   return (
     <main className={styles.page}>
       <header className={styles.header}>
-        <Link className={styles.wordmark} href="/" aria-label="KIN home">KIN</Link>
+        <Link className={styles.wordmark} href="/" aria-label="re.KIN home">re.KIN</Link>
         <Link href="/gifts">GIFTS / CATALOG</Link>
       </header>
 
@@ -162,7 +162,7 @@ export default function GiftPackagePage({ gift }: GiftPackagePageProps) {
             <p>
               Your board curation will travel with you. Review your brief, add
               your message. This MVP submits an order request by email, without
-              collecting payment; KIN will confirm price and timing before
+              collecting payment; re.KIN will confirm price and timing before
               accepting the commission.
             </p>
           </div>
@@ -188,7 +188,7 @@ export default function GiftPackagePage({ gift }: GiftPackagePageProps) {
             <h2>Help shape what comes next.</h2>
             <p>
               This is a concept preview. Registering interest is saved only in
-              this browser; it does not contact KIN, reserve a package, or
+              this browser; it does not contact re.KIN, reserve a package, or
               create an order.
             </p>
           </div>

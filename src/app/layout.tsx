@@ -17,7 +17,7 @@ const cormorantGaramond = Cormorant_Garamond({
 });
 
 export const metadata: Metadata = {
-  title: "KIN",
+  title: "re.KIN",
   description: "A place to gather what you love and turn it into thoughtful gifts.",
 };
 
