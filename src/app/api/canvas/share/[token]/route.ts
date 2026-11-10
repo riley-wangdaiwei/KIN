@@ -71,7 +71,7 @@ export async function GET(
     .from("canvas_people")
     .select("id,name,created_at")
     .eq("user_id", shareRow.user_id)
-    .order("created_at", { ascending: true });
+    .order("sort_order", { ascending: true });
   const [peopleResult, unsortedResult] = await Promise.all([
     shareRow.person_id
       ? peopleQuery.eq("id", shareRow.person_id)
@@ -81,7 +81,7 @@ export async function GET(
       .select("id,person_id,related_entry_id,kind,content,storage_path,created_at")
       .eq("user_id", shareRow.user_id)
       .is("person_id", null)
-      .order("created_at", { ascending: true }),
+      .order("sort_order", { ascending: true }),
   ]);
   if (peopleResult.error || unsortedResult.error) {
     return NextResponse.json({ error: "Could not load this shared canvas." }, { status: 500 });
@@ -95,7 +95,7 @@ export async function GET(
         .select("id,person_id,related_entry_id,kind,content,storage_path,created_at")
         .eq("user_id", shareRow.user_id)
         .eq("person_id", person.id)
-        .order("created_at", { ascending: true }),
+        .order("sort_order", { ascending: true }),
     ),
   );
   const entryRows = [

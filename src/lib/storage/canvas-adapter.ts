@@ -89,11 +89,11 @@ export async function loadCanvas(): Promise<GiftingCanvas> {
     supabase
       .from("canvas_people")
       .select("id,name,created_at")
-      .order("created_at", { ascending: true }),
+      .order("sort_order", { ascending: true }),
     supabase
       .from("canvas_entries")
       .select("id,person_id,related_entry_id,kind,content,storage_path,created_at")
-      .order("created_at", { ascending: true }),
+      .order("sort_order", { ascending: true }),
   ]);
   if (peopleResult.error) {
     throw new Error(`Could not load your people: ${peopleResult.error.message}`);
