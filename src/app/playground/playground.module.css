@@ -3,7 +3,7 @@
   height: 640vh;
   background: #050505;
   color: #f4f3ef;
-  font-family: "Prosodic", Arial, Helvetica, sans-serif;
+  font-family: var(--kin-ui-sans);
 }
 
 .sticky {
@@ -17,17 +17,7 @@
   isolation: isolate;
 }
 
-.logo {
-  position: absolute;
-  z-index: 5;
-  top: 1.1rem;
-  left: 1.15rem;
-  width: clamp(6.25rem, 9vw, 8.75rem);
-  aspect-ratio: 2.3;
-}
-.logo img { object-fit: contain; }
-
-.meeting, .login, .lowerLinks button, .sideNav a {
+.sideNav a {
   position: absolute;
   z-index: 5;
   padding: 0;
@@ -36,28 +26,16 @@
   color: inherit;
   cursor: pointer;
   font: inherit;
-  font-size: 0.7rem;
+  font-size: 1rem;
   text-decoration: none;
 }
-.meeting {
-  top: 1.45rem;
-  left: 50%;
-  transform: translateX(1rem);
-  font-family: "Medieval", "Times New Roman", serif;
-  font-size: 0.85rem;
+.sideNav a,
+.ending a {
+  font-family: var(--kin-accent-serif);
+  font-weight: 500;
 }
-.login { top: 1.45rem; right: 1.15rem; }
-.lowerLinks {
-  position: absolute;
-  z-index: 5;
-  bottom: 1.35rem;
-  left: 1.15rem;
-  display: flex;
-  gap: 1.3rem;
-}
-.lowerLinks button { position: static; }
-.meeting:hover, .login:hover, .lowerLinks button:hover, .sideNav a:hover, .ending a:hover { color: #aaa; }
-.meeting:focus-visible, .login:focus-visible, .lowerLinks button:focus-visible, .sideNav a:focus-visible, .ending a:focus-visible, .logo:focus-visible { outline: 1px solid currentColor; outline-offset: 5px; }
+.sideNav a:hover, .ending a:hover { color: #aaa; }
+.sideNav a:focus-visible, .ending a:focus-visible { outline: 1px solid currentColor; outline-offset: 5px; }
 
 .vase {
   position: absolute;
@@ -84,38 +62,66 @@
 .vaseIntro .video, .vaseEnding .video { opacity: 0; }
 .vaseEnding { top: 75%; left: 78%; width: min(33vw, 30rem); }
 
-.opening, .story {
+.story {
   position: absolute;
   z-index: 2;
   top: 50%;
   left: max(5vw, 2rem);
-  width: min(67vw, 63rem);
+  width: min(65vw, 62rem);
   transform: translateY(-50%);
   transition: opacity 450ms ease;
 }
-.opening h1, .story h2 {
+.story h1 {
   margin: 0;
-  font-family: "Medieval", "Times New Roman", Georgia, serif;
-  font-size: clamp(2.8rem, 6.2vw, 7.2rem);
-  font-weight: 400;
-  letter-spacing: -0.045em;
-  line-height: 0.86;
+  font-family: var(--kin-display-serif);
+  font-size: clamp(1.9rem, 3.8vw, 4.3rem);
+  font-weight: 700;
+  letter-spacing: -0.055em;
+  line-height: 0.94;
 }
-.opening h1 span { display: block; max-width: 14ch; }
-.opening h1 span:nth-child(2) { max-width: 12ch; }
-.opening h1 span:nth-child(3) { max-width: 13ch; }
-.story { width: min(61vw, 58rem); }
-.story h2 { max-width: 14ch; }
-.story p {
-  max-width: 49ch;
-  margin: 1.4rem 0 0;
-  font-family: "Prosodic", Arial, Helvetica, sans-serif;
-  font-size: clamp(0.95rem, 1.45vw, 1.25rem);
-  line-height: 1.25;
+.storyContent {
+  width: min(100%, 53rem);
+}
+.storyStep {
+  margin-top: clamp(0.75rem, 1.5vw, 1.25rem);
   animation: appear 500ms ease both;
 }
-.visible { opacity: 1; pointer-events: auto; }
-.hidden { opacity: 0; pointer-events: none; }
+.storyStep > p {
+  max-width: 49ch;
+  margin: 0;
+  font-family: var(--kin-reading-serif);
+  font-size: clamp(1rem, 1.35vw, 1.15rem);
+  font-weight: 300;
+  line-height: 1.35;
+}
+.packageContents {
+  display: grid;
+  margin: 0;
+}
+.packageItem {
+  display: grid;
+  grid-template-columns: minmax(8rem, 11rem) minmax(0, 1fr);
+  gap: 0.45rem 1rem;
+  padding: 0.42rem 0;
+  border-top: 1px solid rgb(255 255 255 / 24%);
+}
+.packageItem dt {
+  color: #f4f3ef;
+  font-family: var(--kin-accent-serif);
+  font-size: 1.05rem;
+  font-weight: 500;
+  line-height: 1.12;
+}
+.packageItem dd {
+  margin: 0;
+  color: #c8c8c8;
+  font-family: var(--kin-reading-serif);
+  font-size: clamp(0.7rem, 1vw, 0.83rem);
+  font-weight: 300;
+  line-height: 1.3;
+}
+.visible { opacity: 1; pointer-events: auto; visibility: visible; }
+.hidden { opacity: 0; pointer-events: none; visibility: hidden; }
 .sideNav {
   position: absolute;
   z-index: 4;
@@ -126,7 +132,7 @@
   transform: translateY(-50%);
   transition: opacity 450ms ease;
 }
-.sideNav a { position: static; justify-self: end; font-size: 0.72rem; }
+.sideNav a { position: static; justify-self: end; font-size: 1.05rem; }
 .ending {
   position: absolute;
   z-index: 3;
@@ -139,30 +145,28 @@
   align-items: baseline;
   gap: 1rem;
   color: inherit;
-  font-family: "Medieval", "Times New Roman", serif;
-  font-size: clamp(1.5rem, 3vw, 3rem);
+  font-family: var(--kin-accent-serif);
+  font-weight: 500;
+  font-size: clamp(1.7rem, 3vw, 3rem);
   text-decoration: none;
 }
-.ending span { font-family: Arial, sans-serif; font-size: 0.8em; }
+.ending span { font-size: 0.8em; }
 
 @keyframes float { 0%, 100% { transform: translateY(-8px); } 50% { transform: translateY(8px); } }
 @keyframes appear { from { opacity: 0; transform: translateY(0.5rem); } to { opacity: 1; transform: translateY(0); } }
 
 @media (max-width: 700px) {
   .sticky { min-height: 38rem; }
-  .logo { top: 0.9rem; left: 0.75rem; width: 6rem; }
-  .meeting { top: 1.1rem; left: 50%; max-width: 8rem; transform: translateX(-15%); font-size: 0.63rem; text-align: center; }
-  .login { top: 1.1rem; right: 0.75rem; font-size: 0.63rem; }
-  .lowerLinks { bottom: 1rem; left: 0.75rem; gap: 0.9rem; }
-  .lowerLinks button { font-size: 0.62rem; }
   .vase { top: 32%; left: 50%; width: 88vw; }
   .vaseEnding { top: 73%; left: 70%; width: 66vw; }
-  .opening, .story { top: 59%; left: 7vw; width: 86vw; transform: translateY(-20%); }
-  .opening h1, .story h2 { font-size: clamp(2.5rem, 11vw, 4.8rem); }
-  .opening h1 span { max-width: 12ch; }
-  .story p { max-width: 38ch; margin-top: 1rem; font-size: 0.92rem; }
-  .sideNav { top: auto; right: 0.8rem; bottom: 4rem; gap: 0.55rem; transform: none; }
-  .sideNav a { font-size: 0.62rem; }
+  .story { top: 54%; left: 7vw; width: 86vw; transform: translateY(-38%); }
+  .story h1 { font-size: clamp(1.8rem, 6.6vw, 2.9rem); }
+  .storyStep > p { font-size: 0.92rem; }
+  .packageItem { grid-template-columns: 6.5rem minmax(0, 1fr); gap: 0.4rem 0.65rem; }
+  .packageItem dt { font-size: 0.98rem; }
+  .packageItem dd { font-size: 0.7rem; }
+  .sideNav { top: auto; right: 0.8rem; bottom: 5.2rem; gap: 0.55rem; transform: none; }
+  .sideNav a { font-size: 0.95rem; }
   .ending { bottom: 17%; left: 7%; max-width: 70vw; }
   .ending a { gap: 0.6rem; font-size: 1.5rem; }
 }
@@ -171,5 +175,5 @@
   .experience *, .experience *::before, .experience *::after { animation: none !important; scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
   .vase .video { display: none; }
   .vase:not(.vaseIntro) .still { opacity: 1; }
-  .opening, .story { transition: none; }
+  .story { transition: none; }
 }

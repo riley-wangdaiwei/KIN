@@ -75,7 +75,7 @@
   margin: 0.25rem 0 0;
   font-family: var(--kin-display-serif);
   font-size: clamp(2rem, 4.5vw, 3.8rem);
-  font-weight: 400;
+  font-weight: 700;
   line-height: 0.85;
   letter-spacing: -0.04em;
 }

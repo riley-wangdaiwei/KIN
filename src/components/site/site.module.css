@@ -4,6 +4,29 @@
   color: var(--kin-white);
 }
 
+:global(body:has(main[data-homepage]) > footer) {
+  display: none;
+}
+
+.playgroundPage {
+  min-height: 100vh;
+  padding-bottom: 7rem;
+  background: #050505;
+}
+
+.playgroundPage .textHero {
+  padding-top: clamp(7rem, 12vh, 9rem);
+}
+
+.playgroundPage .heroCopy {
+  width: min(82vw, 60rem);
+}
+
+.playgroundPage .content {
+  width: min(82vw, 60rem);
+  margin-left: var(--kin-page-gutter);
+}
+
 .imagePage {
   /* Fixed-backdrop variant: the backdrop is a separate fixed layer
      (.fixedBg) so it also works on iOS (background-attachment: fixed
@@ -135,7 +158,7 @@
   margin: 0;
   font-family: var(--kin-display-serif);
   font-size: clamp(2rem, 3.6vw, 3.5rem);
-  font-weight: 400;
+  font-weight: 700;
   line-height: 0.9;
   letter-spacing: -0.04em;
   color: var(--kin-white);
@@ -167,7 +190,7 @@
   margin: 0;
   font-family: var(--kin-display-serif);
   font-size: clamp(1.75rem, 3.1vw, 3rem);
-  font-weight: 400;
+  font-weight: 700;
   line-height: 0.9;
   letter-spacing: -0.035em;
   color: var(--kin-white);
@@ -228,7 +251,7 @@
   margin: 0 0 0.4rem;
   font-family: var(--kin-display-serif);
   font-size: clamp(1.35rem, 2.2vw, 2.1rem);
-  font-weight: 400;
+  font-weight: 700;
   line-height: 0.9;
   color: var(--kin-white);
 }
@@ -257,8 +280,9 @@
   justify-content: flex-start;
   margin-top: 1rem;
   color: var(--kin-white);
-  font-family: var(--kin-ui-sans);
-  font-size: 0.75rem;
+  font-family: var(--kin-accent-serif);
+  font-size: 1.05rem;
+  font-weight: 500;
   text-decoration: none;
   transition: color var(--kin-transition);
 }
@@ -276,15 +300,16 @@
   margin: 2rem 0 0.55rem;
   font-family: var(--kin-display-serif);
   font-size: clamp(1.5rem, 2.4vw, 2.3rem);
-  font-weight: 400;
+  font-weight: 700;
   line-height: 0.9;
   color: var(--kin-white);
 }
 
 .legalCopy h3 {
   margin-bottom: 0.4rem;
-  font-family: var(--kin-ui-sans);
-  font-size: 0.85rem;
+  font-family: var(--kin-accent-serif);
+  font-size: 1.1rem;
+  font-weight: 500;
   color: var(--kin-white);
 }
 
@@ -292,6 +317,7 @@
   margin: 1.3rem 0;
   color: var(--kin-light-gray);
   font-family: var(--kin-reading-serif);
+  font-weight: 300;
 }
 
 .siteFooter {
@@ -373,8 +399,16 @@
     padding-left: 0;
   }
 
+  .playgroundPage .content {
+    width: min(88vw, 60rem);
+  }
+
   .heroCopy {
     width: min(60vw, 55rem);
+  }
+
+  .playgroundPage .heroCopy {
+    width: min(88vw, 60rem);
   }
 
   .siteFooter {

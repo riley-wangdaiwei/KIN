@@ -12,11 +12,11 @@
   --kin-black-panel: rgb(0 0 0 / 94%);
   --kin-white-wash: rgb(255 255 255 / 12%);
 
-  --kin-display-serif: "Times New Roman", "Bodoni MT", Didot, Georgia, serif;
-  --kin-reading-serif: "Times New Roman", Georgia, serif;
-  --kin-micro-mono: "ITC Avant Garde Gothic", "Avant Garde", Futura,
-    "Century Gothic", sans-serif;
-  --kin-ui-sans: Arial, Helvetica, sans-serif;
+  --kin-display-serif: var(--font-montserrat), sans-serif;
+  --kin-reading-serif: var(--font-montserrat), sans-serif;
+  --kin-micro-mono: var(--font-montserrat), sans-serif;
+  --kin-ui-sans: var(--font-montserrat), sans-serif;
+  --kin-accent-serif: var(--font-cormorant-garamond), serif;
 
   --kin-title-cover: clamp(2.8rem, 7vw, 6.5rem);
   --kin-giant-glyph: clamp(12rem, 38vw, 38rem);
@@ -34,6 +34,7 @@
   background: var(--kin-black);
   color: var(--kin-white);
   font-family: var(--kin-ui-sans);
+  font-weight: 300;
   font-size: 14px;
   line-height: 1.35;
 }
@@ -67,7 +68,7 @@ a {
 
 .kin-editorial-title {
   font-family: var(--kin-display-serif);
-  font-weight: 400;
+  font-weight: 700;
   line-height: 0.88;
   letter-spacing: -0.035em;
 }
@@ -150,7 +151,7 @@ a {
   margin: 0 0 0.75rem;
   font-family: var(--kin-display-serif);
   font-size: var(--kin-title-section);
-  font-weight: 400;
+  font-weight: 700;
   line-height: 0.84;
   letter-spacing: -0.035em;
 }
@@ -193,7 +194,7 @@ a {
   margin: 0 0 0.7rem;
   font-family: var(--kin-display-serif);
   font-size: clamp(2rem, 3.8vw, 4.2rem);
-  font-weight: 400;
+  font-weight: 700;
   line-height: 0.82;
   letter-spacing: -0.045em;
 }
@@ -237,7 +238,7 @@ a {
   margin: 0;
   font-family: var(--kin-display-serif);
   font-size: clamp(2rem, 4vw, 4.2rem);
-  font-weight: 400;
+  font-weight: 700;
   line-height: 0.82;
   letter-spacing: -0.04em;
   text-shadow: 0 1px 12px rgb(0 0 0 / 40%);
@@ -268,6 +269,11 @@ a {
   line-height: 1.2;
   text-align: left;
   transition: color var(--kin-transition);
+}
+
+em {
+  font-family: var(--kin-accent-serif);
+  font-weight: 500;
 }
 
 .editorial-button:hover {
@@ -373,7 +379,7 @@ a {
   margin: -0.12em 0 0;
   font-family: var(--kin-display-serif);
   font-size: clamp(2.8rem, 7.3vw, 7rem);
-  font-weight: 400;
+  font-weight: 700;
   line-height: 0.8;
   letter-spacing: -0.06em;
 }
@@ -393,7 +399,7 @@ a {
   margin: 0;
   font-family: var(--kin-display-serif);
   font-size: var(--kin-title-cover);
-  font-weight: 400;
+  font-weight: 700;
   line-height: 0.82;
   letter-spacing: -0.045em;
 }
@@ -662,7 +668,7 @@ a {
   margin: 0;
   font-family: var(--kin-display-serif);
   font-size: var(--kin-title-section);
-  font-weight: 400;
+  font-weight: 700;
   line-height: 0.84;
   letter-spacing: -0.035em;
 }
@@ -889,7 +895,7 @@ a {
   margin: 0;
   font-family: var(--kin-display-serif);
   font-size: var(--kin-title-cover);
-  font-weight: 400;
+  font-weight: 700;
   line-height: 0.8;
   letter-spacing: -0.04em;
 }

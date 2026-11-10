@@ -90,7 +90,7 @@
   max-width: 13ch;
   font-family: var(--kin-display-serif);
   font-size: clamp(1.45rem, 3.2vw, 3.4rem);
-  font-weight: 400;
+  font-weight: 700;
   letter-spacing: -0.045em;
   line-height: 0.9;
 }

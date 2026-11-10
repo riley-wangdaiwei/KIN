@@ -25,6 +25,13 @@ export default function PrivacyPage() {
           can remove that local copy.
         </p>
         <p>
+          If you choose email sign-in, KIN sends your name and email address
+          to Supabase Auth to create or access your account. Supabase stores
+          the email as the account identifier and the name as basic account
+          metadata; its authentication session is kept in your browser so you
+          can return without signing in again.
+        </p>
+        <p>
           If you submit an order request, KIN receives the email address you
           provide, selected package and fillings, Gift Brief, selected board
           materials, personal message, optional recipient name, delivery
@@ -42,9 +49,10 @@ export default function PrivacyPage() {
         <p>
           Order details are used to review and respond to the request. The
           email provider Resend is used to send the request to KIN and a
-          receipt to the buyer. Website hosting and delivery are provided
-          through Vercel. No payment processor, advertising pixels, or
-          analytics service is configured in this preview.
+          receipt to the buyer.           Supabase provides email authentication. Website hosting and
+          delivery are provided through Vercel. No payment processor,
+          advertising pixels, or analytics service is configured in this
+          preview.
         </p>
         <p>
           Order email is retained in KIN&apos;s inbox until staff delete it.

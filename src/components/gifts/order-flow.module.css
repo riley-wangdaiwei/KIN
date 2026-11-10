@@ -49,7 +49,7 @@
   margin: 0.5rem 0;
   font-family: var(--kin-display-serif);
   font-size: clamp(1.7rem, 2.7vw, 2.5rem);
-  font-weight: 400;
+  font-weight: 700;
   line-height: 0.82;
   letter-spacing: -0.045em;
 }
@@ -98,7 +98,7 @@
 .orderAside strong {
   font-family: var(--kin-display-serif);
   font-size: 1.35rem;
-  font-weight: 400;
+  font-weight: 700;
 }
 
 .formPanel {
@@ -117,7 +117,7 @@
   margin: 1rem 0 0.45rem;
   font-family: var(--kin-display-serif);
   font-size: clamp(1.8rem, 3.2vw, 2.8rem);
-  font-weight: 400;
+  font-weight: 700;
   line-height: 0.86;
   letter-spacing: -0.04em;
 }
@@ -149,7 +149,7 @@
   margin: 0;
   font-family: var(--kin-display-serif);
   font-size: 1.5rem;
-  font-weight: 400;
+  font-weight: 700;
   line-height: 0.95;
 }
 

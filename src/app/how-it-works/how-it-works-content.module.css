@@ -82,9 +82,9 @@
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
   color: var(--kin-white);
-  font-family: var(--kin-ui-sans);
-  font-size: clamp(1.025rem, 1.31vw, 1.19rem);
-  font-weight: 700;
+  font-family: var(--kin-accent-serif);
+  font-size: clamp(1.15rem, 1.45vw, 1.35rem);
+  font-weight: 500;
   line-height: 1.2;
   text-decoration: none;
 }
@@ -110,7 +110,7 @@
   margin: 0;
   font-family: var(--kin-display-serif);
   font-size: clamp(2rem, 4.4vw, 4rem);
-  font-weight: 400;
+  font-weight: 700;
   letter-spacing: -0.045em;
   line-height: 0.92;
 }
@@ -187,6 +187,7 @@
 .cardTitle {
   font-family: var(--kin-display-serif);
   font-size: clamp(1.8rem, 3.8vw, 3.4rem);
+  font-weight: 700;
   letter-spacing: -0.035em;
   line-height: 0.92;
 }

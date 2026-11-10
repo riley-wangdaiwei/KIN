@@ -3,36 +3,81 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { giftPackages } from "@/data/gifts";
 import styles from "./playground.module.css";
 
-const chapters = [
+const twoPlaces = giftPackages.find((gift) => gift.slug === "two-places-one-sky");
+
+if (!twoPlaces) {
+  throw new Error('The "Two Places, One Sky" gift package is missing.');
+}
+
+type StoryStep = {
+  body?: string;
+  rows?: { label: string; description: string }[];
+};
+
+const chapters: { title: string; steps: StoryStep[] }[] = [
   {
     title: "less generic gifting",
-    lines: [
-      "Tell us who the gift is for.",
-      "Meet an artist who fits them.",
-      "Shape their stories into a gift direction.",
-      "Choose what the gift becomes.",
+    steps: [
+      { body: "Tell us who the gift is for." },
+      { body: "Meet an artist who fits them." },
     ],
   },
   {
     title: "more oddly specific art about your favorite people",
-    lines: [
-      "If your friend collects small curiosities → an illustrated cabinet, a poem, and a note about how they see the world.",
-      "If two people share a history across places → a paired map, a location postcard, and a message between the two places.",
+    steps: [
+      {
+        rows: [
+          {
+            label: "Hero gift",
+            description: "The main made-for-them artwork or creation.",
+          },
+          {
+            label: "Fillings",
+            description: "Small companion works selected to deepen the gift.",
+          },
+          {
+            label: "Personal message",
+            description: "Your words, placed where the recipient will find them.",
+          },
+          {
+            label: "README guide",
+            description: "A practical note on opening, saving, or using the gift.",
+          },
+          {
+            label: "Artist's process note",
+            description: "A brief account of the choices behind the finished work.",
+          },
+        ],
+      },
+      {
+        rows: [
+          { label: "Hero gift", description: twoPlaces.heroGift },
+          { label: "Fillings", description: twoPlaces.fillings.join(" ") },
+          { label: "Personal message", description: twoPlaces.personalMessage },
+          { label: "README guide", description: twoPlaces.readmeGuide.join(" ") },
+          {
+            label: "Artist's process note",
+            description: twoPlaces.artistProcessNote,
+          },
+        ],
+      },
     ],
   },
   {
     title: "a more personal identity for the way you give",
-    lines: [
-      "Your way of giving, made personal. After partnering with us and curating many gifts,",
-      "you develop your own gifting style: a way of noticing what matters and turning it into something thoughtful.",
-      "Once that style takes shape, you can use it to gift new people directly.",
+    steps: [
+      {
+        body: "Partner with KIN across several gifts, and develop a way of noticing what matters to each person.",
+      },
+      {
+        body: "Think of it as collaborating with artists to shape your own identity: not just a personal style, but artists you keep coming back to. Once that way of noticing is yours, you can carry it into gifts for people you haven't curated with us yet.",
+      },
     ],
   },
 ];
-
-const cutPoints = [0.12, 0.4, 0.65, 0.9, 1];
 
 export default function PlaygroundExperience() {
   const experienceRef = useRef<HTMLElement>(null);
@@ -79,59 +124,103 @@ export default function PlaygroundExperience() {
     };
   }, []);
 
-  const activeChapter = progress < cutPoints[0] ? -1 : progress < cutPoints[1] ? 0 : progress < cutPoints[2] ? 1 : progress < cutPoints[3] ? 2 : -1;
-  const showEnding = progress >= cutPoints[3];
-  const intro = progress < cutPoints[0];
+  const activeChapter =
+    progress < 0.3 ? 0 : progress < 0.6 ? 1 : progress < 0.9 ? 2 : -1;
+  const showEnding = progress >= 0.9;
   const sceneText = activeChapter >= 0 ? chapters[activeChapter] : null;
-  const chapterProgress = activeChapter === 0
-    ? (progress - cutPoints[0]) / (cutPoints[1] - cutPoints[0])
-    : activeChapter === 1
-      ? (progress - cutPoints[1]) / (cutPoints[2] - cutPoints[1])
-      : (progress - cutPoints[2]) / (cutPoints[3] - cutPoints[2]);
-  const lineIndex = sceneText ? (reducedMotion ? sceneText.lines.length - 1 : Math.min(sceneText.lines.length - 1, Math.floor(Math.max(0, chapterProgress) * sceneText.lines.length))) : -1;
+  const chapterProgress =
+    sceneText === null
+      ? 0
+      : (progress - activeChapter * 0.3) / 0.3;
+  const stepIndex = reducedMotion
+    ? sceneText?.steps.length ?? 0
+    : Math.min(1, Math.floor(Math.max(0, chapterProgress) * 2));
+  const visibleSteps = sceneText
+    ? reducedMotion
+      ? sceneText.steps
+      : [sceneText.steps[stepIndex]]
+    : [];
 
   return (
     <section className={styles.experience} ref={experienceRef}>
       <div className={styles.sticky}>
-        <Link className={styles.logo} href="/" aria-label="re.KIN home">
-          <Image src="/rekin-hero/rekin-logo.png" alt="re.KIN" fill priority sizes="140px" />
-        </Link>
-        <button className={styles.meeting} type="button">book a free curation meeting</button>
-        <button className={styles.login} type="button">login</button>
-        <nav className={styles.lowerLinks} aria-label="Site information">
-          <button type="button">privacy policy</button>
-          <button type="button">about</button>
-        </nav>
-
-        <div className={`${styles.vase} ${intro ? styles.vaseIntro : ""} ${showEnding ? styles.vaseEnding : ""}`} aria-hidden="true">
-          <Image className={styles.still} src="/rekin-hero/part1.jpg" alt="" fill sizes="(max-width: 700px) 75vw, 44vw" priority />
-          {!reducedMotion && <video ref={videoRef} className={styles.video} src="/rekin-hero/hero.mp4" poster="/rekin-hero/hero-poster.jpg" muted playsInline preload="metadata" aria-hidden="true" />}
+        <div
+          className={`${styles.vase} ${activeChapter === 0 ? styles.vaseIntro : ""} ${showEnding ? styles.vaseEnding : ""}`}
+          aria-hidden="true"
+        >
+          <Image
+            className={styles.still}
+            src="/rekin-hero/part1.jpg"
+            alt=""
+            fill
+            sizes="(max-width: 700px) 75vw, 44vw"
+            priority
+          />
+          {!reducedMotion && (
+            <video
+              ref={videoRef}
+              className={styles.video}
+              src="/rekin-hero/hero.mp4"
+              poster="/rekin-hero/hero-poster.jpg"
+              muted
+              playsInline
+              preload="metadata"
+              aria-hidden="true"
+            />
+          )}
         </div>
 
-        <div className={`${styles.opening} ${intro ? styles.visible : styles.hidden}`} aria-hidden={!intro}>
-          <h1><span>less generic gifting,</span><span>more oddly specific art about your favorite people,</span><span>a more personal identity for the way you give.</span></h1>
+        <div
+          className={`${styles.story} ${sceneText ? styles.visible : styles.hidden}`}
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          {sceneText && (
+            <>
+              <h1>{sceneText.title}</h1>
+              <div className={styles.storyContent}>
+                {visibleSteps.map((step, index) => (
+                  <div
+                    className={styles.storyStep}
+                    key={`${activeChapter}-${stepIndex}-${index}`}
+                  >
+                    {step.body && <p>{step.body}</p>}
+                    {step.rows && (
+                      <dl className={styles.packageContents}>
+                        {step.rows.map((row) => (
+                          <div className={styles.packageItem} key={row.label}>
+                            <dt>{row.label}</dt>
+                            <dd>{row.description}</dd>
+                          </div>
+                        ))}
+                      </dl>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </div>
 
-        <div className={`${styles.story} ${sceneText ? styles.visible : styles.hidden}`} aria-live="polite">
-          {sceneText && <>
-            <h2>{sceneText.title}</h2>
-            <p key={`${activeChapter}-${lineIndex}`}>{sceneText.lines.slice(0, lineIndex + 1).slice(-2).join(" ")}</p>
-          </>}
-        </div>
-
-        <nav className={`${styles.sideNav} ${activeChapter >= 1 || showEnding ? styles.visible : styles.hidden}`} aria-label="Explore KIN">
+        <nav
+          className={`${styles.sideNav} ${activeChapter >= 1 || showEnding ? styles.visible : styles.hidden}`}
+          aria-label="Explore KIN"
+        >
           <Link href="/artists">artists and partners</Link>
-          {(activeChapter >= 2 || showEnding) && <Link href="/my-gifting-identity">my gifting identity</Link>}
+          {(activeChapter >= 2 || showEnding) && (
+            <Link href="/my-gifting-identity">My Gifting Identity</Link>
+          )}
         </nav>
 
-        <div className={`${styles.ending} ${showEnding ? styles.visible : styles.hidden}`}>
-          <Link href="/my-gifting-identity#start-a-project">Tell us who you have in mind. <span aria-hidden="true">↗</span></Link>
+        <div
+          className={`${styles.ending} ${showEnding ? styles.visible : styles.hidden}`}
+        >
+          <Link href="/my-gifting-identity#start-a-project">
+            Tell us who you have in mind.{" "}
+            <span aria-hidden="true">↗</span>
+          </Link>
         </div>
       </div>
     </section>
   );
 }
-
-
-
-

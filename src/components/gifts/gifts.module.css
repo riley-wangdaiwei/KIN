@@ -47,7 +47,7 @@
   margin: 0.35rem 0 0;
   font-family: var(--kin-display-serif);
   font-size: clamp(2rem, 3.6vw, 3.5rem);
-  font-weight: 400;
+  font-weight: 700;
   line-height: 0.9;
   letter-spacing: -0.04em;
 }
@@ -120,7 +120,7 @@
   margin: 0;
   font-family: var(--kin-display-serif);
   font-size: clamp(1.7rem, 3.4vw, 3rem);
-  font-weight: 400;
+  font-weight: 700;
   line-height: 0.9;
   color: var(--kin-white);
 }
@@ -196,7 +196,7 @@
   max-width: 12ch;
   font-family: var(--kin-display-serif);
   font-size: clamp(1.7rem, 3.4vw, 3rem);
-  font-weight: 400;
+  font-weight: 700;
   line-height: 0.87;
   letter-spacing: -0.03em;
 }
@@ -219,7 +219,7 @@
   margin: 0.3rem 0 0.25rem;
   font-family: var(--kin-display-serif);
   font-size: clamp(1.4rem, 2.3vw, 2rem);
-  font-weight: 400;
+  font-weight: 700;
   line-height: 0.9;
   color: var(--kin-white);
 }

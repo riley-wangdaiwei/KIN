@@ -111,7 +111,7 @@
   margin: 0.3rem 0 0.5rem;
   font-family: var(--kin-display-serif);
   font-size: clamp(1.9rem, 3.6vw, 3.5rem);
-  font-weight: 400;
+  font-weight: 700;
   line-height: 0.88;
   letter-spacing: -0.04em;
   color: var(--kin-white);
@@ -383,7 +383,7 @@
   margin: 0 0 0.55rem;
   font-family: var(--kin-display-serif);
   font-size: 1.4rem;
-  font-weight: 400;
+  font-weight: 700;
   line-height: 0.95;
 }
 
@@ -560,7 +560,7 @@
   margin: 0;
   font-family: var(--kin-display-serif);
   font-size: clamp(2.2rem, 4.5vw, 4.4rem);
-  font-weight: 400;
+  font-weight: 700;
   line-height: 0.8;
   letter-spacing: -0.045em;
 }
@@ -591,7 +591,7 @@
   margin: 0.35rem 0 0;
   font-family: var(--kin-display-serif);
   font-size: clamp(1.6rem, 3.2vw, 3.3rem);
-  font-weight: 400;
+  font-weight: 700;
   line-height: 0.9;
   letter-spacing: -0.025em;
 }
@@ -696,7 +696,7 @@
   margin: 0.3rem 0 0;
   font-family: var(--kin-display-serif);
   font-size: clamp(1.9rem, 3.8vw, 3.8rem);
-  font-weight: 400;
+  font-weight: 700;
   line-height: 0.82;
   letter-spacing: -0.04em;
 }
@@ -766,7 +766,7 @@
   margin: -0.3rem 0 0.8rem;
   font-family: var(--kin-display-serif);
   font-size: clamp(2.2rem, 5.7vw, 4.2rem);
-  font-weight: 400;
+  font-weight: 700;
   line-height: 0.8;
   letter-spacing: -0.045em;
 }
