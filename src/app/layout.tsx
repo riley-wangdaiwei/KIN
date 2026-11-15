@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { Comfortaa } from "next/font/google";
+import localFont from "next/font/local";
 import SiteFooter from "@/components/site/SiteFooter";
 import "./globals.css";
 
-const comfortaa = Comfortaa({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "700"],
+const comfortaa = localFont({
+  src: "./fonts/Comfortaa-VariableFont_wght.ttf",
+  weight: "300 700",
   variable: "--font-comfortaa",
 });
 
