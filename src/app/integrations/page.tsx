@@ -51,7 +51,7 @@ export default function IntegrationsPage() {
       eyebrow="INTEGRATIONS / PARTNER NETWORK"
       title="Good gifts travel together."
       intro="re.KIN can begin as a referral link and grow into a widget or API when it serves the partner. A connection should add meaning, not complexity."
-      heroImage="/integrations.jpg"
+      heroImage="/purple-paper.png"
       backgroundBehavior="scroll"
     >
       <section className={styles.section}>

@@ -4,13 +4,13 @@
   color: var(--kin-white);
 }
 
-/* Fixed full-page backdrop: home.jpg stays put, all content scrolls over it.
+/* Fixed full-page backdrop: purple paper stays put, all content scrolls over it.
    (Separate layer because background-attachment: fixed is ignored on iOS.) */
 .homeBg {
   position: fixed;
   inset: 0;
   z-index: -1;
-  background: url("/home.jpg") center / cover no-repeat;
+  background: #6a4fc6 url("/purple-paper.png") center / cover no-repeat;
   pointer-events: none;
 }
 

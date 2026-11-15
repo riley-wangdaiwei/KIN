@@ -18,7 +18,7 @@ export default function HowItWorksPage() {
           aria-hidden="true"
           alt=""
           className={siteStyles.tallBg}
-          src="/how-it-works.jpg"
+          src="/purple-paper.png"
         />
         <div className={styles.pageContent}>
           <HowItWorksContent />

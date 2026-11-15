@@ -15,9 +15,7 @@
   position: fixed;
   inset: 0;
   z-index: -1;
-  background:
-    linear-gradient(var(--kin-overlay), var(--kin-overlay)),
-    url("/home.jpg") center / cover no-repeat;
+  background: #6a4fc6 url("/purple-paper.png") center / cover no-repeat;
   pointer-events: none;
 }
 
@@ -167,7 +165,7 @@
   justify-content: space-between;
   gap: 2rem;
   padding: 3rem var(--kin-page-gutter) 2.5rem;
-  background: rgb(3 8 13 / 88%);
+  background: transparent;
 }
 
 .footerWordmark {

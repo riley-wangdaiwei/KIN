@@ -1,19 +1,12 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Montserrat } from "next/font/google";
+import { Comfortaa } from "next/font/google";
 import SiteFooter from "@/components/site/SiteFooter";
 import "./globals.css";
 
-const montserrat = Montserrat({
+const comfortaa = Comfortaa({
   subsets: ["latin"],
   weight: ["300", "400", "500", "700"],
-  variable: "--font-montserrat",
-});
-
-const cormorantGaramond = Cormorant_Garamond({
-  subsets: ["latin"],
-  weight: ["400", "500"],
-  style: ["normal", "italic"],
-  variable: "--font-cormorant-garamond",
+  variable: "--font-comfortaa",
 });
 
 export const metadata: Metadata = {
@@ -27,11 +20,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${montserrat.variable} ${cormorantGaramond.variable}`}
-    >
+    <html lang="en" className={comfortaa.variable}>
       <body>
+        <div aria-hidden="true" className="kin-paper-bg" />
         {children}
         <SiteFooter />
       </body>

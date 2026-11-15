@@ -12,11 +12,11 @@
   --kin-black-panel: rgb(0 0 0 / 94%);
   --kin-white-wash: rgb(255 255 255 / 12%);
 
-  --kin-display-serif: var(--font-montserrat), sans-serif;
-  --kin-reading-serif: var(--font-montserrat), sans-serif;
-  --kin-micro-mono: var(--font-montserrat), sans-serif;
-  --kin-ui-sans: var(--font-montserrat), sans-serif;
-  --kin-accent-serif: var(--font-cormorant-garamond), serif;
+  --kin-display-serif: var(--font-comfortaa), sans-serif;
+  --kin-reading-serif: var(--font-comfortaa), sans-serif;
+  --kin-micro-mono: var(--font-comfortaa), sans-serif;
+  --kin-ui-sans: var(--font-comfortaa), sans-serif;
+  --kin-accent-serif: var(--font-comfortaa), sans-serif;
 
   --kin-title-cover: clamp(2.8rem, 7vw, 6.5rem);
   --kin-giant-glyph: clamp(12rem, 38vw, 38rem);
@@ -31,7 +31,7 @@
   --kin-grid-columns: 12;
   --kin-transition: 180ms ease-out;
 
-  background: var(--kin-black);
+  background: #6a4fc6;
   color: var(--kin-white);
   font-family: var(--kin-ui-sans);
   font-weight: 300;
@@ -68,7 +68,15 @@
 
 html {
   min-width: 320px;
-  background: var(--kin-black);
+  background: #6a4fc6;
+}
+
+.kin-paper-bg {
+  position: fixed;
+  z-index: -1;
+  inset: 0;
+  background: #6a4fc6 url("/purple-paper.png") center / cover no-repeat;
+  pointer-events: none;
 }
 
 body {
@@ -373,15 +381,13 @@ em {
 
 .design-preview__cover-image {
   z-index: 0;
-  object-fit: cover;
-  object-position: center 52%;
-  filter: grayscale(1) contrast(1.05);
+  background: #6a4fc6 url("/purple-paper.png") center / cover no-repeat;
 }
 
 .design-preview__cover-wash {
   position: absolute;
   z-index: 1;
-  background: rgb(0 0 0 / 36%);
+  background: transparent;
   inset: 0;
   pointer-events: none;
 }
@@ -1091,7 +1097,7 @@ em {
 .design-preview__cover-image {
   position: absolute;
   inset: 0;
-  background: url("/home.jpg") center / cover no-repeat;
+  background: #6a4fc6 url("/purple-paper.png") center / cover no-repeat;
 }
 
 .design-preview__masthead {

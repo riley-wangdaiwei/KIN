@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { giftPackages } from "@/data/gifts";
 import { artistPartnerNames, identityExamples } from "@/data/hover-lists";
+import JarScroll from "@/components/site/JarScroll";
 import HoverRingMenu from "@/components/site/HoverRingMenu";
 import styles from "./playground.module.css";
 
@@ -100,9 +101,14 @@ const openingTitles = [
   "a more personal identity for the way you give",
 ];
 
+const headlineImages = [
+  { src: "/rekin-line1-transparent.png", width: 3200, height: 640 },
+  { src: "/rekin-line2-transparent.png", width: 7040, height: 640 },
+  { src: "/rekin-line3-transparent.png", width: 6400, height: 640 },
+];
+
 export default function PlaygroundExperience() {
   const experienceRef = useRef<HTMLElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
   const [progress, setProgress] = useState(0);
   const [reducedMotion, setReducedMotion] = useState(false);
 
@@ -121,13 +127,6 @@ export default function PlaygroundExperience() {
       const distance = Math.max(1, node.offsetHeight - window.innerHeight);
       const next = Math.min(1, Math.max(0, -rect.top / distance));
       setProgress(next);
-
-      const video = videoRef.current;
-      if (video && Number.isFinite(video.duration) && video.duration > 0) {
-        const videoProgress = Math.min(1, Math.max(0, (next - 0.1) / 0.8));
-        const target = videoProgress * Math.max(0, video.duration - 0.05);
-        if (Math.abs(video.currentTime - target) > 0.035) video.currentTime = target;
-      }
     };
     const onScroll = () => {
       if (!ticking) {
@@ -178,33 +177,22 @@ export default function PlaygroundExperience() {
           className={`${styles.vase} ${isOpening || activeChapter === 0 ? styles.vaseIntro : ""} ${showEnding ? styles.vaseEnding : ""}`}
           aria-hidden="true"
         >
-          <Image
-            className={styles.still}
-            src="/rekin-hero/part1.jpg"
-            alt=""
-            fill
-            sizes="(max-width: 700px) 75vw, 44vw"
-            priority
-          />
-          {!reducedMotion && (
-            <video
-              ref={videoRef}
-              className={styles.video}
-              src="/rekin-hero/hero.mp4"
-              poster="/rekin-hero/hero-poster.jpg"
-              muted
-              playsInline
-              preload="metadata"
-              aria-hidden="true"
-            />
-          )}
+          <JarScroll progress={progress} reducedMotion={reducedMotion} />
         </div>
 
         {isOpening ? (
           <div className={`${styles.openingTitles} ${styles.visible}`}>
             <h1>
-              {openingTitles.map((title) => (
-                <span key={title}>{title}</span>
+              {openingTitles.map((title, index) => (
+                <Image
+                  className={`${styles.headlineImage} ${index === 0 ? styles.headlineImageFirst : ""}`}
+                  key={title}
+                  src={headlineImages[index].src}
+                  alt={title}
+                  width={headlineImages[index].width}
+                  height={headlineImages[index].height}
+                  priority
+                />
               ))}
             </h1>
           </div>
@@ -216,7 +204,15 @@ export default function PlaygroundExperience() {
           >
             {sceneText && (
               <>
-                <h2>{sceneText.title}</h2>
+                <h2>
+                  <Image
+                    className={`${styles.headlineImage} ${activeChapter === 0 ? styles.headlineImageFirst : ""}`}
+                    src={headlineImages[activeChapter].src}
+                    alt={sceneText.title}
+                    width={headlineImages[activeChapter].width}
+                    height={headlineImages[activeChapter].height}
+                  />
+                </h2>
                 <div className={styles.storyContent}>
                   {visibleSteps.map((step, index) => (
                     <div

@@ -1,7 +1,7 @@
 .experience {
   position: relative;
   height: 640vh;
-  background: var(--kin-black);
+  background: transparent;
   color: #f4f3ef;
   font-family: var(--kin-ui-sans);
 }
@@ -13,7 +13,7 @@
   height: 100svh;
   min-height: 34rem;
   overflow: hidden;
-  background: var(--kin-black);
+  background: transparent;
   isolation: isolate;
 }
 
@@ -42,25 +42,13 @@
   z-index: 1;
   top: 50%;
   left: 58%;
-  width: min(53vw, 49rem);
-  aspect-ratio: 2.24;
+  width: min(38vw, 30rem);
+  aspect-ratio: 630 / 656;
   transform: translate(-50%, -50%);
   transition: width 700ms ease, top 700ms ease, left 700ms ease, opacity 450ms ease;
 }
-.vase::after {
-  position: absolute;
-  inset: 0;
-  content: "";
-  pointer-events: none;
-  background: radial-gradient(ellipse at center, transparent 55%, var(--kin-black) 100%);
-}
-.still, .video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
-.still { animation: float 6s ease-in-out infinite; }
-.video { opacity: 0; }
-.vase:not(.vaseIntro):not(.vaseEnding) .still { opacity: 0; }
-.vase:not(.vaseIntro):not(.vaseEnding) .video { opacity: 1; }
-.vaseIntro .video, .vaseEnding .video { opacity: 0; }
-.vaseEnding { top: 75%; left: 78%; width: min(33vw, 30rem); }
+.vase canvas { display: block; width: 100%; height: 100%; }
+.vaseEnding { top: 75%; left: 78%; width: min(22vw, 18rem); }
 
 .story {
   position: absolute;
@@ -73,11 +61,20 @@
 }
 .story h2 {
   margin: 0;
-  font-family: var(--kin-display-serif);
-  font-size: clamp(1.9rem, 3.8vw, 4.3rem);
-  font-weight: 700;
-  letter-spacing: -0.055em;
-  line-height: 0.94;
+}
+.headlineImage {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.headlineImageFirst { width: 45%; }
+.openingTitles h1 .headlineImage:not(.headlineImageFirst) { width: 100%; }
+.story h2 .headlineImage:not(.headlineImageFirst) { width: 100%; }
+.story h2 .headlineImageFirst { width: 45%; }
+.openingTitles h1 {
+  display: grid;
+  gap: 0.06em;
+  margin: 0;
 }
 .openingTitles {
   position: absolute;
@@ -87,16 +84,6 @@
   width: min(65vw, 62rem);
   transform: translateY(-50%);
   transition: opacity 450ms ease;
-}
-.openingTitles h1 {
-  display: grid;
-  gap: 0.06em;
-  margin: 0;
-  font-family: var(--kin-display-serif);
-  font-size: clamp(1.9rem, 3.8vw, 4.3rem);
-  font-weight: 700;
-  letter-spacing: -0.055em;
-  line-height: 0.94;
 }
 .storyContent {
   width: min(100%, 53rem);
@@ -109,7 +96,7 @@
 .packageItem dd {
   max-width: 49ch;
   margin: 0;
-  font-family: var(--font-montserrat), sans-serif;
+  font-family: var(--kin-ui-sans);
   font-size: clamp(1rem, 1.35vw, 1.15rem);
   font-weight: 300;
   line-height: 1.35;
@@ -181,7 +168,6 @@
   text-decoration: none;
 }
 
-@keyframes float { 0%, 100% { transform: translateY(-8px); } 50% { transform: translateY(8px); } }
 @keyframes appear { from { opacity: 0; transform: translateY(0.5rem); } to { opacity: 1; transform: translateY(0); } }
 
 @media (max-width: 700px) {
@@ -190,8 +176,6 @@
   .vaseEnding { top: 73%; left: 70%; width: 66vw; }
   .story { top: 54%; left: 7vw; width: 86vw; transform: translateY(-38%); }
   .openingTitles { top: 54%; left: 7vw; width: 86vw; transform: translateY(-38%); }
-  .story h2,
-  .openingTitles h1 { font-size: clamp(1.8rem, 6.6vw, 2.9rem); }
   .storyStep > p { font-size: 0.92rem; }
   .storyStep > .introduction { font-size: 1.1rem; }
   .packageItem { grid-template-columns: 6.5rem minmax(0, 1fr); gap: 0.4rem 0.65rem; }
@@ -205,7 +189,5 @@
 
 @media (prefers-reduced-motion: reduce) {
   .experience *, .experience *::before, .experience *::after { animation: none !important; scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
-  .vase .video { display: none; }
-  .vase:not(.vaseIntro) .still { opacity: 1; }
   .story { transition: none; }
 }

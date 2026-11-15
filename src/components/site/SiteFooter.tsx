@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import styles from "./site.module.css";
 
@@ -14,7 +15,9 @@ export default function SiteFooter() {
   return (
     <footer className={styles.siteFooter}>
       <div className={styles.footerTop}>
-        <Link className={styles.footerMark} href="/">re.KIN</Link>
+        <Link className={styles.footerMark} href="/" aria-label="re.KIN home">
+          <Image src="/rekin-logo-transparent.png" alt="" width={2512} height={734} />
+        </Link>
         <p>Collect what matters. Curate it with care. Give it meaning.</p>
       </div>
       <nav aria-label="Footer navigation" className={styles.footerLinks}>

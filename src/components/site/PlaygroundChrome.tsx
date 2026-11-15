@@ -213,7 +213,7 @@ export default function PlaygroundChrome({
       {!overlaysOnly && <header className={styles.header}>
         <Link className={styles.logo} href="/" aria-label="re.KIN home">
           <Image
-            src="/rekin-hero/rekin-logo.png"
+            src="/rekin-logo-transparent.png"
             alt=""
             fill
             priority

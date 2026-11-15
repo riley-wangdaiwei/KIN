@@ -1,10 +1,13 @@
+import Image from "next/image";
 import Link from "next/link";
 import styles from "./site.module.css";
 
 export default function SiteHeader() {
   return (
     <header className={styles.header}>
-      <Link className={styles.wordmark} href="/" aria-label="re.KIN home">re.KIN</Link>
+      <Link className={styles.wordmark} href="/" aria-label="re.KIN home">
+        <Image src="/rekin-logo-transparent.png" alt="" width={2512} height={734} />
+      </Link>
       <nav aria-label="Main navigation">
         <Link href="/how-it-works">HOW IT WORKS</Link>
         <Link href="/gifts">GIFTS</Link>
