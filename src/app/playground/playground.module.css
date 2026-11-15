@@ -69,13 +69,12 @@
 }
 .openingHeadlineImage {
   display: block;
-  width: 246%;
-  max-width: none;
+  width: min(246%, 90vw);
   height: auto;
 }
-.story h2 .headlineChapter1 { width: 203%; }
-.story h2 .headlineChapter2 { width: 169%; }
-.story h2 .headlineChapter3 { width: 201%; }
+.story h2 .headlineChapter1 { width: min(203%, 90vw); }
+.story h2 .headlineChapter2 { width: min(169%, 90vw); }
+.story h2 .headlineChapter3 { width: min(201%, 90vw); }
 .openingTitles h1 {
   display: grid;
   gap: 0.06em;
