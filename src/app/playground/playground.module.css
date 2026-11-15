@@ -67,10 +67,15 @@
   width: 100%;
   height: auto;
 }
-.headlineImageFirst { width: 45%; }
-.openingTitles h1 .headlineImage:not(.headlineImageFirst) { width: 100%; }
-.story h2 .headlineImage:not(.headlineImageFirst) { width: 100%; }
-.story h2 .headlineImageFirst { width: 45%; }
+.openingHeadlineImage {
+  display: block;
+  width: 246%;
+  max-width: none;
+  height: auto;
+}
+.story h2 .headlineChapter1 { width: 203%; }
+.story h2 .headlineChapter2 { width: 169%; }
+.story h2 .headlineChapter3 { width: 201%; }
 .openingTitles h1 {
   display: grid;
   gap: 0.06em;

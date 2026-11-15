@@ -96,16 +96,17 @@ const chapters: { title: string; steps: StoryStep[] }[] = [
   },
 ];
 
-const openingTitles = [
-  "less generic gifting",
-  "more oddly specific art about your favorite people",
-  "a more personal identity for the way you give",
-];
+const openingHeadline = {
+  src: "/rekin-headline-white.png",
+  width: 4067,
+  height: 1393,
+  alt: "Less generic gifting, more oddly specific art about your favorite people, and a more personal identity for the way you give.",
+};
 
-const headlineImages = [
-  { src: "/rekin-line1-transparent.png", width: 3200, height: 640 },
-  { src: "/rekin-line2-transparent.png", width: 7040, height: 640 },
-  { src: "/rekin-line3-transparent.png", width: 6400, height: 640 },
+const sentenceImages = [
+  { src: "/rekin-sentence1-white.png", width: 2589, height: 345 },
+  { src: "/rekin-sentence2-white.png", width: 3764, height: 607 },
+  { src: "/rekin-sentence3-white.png", width: 4067, height: 607 },
 ];
 
 export default function PlaygroundExperience() {
@@ -193,17 +194,14 @@ export default function PlaygroundExperience() {
         {isOpening ? (
           <div className={`${styles.openingTitles} ${styles.visible}`}>
             <h1>
-              {openingTitles.map((title, index) => (
-                <Image
-                  className={`${styles.headlineImage} ${index === 0 ? styles.headlineImageFirst : ""}`}
-                  key={title}
-                  src={headlineImages[index].src}
-                  alt={title}
-                  width={headlineImages[index].width}
-                  height={headlineImages[index].height}
-                  priority
-                />
-              ))}
+              <Image
+                className={styles.openingHeadlineImage}
+                src={openingHeadline.src}
+                alt={openingHeadline.alt}
+                width={openingHeadline.width}
+                height={openingHeadline.height}
+                priority
+              />
             </h1>
           </div>
         ) : (
@@ -216,11 +214,11 @@ export default function PlaygroundExperience() {
               <>
                 <h2>
                   <Image
-                    className={`${styles.headlineImage} ${activeChapter === 0 ? styles.headlineImageFirst : ""}`}
-                    src={headlineImages[activeChapter].src}
+                    className={`${styles.headlineImage} ${styles[`headlineChapter${activeChapter + 1}`]}`}
+                    src={sentenceImages[activeChapter].src}
                     alt={sceneText.title}
-                    width={headlineImages[activeChapter].width}
-                    height={headlineImages[activeChapter].height}
+                    width={sentenceImages[activeChapter].width}
+                    height={sentenceImages[activeChapter].height}
                   />
                 </h2>
                 <div className={styles.storyContent}>
