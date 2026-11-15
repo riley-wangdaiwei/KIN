@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
+import type { User } from "@supabase/supabase-js";
 import { getBrowserSupabase } from "@/lib/supabase/browser";
 import styles from "./playground-chrome.module.css";
 
@@ -34,6 +35,31 @@ export default function PlaygroundChrome({
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState("");
   const [sending, setSending] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+
+  const metadataName = user?.user_metadata?.name;
+  const displayName =
+    typeof metadataName === "string" && metadataName !== ""
+      ? metadataName
+      : (user?.email?.split("@")[0] ?? "");
+
+  // Create the browser Supabase client on mount so a session arriving in the
+  // URL hash (magic-link sign-in) is picked up and stored, then track it.
+  useEffect(() => {
+    const supabase = getBrowserSupabase();
+    if (!supabase) return;
+    let active = true;
+    void supabase.auth.getSession().then(({ data }) => {
+      if (active) setUser(data.session?.user ?? null);
+    });
+    const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (active) setUser(session?.user ?? null);
+    });
+    return () => {
+      active = false;
+      data.subscription.unsubscribe();
+    };
+  }, []);
 
   useEffect(() => {
     function openLogin() {
@@ -97,6 +123,12 @@ export default function PlaygroundChrome({
       document.body.style.overflow = previousOverflow;
     };
   }, [loginOpen]);
+
+  async function handleSignOut() {
+    const supabase = getBrowserSupabase();
+    if (supabase) await supabase.auth.signOut();
+    setLoginOpen(false);
+  }
 
   async function sendLoginLink(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -205,7 +237,7 @@ export default function PlaygroundChrome({
           }}
           type="button"
         >
-          login
+          {user ? displayName : "login"}
         </button>
       </header>}
 
@@ -284,35 +316,48 @@ export default function PlaygroundChrome({
                 fill
                 sizes="(max-width: 700px) 94vw, 56rem"
               />
-              <form className={styles.form} onSubmit={sendLoginLink}>
-                <h2 id="login-title">Welcome back</h2>
-                <label>
-                  Name
-                  <input
-                    autoComplete="name"
-                    autoFocus
-                    onChange={(event) => setName(event.target.value)}
-                    required
-                    value={name}
-                  />
-                </label>
-                <label>
-                  Email
-                  <input
-                    autoComplete="email"
-                    onChange={(event) => setEmail(event.target.value)}
-                    required
-                    type="email"
-                    value={email}
-                  />
-                </label>
-                <button disabled={sending} type="submit">
-                  {sending ? "sending…" : "email me a sign-in link"}
-                </button>
-                <p aria-live="polite" className={styles.status}>
-                  {status}
-                </p>
-              </form>
+              {user ? (
+                <div className={styles.form}>
+                  <h2 id="login-title">Welcome back</h2>
+                  <p className={styles.status}>
+                    Signed in as {displayName}
+                    {user.email ? ` (${user.email})` : ""}
+                  </p>
+                  <button onClick={() => void handleSignOut()} type="button">
+                    Sign out
+                  </button>
+                </div>
+              ) : (
+                <form className={styles.form} onSubmit={sendLoginLink}>
+                  <h2 id="login-title">Welcome back</h2>
+                  <label>
+                    Name
+                    <input
+                      autoComplete="name"
+                      autoFocus
+                      onChange={(event) => setName(event.target.value)}
+                      required
+                      value={name}
+                    />
+                  </label>
+                  <label>
+                    Email
+                    <input
+                      autoComplete="email"
+                      onChange={(event) => setEmail(event.target.value)}
+                      required
+                      type="email"
+                      value={email}
+                    />
+                  </label>
+                  <button disabled={sending} type="submit">
+                    {sending ? "sending…" : "email me a sign-in link"}
+                  </button>
+                  <p aria-live="polite" className={styles.status}>
+                    {status}
+                  </p>
+                </form>
+              )}
             </div>
           </section>
         </div>
