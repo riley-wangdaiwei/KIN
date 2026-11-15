@@ -10,6 +10,8 @@ export interface StorageAdapter {
   saveWorld(world: World): void;
   getBoardIntroSeen(): boolean;
   saveBoardIntroSeen(seen: boolean): void;
+  getHomepageSeen(): boolean;
+  saveHomepageSeen(seen: boolean): void;
   getGiftBrief(): GiftBrief | null;
   saveGiftBrief(brief: GiftBrief): void;
   getGiftIntents(): GiftIntent[];

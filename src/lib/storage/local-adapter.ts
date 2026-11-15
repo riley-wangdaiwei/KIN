@@ -8,6 +8,7 @@ const keys = {
   taste: "kin:taste",
   world: "kin:world",
   boardIntroSeen: "kin:board-intro-seen",
+  homepageSeen: "kin:homepage-seen",
   giftBrief: "kin:gift-brief",
   giftIntents: "kin:gift-intents",
 } as const;
@@ -36,6 +37,8 @@ export const localAdapter: StorageAdapter = {
   saveWorld: (world) => write(keys.world, world),
   getBoardIntroSeen: () => read<boolean>(keys.boardIntroSeen) ?? false,
   saveBoardIntroSeen: (seen) => write(keys.boardIntroSeen, seen),
+  getHomepageSeen: () => read<boolean>(keys.homepageSeen) ?? false,
+  saveHomepageSeen: (seen) => write(keys.homepageSeen, seen),
   getGiftBrief: () => read<GiftBrief>(keys.giftBrief),
   saveGiftBrief: (brief) => write(keys.giftBrief, brief),
   getGiftIntents: () => read<GiftIntent[]>(keys.giftIntents) ?? [],

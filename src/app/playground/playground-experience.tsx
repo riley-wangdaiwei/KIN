@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { giftPackages } from "@/data/gifts";
 import { artistPartnerNames, identityExamples } from "@/data/hover-lists";
+import { storage } from "@/lib/storage";
 import JarScroll from "@/components/site/JarScroll";
 import HoverRingMenu from "@/components/site/HoverRingMenu";
 import styles from "./playground.module.css";
@@ -111,6 +112,15 @@ export default function PlaygroundExperience() {
   const experienceRef = useRef<HTMLElement>(null);
   const [progress, setProgress] = useState(0);
   const [reducedMotion, setReducedMotion] = useState(false);
+  const [returningVisitor, setReturningVisitor] = useState(false);
+
+  useEffect(() => {
+    // Browser storage is only available after mount; this initializes the hydrated UI.
+    /* eslint-disable react-hooks/set-state-in-effect */
+    setReturningVisitor(storage.getHomepageSeen());
+    /* eslint-enable react-hooks/set-state-in-effect */
+    storage.saveHomepageSeen(true);
+  }, []);
 
   useEffect(() => {
     const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -260,7 +270,7 @@ export default function PlaygroundExperience() {
             label="artists and partners"
             menuSide="left"
           />
-          {(activeChapter >= 2 || showEnding) && (
+          {(returningVisitor || activeChapter >= 2 || showEnding) && (
             <HoverRingMenu
               href="/my-gifting-identity"
               items={identityExamples}
