@@ -278,7 +278,7 @@ export default function PlaygroundChrome({
             />
             <Link
               className={styles.canvasLink}
-              href="/my-gifting-identity"
+              href="/canvas"
               onClick={() => setBookingOpen(false)}
             >
               Too shy to talk? Use your canvas instead.

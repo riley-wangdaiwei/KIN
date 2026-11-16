@@ -270,7 +270,7 @@ export default function PlaygroundExperience() {
           />
           {(returningVisitor || activeChapter >= 2 || showEnding) && (
             <HoverRingMenu
-              href="/my-gifting-identity"
+              href="/canvas"
               items={identityExamples}
               label="My Gifting Identity"
               menuSide="left"
