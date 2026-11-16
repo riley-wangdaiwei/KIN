@@ -18,7 +18,6 @@ import {
 } from "@/lib/storage/canvas-adapter";
 import { getBrowserSupabase } from "@/lib/supabase/browser";
 import type { CanvasEntry, CanvasPerson, GiftingCanvas } from "@/features/canvas/types";
-import { groupPeopleIntoColumns } from "@/features/canvas/types";
 import styles from "./canvas-workspace.module.css";
 
 const emptyCanvas: GiftingCanvas = { people: [], unsorted: [] };
@@ -264,7 +263,7 @@ export default function CanvasWorkspace() {
     );
   }
 
-  const columns = groupPeopleIntoColumns(canvas.people);
+  const people = canvas.people;
 
   return (
     <div className={styles.workspace}>
@@ -375,13 +374,12 @@ export default function CanvasWorkspace() {
           </div>
 
           <div className={styles.columns}>
-            {columns.map((column, columnIndex) => (
-              <div
-                aria-label={`Canvas column ${columnIndex + 1}`}
-                className={styles.column}
-                key={columnIndex}
-              >
-                {column.map((person) => (
+            {people.map((person) => {
+              const firstImage = person.entries.find((entry) => entry.kind !== "text");
+              const remainingEntries = firstImage
+                ? person.entries.filter((entry) => entry.id !== firstImage.id)
+                : person.entries;
+              return (
                   <PersonBlock
                     busy={busy}
                     editing={editingPersonId === person.id}
@@ -398,15 +396,18 @@ export default function CanvasWorkspace() {
                       });
                     }}
                     onShare={() => void share(person.id)}
+                    onDeleteEntry={(entryId) => void perform(() => deleteCanvasEntry(entryId))}
+                    onMoveEntry={(entryId, target) => void perform(() => moveCanvasEntry(entryId, target))}
                     onStartRename={() => setEditingPersonId(person.id)}
                     person={person}
                     shareUrl={shareLinks[person.id]}
+                    firstImage={firstImage}
+                    people={canvas.people}
                   >
-                    {renderEntries(person.entries)}
+                    {renderEntries(remainingEntries)}
                   </PersonBlock>
-                ))}
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
@@ -440,6 +441,7 @@ function CanvasEntryItem({
   onMove,
   onStartDrag,
   people,
+  inlinePersonImage = false,
 }: {
   busy: boolean;
   entry: CanvasEntry;
@@ -447,10 +449,11 @@ function CanvasEntryItem({
   onMove: (personId: string | null) => void;
   onStartDrag: (event: DragEvent<HTMLElement>) => void;
   people: CanvasPerson[];
+  inlinePersonImage?: boolean;
 }) {
   return (
     <article
-      className={`${styles.entry} ${entry.kind === "text" ? styles.textEntry : styles.imageEntry}`}
+      className={`${styles.entry} ${entry.kind === "text" ? styles.textEntry : styles.imageEntry} ${inlinePersonImage ? styles.personImageEntry : ""}`}
       draggable
       onDragStart={onStartDrag}
     >
@@ -498,8 +501,12 @@ function PersonBlock({
   onDrop,
   onRename,
   onShare,
+  onDeleteEntry,
+  onMoveEntry,
   onStartRename,
   person,
+  firstImage,
+  people,
   shareUrl,
 }: {
   busy: boolean;
@@ -509,8 +516,12 @@ function PersonBlock({
   onDrop: (event: DragEvent<HTMLElement>) => void;
   onRename: (name: string) => void;
   onShare: () => void;
+  onDeleteEntry: (entryId: string) => void;
+  onMoveEntry: (entryId: string, target: string | null) => void;
   onStartRename: () => void;
   person: CanvasPerson;
+  firstImage?: CanvasEntry;
+  people: CanvasPerson[];
   shareUrl?: string;
 }) {
   const [name, setName] = useState(person.name);
@@ -540,7 +551,21 @@ function PersonBlock({
             <button disabled={busy || !name.trim()} type="submit">Save</button>
           </form>
         ) : (
-          <h3>{person.name}</h3>
+          <AlphabetName name={person.name} />
+        )}
+        {firstImage && (
+          <CanvasEntryItem
+            busy={busy}
+            entry={firstImage}
+            onDelete={() => onDeleteEntry(firstImage.id)}
+            onMove={(target) => onMoveEntry(firstImage.id, target)}
+            onStartDrag={(event) => {
+              event.dataTransfer.setData("text/canvas-entry-id", firstImage.id);
+              event.dataTransfer.effectAllowed = "move";
+            }}
+            people={people}
+            inlinePersonImage
+          />
         )}
         {!editing && (
           <button className={styles.smallAction} onClick={onStartRename} type="button">
@@ -557,5 +582,35 @@ function PersonBlock({
       </button>
       {shareUrl && <a className={styles.shareLink} href={shareUrl}>{shareUrl}</a>}
     </section>
+  );
+}
+
+function AlphabetName({ name }: { name: string }) {
+  return (
+    <h3 aria-label={name} className={styles.alphabetRow}>
+      <span className={styles.visuallyHidden}>{name}</span>
+      {Array.from(name).map((character, index) => {
+        if (character === " ") {
+          return <span aria-hidden="true" className={styles.letterSpace} key={`${index}-space`} />;
+        }
+
+        const asset = character.toLowerCase() === "," ? "comma" : character.toLowerCase();
+        if (/^[a-z]$/.test(asset) || asset === "comma") {
+          return (
+            // Public hand-drawn letter assets have varied intrinsic widths.
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              alt=""
+              aria-hidden="true"
+              className={styles.alphabetLetter}
+              key={`${index}-${character}`}
+              src={`/alphabet/${asset}.png`}
+            />
+          );
+        }
+
+        return <span aria-hidden="true" className={styles.fallbackLetter} key={`${index}-${character}`}>{character}</span>;
+      })}
+    </h3>
   );
 }

@@ -16,7 +16,7 @@ export default function SiteFooter() {
     <footer className={styles.siteFooter}>
       <div className={styles.footerTop}>
         <Link className={styles.footerMark} href="/" aria-label="re.KIN home">
-          <Image src="/rekin-logo-transparent.png" alt="" width={2512} height={734} />
+          <Image src="/rekin-logo-transparent.png" alt="" width={2679} height={747} />
         </Link>
         <p>Collect what matters. Curate it with care. Give it meaning.</p>
       </div>
