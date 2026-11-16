@@ -43,14 +43,26 @@ async function toCanvasEntry(row: EntryRow): Promise<CanvasEntry> {
   if (row.kind === "image" && row.storage_path) {
     if (row.storage_path.startsWith("/")) imageUrl = row.storage_path;
     else {
-    const { data, error } = await requireSupabase()
-      .storage.from("canvas-images")
-      .createSignedUrl(row.storage_path, 3600);
-    if (error) throw new Error(`Could not load a canvas image: ${error.message}`);
-    imageUrl = data.signedUrl;
+      const { data, error } = await requireSupabase()
+        .storage.from("canvas-images")
+        .createSignedUrl(row.storage_path, 3600);
+      if (error) throw new Error(`Could not load a canvas image: ${error.message}`);
+      imageUrl = data.signedUrl;
     }
   } else if (row.kind === "sticker") {
-    imageUrl = "/pot.jpg";
+    if (row.storage_path) {
+      if (row.storage_path.startsWith("/")) imageUrl = row.storage_path;
+      else {
+        const { data, error } = await requireSupabase()
+          .storage.from("canvas-images")
+          .createSignedUrl(row.storage_path, 3600);
+        if (error) throw new Error(`Could not load a canvas sticker: ${error.message}`);
+        imageUrl = data.signedUrl;
+      }
+    } else {
+      const key = row.content.trim();
+      imageUrl = key ? `/stickers/${key}.svg` : "/pot.jpg";
+    }
   }
 
   return {
@@ -219,21 +231,75 @@ export async function createCanvasImage(
   }
 }
 
-export async function createCanvasSticker(): Promise<void> {
+export async function createCanvasSticker(
+  key: string = "pot",
+  personId: string | null = null,
+): Promise<void> {
   const user = await requireUser();
+  const stickerKey = key.trim() || "pot";
   const { error } = await requireSupabase().from("canvas_entries").insert({
     user_id: user.id,
+    person_id: personId,
     kind: "sticker",
-    content: "pot",
+    content: stickerKey,
+    storage_path: /^[-a-z]+$/i.test(stickerKey) ? `/stickers/${stickerKey}.svg` : null,
   });
-  if (error) throw new Error(`Could not add the re.KIN pot sticker: ${error.message}`);
+  if (error) throw new Error(`Could not add this sticker: ${error.message}`);
+}
+
+export async function createCanvasStickerUpload(
+  file: File,
+  targetPersonId: string | null = null,
+  relatedEntryId: string | null = null,
+): Promise<void> {
+  if (!file.type.startsWith("image/")) {
+    throw new Error("Choose an image file.");
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    throw new Error("Images must be 5 MB or smaller.");
+  }
+
+  const user = await requireUser();
+  const supabase = requireSupabase();
+  const id = crypto.randomUUID();
+  const storagePath = `${user.id}/${id}`;
+  const personId = relatedEntryId ? await parentPersonId(relatedEntryId) : targetPersonId;
+  const { error: uploadError } = await supabase.storage
+    .from("canvas-images")
+    .upload(storagePath, file, { contentType: file.type, upsert: false });
+  if (uploadError) throw new Error(`Could not upload this sticker: ${uploadError.message}`);
+
+  const { error: insertError } = await supabase.from("canvas_entries").insert({
+    id,
+    user_id: user.id,
+    person_id: personId,
+    related_entry_id: relatedEntryId,
+    kind: "sticker",
+    content: file.name,
+    storage_path: storagePath,
+  });
+  if (insertError) {
+    const { error: cleanupError } = await supabase.storage
+      .from("canvas-images")
+      .remove([storagePath]);
+    if (cleanupError) {
+      throw new Error(
+        `Could not save this sticker: ${insertError.message}. Its temporary upload could not be removed: ${cleanupError.message}`,
+      );
+    }
+    throw new Error(`Could not save this sticker: ${insertError.message}`);
+  }
 }
 
 export async function createCanvasImageFromUrl(path: string, personId: string | null): Promise<void> {
   if (!/^\/jar\/frames\/jar_\d{3}\.webp$/.test(path)) throw new Error("Invalid public canvas image.");
   const user = await requireUser();
   const { error } = await requireSupabase().from("canvas_entries").insert({
-    user_id: user.id, person_id: personId, kind: "image", content: "", storage_path: path,
+    user_id: user.id,
+    person_id: personId,
+    kind: "image",
+    content: "",
+    storage_path: path,
   });
   if (error) throw new Error(`Could not add this image: ${error.message}`);
 }
