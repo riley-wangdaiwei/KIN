@@ -41,6 +41,7 @@ export default function CanvasWorkspace() {
   const [note, setNote] = useState("");
   const [editingPersonId, setEditingPersonId] = useState<string | null>(null);
   const [shareLinks, setShareLinks] = useState<Record<string, string>>({});
+  const [sendState, setSendState] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const imageInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const generalImageInputRef = useRef<HTMLInputElement>(null);
 
@@ -154,6 +155,29 @@ export default function CanvasWorkspace() {
       setError(messageFrom(shareError));
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function sendCanvasToTeam() {
+    if (!window.confirm("Send your canvas share link to the re.KIN team?")) return;
+    setSendState("sending");
+    setError("");
+    try {
+      const token = await createCanvasShare(null);
+      const url = `${window.location.origin}/canvas-share/${token}`;
+      const response = await fetch("/api/canvas/share-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ shareUrl: url }),
+      });
+      if (!response.ok) {
+        const result = (await response.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(result?.error ?? "Could not send your canvas.");
+      }
+      setSendState("sent");
+    } catch (sendError) {
+      setError(messageFrom(sendError));
+      setSendState("error");
     }
   }
 
@@ -385,6 +409,25 @@ export default function CanvasWorkspace() {
             ))}
           </div>
         </div>
+      )}
+      {configured && userId && !loading && (
+        <footer className={styles.sendFooter}>
+          <p>
+            When you finish, share your canvas with us and we will get you
+            matched with an artist.
+          </p>
+          <button
+            disabled={busy || sendState === "sending"}
+            onClick={() => void sendCanvasToTeam()}
+            type="button"
+          >
+            {sendState === "sent"
+              ? "Sent ✓"
+              : sendState === "sending"
+                ? "Sending…"
+                : "Send to re.KIN"}
+          </button>
+        </footer>
       )}
     </div>
   );

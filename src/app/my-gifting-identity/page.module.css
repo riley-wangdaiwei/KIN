@@ -5,27 +5,6 @@
   color: var(--kin-white);
 }
 
-.heading {
-  width: min(52rem, 82vw);
-  margin-bottom: clamp(2rem, 5vw, 4rem);
-}
-
-.eyebrow {
-  margin: 0 0 0.6rem;
-  color: var(--kin-light-gray);
-  font: 400 var(--kin-caption-size)/1.2 var(--kin-micro-mono);
-  letter-spacing: 0.02em;
-}
-
-.heading h1 {
-  margin: 0;
-  font-family: var(--kin-display-serif);
-  font-size: clamp(3rem, 7vw, 6.5rem);
-  font-weight: 700;
-  letter-spacing: -0.055em;
-  line-height: 0.88;
-}
-
 .intro {
   max-width: 48ch;
   margin: 1rem 0 0;
@@ -45,11 +24,9 @@
 .questionnaire {
   max-width: 54rem;
   scroll-margin-top: 2rem;
-  margin-bottom: clamp(5rem, 12vw, 11rem);
 }
 
-.questionnaire h1,
-.identity h2 {
+.questionnaire h1 {
   max-width: 13ch;
   margin: 1rem 0 0;
   font-family: var(--kin-display-serif);
@@ -59,16 +36,15 @@
   line-height: 0.88;
 }
 
-.identity {
+.canvasLink {
   max-width: 54rem;
-  margin-bottom: clamp(5rem, 12vw, 11rem);
-}
-
-.identity p {
-  max-width: 48ch;
-  margin: 1rem 0 0;
+  margin: clamp(3rem, 8vw, 6rem) 0 0;
   color: var(--kin-light-gray);
   font-family: var(--kin-reading-serif);
   font-size: clamp(1rem, 1.4vw, 1.2rem);
   line-height: 1.25;
+}
+
+.canvasLink a {
+  color: var(--kin-white);
 }
