@@ -9,7 +9,6 @@ const keys = {
   world: "kin:world",
   boardIntroSeen: "kin:board-intro-seen",
   homepageSeen: "kin:homepage-seen",
-  waterfallHidden: "kin:waterfall-hidden",
   giftBrief: "kin:gift-brief",
   giftIntents: "kin:gift-intents",
 } as const;
@@ -40,8 +39,6 @@ export const localAdapter: StorageAdapter = {
   saveBoardIntroSeen: (seen) => write(keys.boardIntroSeen, seen),
   getHomepageSeen: () => read<boolean>(keys.homepageSeen) ?? false,
   saveHomepageSeen: (seen) => write(keys.homepageSeen, seen),
-  getWaterfallHidden: () => read<boolean>(keys.waterfallHidden) ?? false,
-  saveWaterfallHidden: (hidden) => write(keys.waterfallHidden, hidden),
   getGiftBrief: () => read<GiftBrief>(keys.giftBrief),
   saveGiftBrief: (brief) => write(keys.giftBrief, brief),
   getGiftIntents: () => read<GiftIntent[]>(keys.giftIntents) ?? [],

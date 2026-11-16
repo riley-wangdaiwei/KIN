@@ -24,6 +24,15 @@ import styles from "./canvas-workspace.module.css";
 
 const emptyCanvas: GiftingCanvas = { people: [], unsorted: [] };
 const providedStickerKeys = ["humankind", "rekin", "love", "foto"] as const;
+const STREAM_ROW_HEIGHT = 28;
+const STREAM_SPEED = 1.25;
+const stickerImageSources: Record<string, string> = {
+  pot: "/pot.jpg",
+  humankind: "/stickers/humankind.png",
+  rekin: "/stickers/rekin.png",
+  love: "/stickers/love.png",
+  foto: "/stickers/foto.png",
+};
 type StreamItem = {
   id: number;
   kind: "word" | "image";
@@ -32,8 +41,9 @@ type StreamItem = {
   x: number;
   y: number;
   speed: number;
-  width: number;
-  height: number;
+  detourUntil?: number;
+  detourX?: number;
+  stickerKey?: string;
 };
 
 type InlinePrompt = {
@@ -54,10 +64,10 @@ function messageFrom(error: unknown): string {
 }
 
 function buildStreamSequence() {
-  const items: Array<{ kind: "word" | "image"; label?: string; imageSrc?: string }> = [];
   const stickerImages = providedStickerKeys.map((key) => ({
     kind: "image" as const,
-    imageSrc: `/stickers/${key}.svg`,
+    imageSrc: stickerImageSources[key],
+    stickerKey: key,
   }));
   const cycle = [
     { kind: "word", label: "stickers" },
@@ -68,43 +78,38 @@ function buildStreamSequence() {
     { kind: "word", label: "people" },
     { kind: "word", label: "images" },
     { kind: "word", label: "jars" },
+    { kind: "image", imageSrc: stickerImageSources.pot, stickerKey: "pot" },
     ...stickerImages,
   ] as const;
 
-  for (let i = 0; i < 24; i += 1) {
-    const template = cycle[i % cycle.length];
-    items.push({ ...template });
-  }
-
-  return items;
+  return cycle.map((item) => ({ ...item }));
 }
 
 function getColumnX() {
   if (typeof window === "undefined") return 0;
-  return Math.max(24, window.innerWidth - 136);
+  return Math.max(48, window.innerWidth - 100);
 }
 
 function makeStreamItem(id: number, index: number): StreamItem {
-  const template = buildStreamSequence()[index % 24];
-  const x = getColumnX() + (template.kind === "image" ? 2 : 0);
-  const height = template.kind === "image" ? 44 : 28;
+  const sequence = buildStreamSequence();
+  const template = sequence[index % sequence.length];
 
   return {
     id,
     kind: template.kind,
     label: template.kind === "word" ? template.label : undefined,
     imageSrc: template.kind === "image" ? template.imageSrc : undefined,
-    x,
-    y: index * 34,
-    speed: 1.25,
-    width: template.kind === "image" ? 54 : 90,
-    height,
+    stickerKey: template.kind === "image" ? template.stickerKey : undefined,
+    x: getColumnX(),
+    y: index * STREAM_ROW_HEIGHT - STREAM_ROW_HEIGHT,
+    speed: STREAM_SPEED,
   };
 }
 
 function getInitialStreamItems() {
   if (typeof window === "undefined") return [];
-  return Array.from({ length: 16 }).map((_, index) => makeStreamItem(index + 1, index));
+  const count = Math.ceil(window.innerHeight / STREAM_ROW_HEIGHT) + 1;
+  return Array.from({ length: count }).map((_, index) => makeStreamItem(index + 1, index));
 }
 
 export default function CanvasWorkspace() {
@@ -124,10 +129,16 @@ export default function CanvasWorkspace() {
   const [inlineValue, setInlineValue] = useState("");
   const [pendingUpload, setPendingUpload] = useState<PendingUpload | null>(null);
   const [dropTargetPerson, setDropTargetPerson] = useState<string | null>(null);
+  const [dropTargetUnsorted, setDropTargetUnsorted] = useState(false);
+  const [dropTargetCanvas, setDropTargetCanvas] = useState(false);
+  const [streamDragging, setStreamDragging] = useState(false);
+  const [draggingStreamId, setDraggingStreamId] = useState<number | null>(null);
   const streamRef = useRef<StreamItem[]>([]);
   const [streamItems, setStreamItems] = useState<StreamItem[]>([]);
   const draggingWordRef = useRef<StreamItem | null>(null);
   const nextStreamId = useRef(1);
+  const nextSequenceIndex = useRef(0);
+  const nextJarFrame = useRef(0);
   const reducedMotion = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   useEffect(() => {
@@ -135,15 +146,18 @@ export default function CanvasWorkspace() {
   }, [streamItems]);
 
   useEffect(() => {
-    if (!userId || loading) {
+    if (!userId) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setStreamItems([]);
       streamRef.current = [];
       return;
     }
+    if (loading || streamRef.current.length > 0) return;
 
     const initial = getInitialStreamItems();
-    const active = reducedMotion ? initial : initial.map((item, index) => ({ ...item, y: index * 36 }));
+    const active = initial;
+    nextStreamId.current = active.length + 1;
+    nextSequenceIndex.current = active.length;
     setStreamItems(active);
     streamRef.current = active;
   }, [loading, reducedMotion, userId]);
@@ -153,47 +167,49 @@ export default function CanvasWorkspace() {
 
     let frame = 0;
     const tick = () => {
-      const items = streamRef.current
-        .map((item) => {
-          const nextY = item.y + item.speed;
-          const shifted = { ...item, y: nextY };
-          const hitAreas = [...document.querySelectorAll<HTMLElement>(`.${styles.unsorted}, .${styles.person}`)]
-            .map((element) => element.getBoundingClientRect());
-
-          const wouldHit = hitAreas.some((area) => {
-            const itemLeft = shifted.x;
-            const itemRight = shifted.x + shifted.width;
-            const itemTop = shifted.y;
-            const itemBottom = shifted.y + shifted.height;
-            return itemRight > area.left && itemLeft < area.right && itemBottom > area.top && itemTop < area.bottom;
-          });
-
-          if (wouldHit) {
-            return { ...shifted, x: shifted.x + 14, y: shifted.y };
-          }
-
-          return shifted;
-        })
-        .map((item) => {
-          if (item.y > window.innerHeight + 100) {
-            const nextIndex = streamRef.current.length + 1;
-            const template = buildStreamSequence()[nextIndex % 24];
-            const columnX = getColumnX();
-            return {
-              ...item,
-              id: nextStreamId.current++,
-              kind: template.kind,
-              label: template.kind === "word" ? template.label : undefined,
-              imageSrc: template.kind === "image" ? template.imageSrc : undefined,
-              x: columnX + (template.kind === "image" ? 2 : 0),
-              y: -40,
-              speed: 1.25,
-              width: template.kind === "image" ? 54 : 100,
-              height: template.kind === "image" ? 44 : 28,
-            };
-          }
-          return item;
-        });
+      const sequence = buildStreamSequence();
+      const hitAreas = [...document.querySelectorAll<HTMLElement>(
+        `.${styles.unsorted}, .${styles.person}, [data-canvas-obstacle]`,
+      )].map((element) => element.getBoundingClientRect());
+      const items = streamRef.current.map((item) => {
+        if (draggingWordRef.current?.id === item.id) return item;
+        const nextY = item.y + item.speed;
+        const element = document.querySelector<HTMLElement>(`[data-stream-id="${item.id}"]`);
+        const rect = element?.getBoundingClientRect();
+        const width = rect?.width ?? 90;
+        const height = rect?.height ?? STREAM_ROW_HEIGHT;
+        const hit = hitAreas.find((area) =>
+          item.x + width / 2 > area.left && item.x - width / 2 < area.right &&
+          nextY + height / 2 > area.top && nextY - height / 2 < area.bottom,
+        );
+        let detourUntil = item.detourUntil;
+        let detourX = item.detourX;
+        if (hit && detourUntil === undefined) {
+          detourUntil = hit.bottom + height / 2 + 4;
+          detourX = Math.max(0, hit.left - width / 2 - 8);
+        }
+        if (detourUntil !== undefined && nextY > detourUntil) {
+          detourUntil = undefined;
+          detourX = undefined;
+        }
+        const targetX = detourX ?? getColumnX();
+        const nextX = item.x + Math.max(-20, Math.min(20, targetX - item.x));
+        if (nextY > window.innerHeight + height) {
+          const template = sequence[nextSequenceIndex.current % sequence.length];
+          nextSequenceIndex.current += 1;
+          return {
+            id: nextStreamId.current++,
+            kind: template.kind,
+            label: template.kind === "word" ? template.label : undefined,
+            imageSrc: template.kind === "image" ? template.imageSrc : undefined,
+            stickerKey: template.kind === "image" ? template.stickerKey : undefined,
+            x: getColumnX(),
+            y: Math.min(...streamRef.current.map((candidate) => candidate.y)) - STREAM_ROW_HEIGHT,
+            speed: STREAM_SPEED,
+          };
+        }
+        return { ...item, x: nextX, y: nextY, detourUntil, detourX };
+      });
 
       streamRef.current = items;
       setStreamItems(items);
@@ -235,7 +251,13 @@ export default function CanvasWorkspace() {
 
     const target = document.elementFromPoint(event.clientX, event.clientY);
     const personElement = target?.closest<HTMLElement>("[data-person-id]");
+    const unsortedElement = target?.closest<HTMLElement>(`.${styles.unsorted}`);
+    const canvasElement = target?.closest<HTMLElement>(`.${styles.canvasArea}`);
+    const isCanvasTarget = Boolean(personElement || unsortedElement || canvasElement);
+    setStreamDragging(isCanvasTarget);
     setDropTargetPerson(personElement?.dataset.personId ?? null);
+    setDropTargetUnsorted(Boolean(unsortedElement));
+    setDropTargetCanvas(Boolean(canvasElement && !personElement && !unsortedElement));
 
     setStreamItems((current) =>
       current.map((item) =>
@@ -249,16 +271,24 @@ export default function CanvasWorkspace() {
     if (!active) return;
 
     const target = document.elementFromPoint(event.clientX, event.clientY);
+    const entryElement = target?.closest<HTMLElement>("[data-entry-id]");
+    const relatedEntryId = entryElement?.dataset.entryId ?? null;
     const personElement = target?.closest<HTMLElement>("[data-person-id]");
     const personId = personElement?.dataset.personId ?? null;
-    const isCanvasTarget = Boolean(target?.closest<HTMLElement>(`.${styles.unsorted}, .${styles.person}`));
+    const isCanvasTarget = Boolean(target?.closest<HTMLElement>(`[data-person-id], .${styles.unsorted}, .${styles.canvasArea}`));
 
     draggingWordRef.current = null;
+    setDraggingStreamId(null);
     setDropTargetPerson(null);
+    setDropTargetUnsorted(false);
+    setDropTargetCanvas(false);
+    setStreamDragging(false);
+    setStreamItems((current) => current.map((item) => item.id === active.id
+      ? { ...item, x: getColumnX(), y: active.y, detourX: undefined, detourUntil: undefined }
+      : item));
     window.removeEventListener("pointermove", handlePointerMove);
 
     if (!isCanvasTarget) {
-      setStreamItems((current) => current.filter((item) => item.id !== active.id));
       return;
     }
 
@@ -269,27 +299,28 @@ export default function CanvasWorkspace() {
     }
 
     if (active.kind === "word" && active.label === "images") {
-      setPendingUpload({ kind: "image", personId, relatedEntryId: null });
+      setPendingUpload({ kind: "image", personId, relatedEntryId });
       generalImageInputRef.current?.click();
       return;
     }
 
     if (active.kind === "word" && active.label === "stickers") {
-      setPendingUpload({ kind: "sticker", personId, relatedEntryId: null });
+      setPendingUpload({ kind: "sticker", personId, relatedEntryId });
       generalImageInputRef.current?.click();
       return;
     }
 
     if (active.kind === "word" && active.label === "jars") {
-      const frame = [0, 45, 90, 135, 180][(nextStreamId.current + 1) % 5];
-      void perform(() => createCanvasImageFromUrl(`/jar/frames/jar_${String(frame).padStart(3, "0")}.webp`, personId));
+      const frame = [0, 45, 90, 135, 180][nextJarFrame.current % 5];
+      nextJarFrame.current += 1;
+      void perform(() => createCanvasImageFromUrl(`/jar/frames/jar_${String(frame).padStart(3, "0")}.webp`, personId, relatedEntryId));
       return;
     }
 
     if (active.kind === "image") {
       void perform(async () => {
-        const key = (active.imageSrc ?? "/pot.jpg").replace(/^\/stickers\//, "").replace(/\.svg$/, "");
-        await createCanvasSticker(key, personId);
+        if (!active.stickerKey) return;
+        await createCanvasSticker(active.stickerKey, personId, relatedEntryId);
       });
     }
   }, [handlePointerMove, perform]);
@@ -297,6 +328,11 @@ export default function CanvasWorkspace() {
   const startDraggingItem = useCallback((item: StreamItem, event: ReactPointerEvent<HTMLButtonElement>) => {
     event.preventDefault();
     draggingWordRef.current = item;
+    setDraggingStreamId(item.id);
+    setStreamDragging(true);
+    setDropTargetPerson(null);
+    setDropTargetUnsorted(false);
+    setDropTargetCanvas(false);
     window.removeEventListener("pointermove", handlePointerMove);
     window.addEventListener("pointermove", handlePointerMove);
     window.removeEventListener("pointerup", handlePointerUp);
@@ -340,6 +376,11 @@ export default function CanvasWorkspace() {
 
   function handleDrop(event: DragEvent<HTMLElement>, personId: string | null) {
     event.preventDefault();
+    event.stopPropagation();
+    setDropTargetPerson(null);
+    setDropTargetUnsorted(false);
+    setDropTargetCanvas(false);
+    setStreamDragging(false);
     const entryId = event.dataTransfer.getData("text/canvas-entry-id");
     if (!entryId) return;
     void perform(() => moveCanvasEntry(entryId, personId));
@@ -404,7 +445,7 @@ export default function CanvasWorkspace() {
           images.forEach((image) => renderedIds.add(image.id));
 
           return (
-            <div className={styles.entryLine} key={entry.id}>
+            <div className={styles.entryLine} data-entry-id={entry.id} key={entry.id}>
               <CanvasEntryItem
                 busy={busy}
                 entry={entry}
@@ -486,14 +527,16 @@ export default function CanvasWorkspace() {
         </form>
       )}
 
-      {userId && !loading && !reducedMotion && (
-        <div aria-hidden="true" className={styles.waterfallLayer}>
+      {userId && !loading && (
+        <div className={styles.waterfallLayer}>
           {streamItems.map((item) => (
             <button
               className={`${styles.fallingWord} ${item.kind === "image" ? styles.fallingImage : ""}`.trim()}
+              data-stream-id={item.id}
               key={item.id}
               onPointerDown={(event) => startDraggingItem(item, event)}
-              style={{ left: item.x, top: item.y }}
+              style={{ left: item.x, top: item.y, pointerEvents: draggingStreamId === item.id ? "none" : "auto" }}
+              aria-label={item.kind === "word" ? `Add ${item.label}` : `Add ${item.stickerKey} image`}
               type="button"
             >
               {item.kind === "word" ? item.label : (
@@ -518,26 +561,45 @@ export default function CanvasWorkspace() {
         <p className={styles.notice}>Loading your canvas…</p>
       ) : (
         <>
-          {error && <p className={styles.status} role="alert">{error}</p>}
-          <div className={styles.canvasArea}>
-            <div
-              aria-label="Unsorted entries"
-              className={`${styles.unsorted} ${dropTargetPerson === null ? styles.dropTarget : ""}`.trim()}
-              onDragOver={(event) => event.preventDefault()}
-              onDrop={(event) => handleDrop(event, null)}
-            >
-              <div className={styles.entries}>{renderEntries(canvas.unsorted)}</div>
-            </div>
+          {error && <p className={styles.visuallyHidden} role="alert">{error}</p>}
+          <div
+            className={`${styles.canvasArea} ${dropTargetCanvas ? styles.canvasAreaDropTarget : ""}`.trim()}
+            onDragOver={(event) => {
+              const target = event.target as HTMLElement;
+              if (target.closest(`[data-person-id], .${styles.unsorted}`)) return;
+              event.preventDefault();
+              setStreamDragging(true);
+              setDropTargetPerson(null);
+              setDropTargetUnsorted(false);
+              setDropTargetCanvas(true);
+            }}
+            onDrop={(event) => handleDrop(event, null)}
+          >
+            {canvas.unsorted.length > 0 && (
+              <div
+                className={`${styles.unsorted} ${streamDragging && dropTargetUnsorted ? styles.dropTarget : ""}`.trim()}
+                onDragOver={(event) => {
+                  event.preventDefault();
+                  setStreamDragging(true);
+                  setDropTargetPerson(null);
+                  setDropTargetUnsorted(true);
+                  setDropTargetCanvas(false);
+                }}
+                onDrop={(event) => handleDrop(event, null)}
+              >
+                <div className={styles.entries}>{renderEntries(canvas.unsorted)}</div>
+              </div>
+            )}
 
             <div className={styles.columns}>
               {canvas.people.map((person) => {
-                const firstImage = person.entries.find((entry) => entry.kind !== "text");
+                const firstImage = person.entries.find((entry) => entry.kind !== "text" && !entry.relatedEntryId);
                 const remainingEntries = firstImage ? person.entries.filter((entry) => entry.id !== firstImage.id) : person.entries;
 
                 return (
                   <PersonBlock
                     busy={busy}
-                    dropTarget={dropTargetPerson === person.id}
+                    dropTarget={streamDragging && dropTargetPerson === person.id}
                     editing={editingPersonId === person.id}
                     key={person.id}
                     onDelete={() => {
@@ -552,6 +614,13 @@ export default function CanvasWorkspace() {
                       });
                     }}
                     onDeleteEntry={(entryId) => void perform(() => deleteCanvasEntry(entryId))}
+                    onDragOver={(event) => {
+                      event.preventDefault();
+                      setStreamDragging(true);
+                      setDropTargetPerson(person.id);
+                      setDropTargetUnsorted(false);
+                      setDropTargetCanvas(false);
+                    }}
                     onStartRename={() => setEditingPersonId(person.id)}
                     person={person}
                     firstImage={firstImage}
@@ -566,7 +635,7 @@ export default function CanvasWorkspace() {
       )}
 
       {configured && userId && !loading && (
-        <footer className={styles.sendFooter}>
+        <footer className={styles.sendFooter} data-canvas-obstacle>
           <p>When you finish, share your canvas with us and we will get you matched with an artist.</p>
           <button disabled={busy || sendState === "sending"} onClick={() => void sendCanvasToTeam()} type="button">
             {sendState === "sent" ? "Sent ✓" : sendState === "sending" ? "Sending…" : "Send to re.KIN"}
@@ -622,6 +691,7 @@ function PersonBlock({
   onDrop,
   onRename,
   onDeleteEntry,
+  onDragOver,
   onStartRename,
   person,
   firstImage,
@@ -634,6 +704,7 @@ function PersonBlock({
   onDrop: (event: DragEvent<HTMLElement>) => void;
   onRename: (name: string) => void;
   onDeleteEntry: (entryId: string) => void;
+  onDragOver: (event: DragEvent<HTMLElement>) => void;
   onStartRename: () => void;
   person: CanvasPerson;
   firstImage?: CanvasEntry;
@@ -645,7 +716,7 @@ function PersonBlock({
       aria-label={`${person.name}’s block`}
       className={`${styles.person} ${dropTarget ? styles.dropTarget : ""}`.trim()}
       data-person-id={person.id}
-      onDragOver={(event) => event.preventDefault()}
+      onDragOver={onDragOver}
       onDrop={onDrop}
     >
       <div className={styles.personTitle}>

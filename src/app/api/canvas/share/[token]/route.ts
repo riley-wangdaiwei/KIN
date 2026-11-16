@@ -27,6 +27,14 @@ interface EntryRow {
   created_at: string;
 }
 
+const canvasStickerPaths: Record<string, string> = {
+  pot: "/pot.jpg",
+  humankind: "/stickers/humankind.png",
+  rekin: "/stickers/rekin.png",
+  love: "/stickers/love.png",
+  foto: "/stickers/foto.png",
+};
+
 function isUuid(value: string): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
     value,
@@ -111,17 +119,19 @@ export async function GET(
 
   async function toEntry(row: EntryRow): Promise<CanvasEntry> {
     let imageUrl: string | null = null;
-    if (row.kind === "image" && row.storage_path) {
-      if (row.storage_path.startsWith("/")) imageUrl = row.storage_path;
+    if ((row.kind === "image" || row.kind === "sticker") && row.storage_path) {
+      if (row.kind === "sticker" && row.storage_path.startsWith("/stickers/")) {
+        imageUrl = canvasStickerPaths[row.content.trim()] ?? null;
+      } else if (row.storage_path.startsWith("/")) imageUrl = row.storage_path;
       else {
-      const { data, error } = await supabase.storage
-        .from("canvas-images")
-        .createSignedUrl(row.storage_path, 600);
-      if (error) throw new Error("Could not load an image for this share.");
-      imageUrl = data.signedUrl;
+        const { data, error } = await supabase.storage
+          .from("canvas-images")
+          .createSignedUrl(row.storage_path, 600);
+        if (error) throw new Error("Could not load an image for this share.");
+        imageUrl = data.signedUrl;
       }
     } else if (row.kind === "sticker") {
-      imageUrl = "/pot.jpg";
+      imageUrl = canvasStickerPaths[row.content.trim()] ?? null;
     }
 
     return {

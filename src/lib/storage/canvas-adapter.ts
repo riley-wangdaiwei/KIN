@@ -23,6 +23,14 @@ interface EntryRow {
   created_at: string;
 }
 
+const canvasStickerPaths: Record<string, string> = {
+  pot: "/pot.jpg",
+  humankind: "/stickers/humankind.png",
+  rekin: "/stickers/rekin.png",
+  love: "/stickers/love.png",
+  foto: "/stickers/foto.png",
+};
+
 function requireSupabase() {
   const supabase = getBrowserSupabase();
   if (!supabase) {
@@ -51,7 +59,8 @@ async function toCanvasEntry(row: EntryRow): Promise<CanvasEntry> {
     }
   } else if (row.kind === "sticker") {
     if (row.storage_path) {
-      if (row.storage_path.startsWith("/")) imageUrl = row.storage_path;
+      if (row.storage_path.startsWith("/stickers/")) imageUrl = canvasStickerPaths[row.content.trim()] ?? null;
+      else if (row.storage_path.startsWith("/")) imageUrl = row.storage_path;
       else {
         const { data, error } = await requireSupabase()
           .storage.from("canvas-images")
@@ -61,7 +70,7 @@ async function toCanvasEntry(row: EntryRow): Promise<CanvasEntry> {
       }
     } else {
       const key = row.content.trim();
-      imageUrl = key ? `/stickers/${key}.svg` : "/pot.jpg";
+      imageUrl = canvasStickerPaths[key] ?? null;
     }
   }
 
@@ -234,15 +243,18 @@ export async function createCanvasImage(
 export async function createCanvasSticker(
   key: string = "pot",
   personId: string | null = null,
+  relatedEntryId: string | null = null,
 ): Promise<void> {
   const user = await requireUser();
   const stickerKey = key.trim() || "pot";
+  const targetPersonId = relatedEntryId ? await parentPersonId(relatedEntryId) : personId;
   const { error } = await requireSupabase().from("canvas_entries").insert({
     user_id: user.id,
-    person_id: personId,
+    person_id: targetPersonId,
+    related_entry_id: relatedEntryId,
     kind: "sticker",
     content: stickerKey,
-    storage_path: /^[-a-z]+$/i.test(stickerKey) ? `/stickers/${stickerKey}.svg` : null,
+    storage_path: canvasStickerPaths[stickerKey] ?? null,
   });
   if (error) throw new Error(`Could not add this sticker: ${error.message}`);
 }
@@ -291,12 +303,18 @@ export async function createCanvasStickerUpload(
   }
 }
 
-export async function createCanvasImageFromUrl(path: string, personId: string | null): Promise<void> {
+export async function createCanvasImageFromUrl(
+  path: string,
+  personId: string | null,
+  relatedEntryId: string | null = null,
+): Promise<void> {
   if (!/^\/jar\/frames\/jar_\d{3}\.webp$/.test(path)) throw new Error("Invalid public canvas image.");
   const user = await requireUser();
+  const targetPersonId = relatedEntryId ? await parentPersonId(relatedEntryId) : personId;
   const { error } = await requireSupabase().from("canvas_entries").insert({
     user_id: user.id,
-    person_id: personId,
+    person_id: targetPersonId,
+    related_entry_id: relatedEntryId,
     kind: "image",
     content: "",
     storage_path: path,

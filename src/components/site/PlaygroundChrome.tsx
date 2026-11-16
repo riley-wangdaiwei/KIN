@@ -230,6 +230,7 @@ export default function PlaygroundChrome({
         </button>
         <button
           className={styles.login}
+          data-canvas-obstacle
           ref={loginButtonRef}
           onClick={() => {
             setStatus("");

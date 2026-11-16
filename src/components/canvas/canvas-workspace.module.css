@@ -2,18 +2,11 @@
   width: 100%;
 }
 
-.canvasTools {
-  display: grid;
-  width: min(38rem, 100%);
-  gap: 0.9rem;
-  margin-bottom: 1.5rem;
-}
-
-.waterfallToggle {
-  align-self: flex-start;
+.workspace button {
+  border: 0;
   padding: 0;
-  color: var(--kin-light-gray);
-  font: 500 0.7rem/1.2 var(--kin-ui-sans);
+  background: transparent;
+  font: inherit;
 }
 
 .waterfallLayer {
@@ -26,25 +19,30 @@
 .fallingWord {
   position: fixed;
   z-index: 31;
+  display: block;
+  height: 28px;
+  padding: 0;
   pointer-events: auto;
-  border: 0;
-  background: transparent;
   color: var(--kin-white);
   cursor: grab;
-  font: 400 clamp(1.15rem, 1.6vw, 1.7rem)/1 var(--kin-ui-sans);
+  font: 400 clamp(1.15rem, 1.6vw, 1.7rem)/28px var(--kin-ui-sans);
   letter-spacing: -0.04em;
   text-transform: lowercase;
   transform: translate(-50%, -50%);
   user-select: none;
+  white-space: nowrap;
 }
 
 .fallingWord:active {
   cursor: grabbing;
 }
 
-.draggingWord {
-  opacity: 0.9;
-  text-shadow: 0 0 18px rgb(255 255 255 / 25%);
+.fallingImage img {
+  display: block;
+  width: auto;
+  height: 28px;
+  max-width: none;
+  object-fit: contain;
 }
 
 .dropPrompt {
@@ -73,85 +71,9 @@
 }
 
 .dropPrompt button {
-  border: 0;
-  background: transparent;
   color: var(--kin-white);
   cursor: pointer;
   font: 500 0.7rem/1.2 var(--kin-ui-sans);
-}
-
-.addPerson,
-.addNote {
-  display: grid;
-  gap: 0.25rem;
-}
-
-.addPerson > label,
-.addNote > label {
-  font-size: 0.75rem;
-  font-weight: 500;
-}
-
-.inlineForm {
-  display: flex;
-  align-items: flex-end;
-  gap: 0.6rem;
-}
-
-.inlineForm input,
-.inlineForm textarea,
-.renameForm input {
-  min-width: 0;
-  flex: 1;
-  border: 0;
-  border-bottom: 1px solid rgb(255 255 255 / 40%);
-  border-radius: 0;
-  padding: 0.4rem 0;
-  background: transparent;
-  color: var(--kin-white);
-  font: 400 0.8rem/1.35 var(--kin-ui-sans);
-}
-
-.inlineForm button,
-.inlineForm button,
-.renameForm button,
-.addMedia button,
-.notice button,
-.shareButton {
-  border: 0;
-  padding: 0.35rem 0.5rem;
-  background: transparent;
-  color: var(--kin-white);
-  cursor: pointer;
-  font: 500 0.75rem/1.3 var(--kin-ui-sans);
-}
-
-.inlineForm button:hover,
-.renameForm button:hover,
-.addMedia button:hover,
-.shareButton:hover {
-  color: var(--kin-light-gray);
-}
-
-.inlineForm button:disabled,
-.renameForm button:disabled,
-.addMedia button:disabled,
-.shareButton:disabled {
-  cursor: wait;
-  opacity: 0.55;
-}
-
-.addMedia {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.3rem 0.7rem;
-}
-
-.status {
-  min-height: 1.2em;
-  margin: 0 0 0.4rem;
-  color: #ffb6b6;
-  font-size: 0.78rem;
 }
 
 .notice {
@@ -168,29 +90,24 @@
   margin: 0;
 }
 
+.notice button {
+  color: var(--kin-white);
+  cursor: pointer;
+}
+
 .canvasArea {
   width: 100%;
+  min-height: 60vh;
+}
+
+.canvasAreaDropTarget {
+  box-shadow: inset 0 -1px rgb(255 255 255 / 32%);
 }
 
 .unsorted {
   width: min(100%, 78rem);
-  min-height: 5rem;
   margin-bottom: clamp(3rem, 8vw, 7rem);
   padding: 0 0 1rem;
-}
-
-.areaHeading,
-.personTitle {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.4rem 0.7rem;
-}
-
-.areaHeading h2 {
-  margin: 0;
-  font: 500 0.78rem/1.3 var(--kin-micro-mono);
-  text-transform: uppercase;
 }
 
 .columns {
@@ -203,12 +120,26 @@
 
 .person {
   min-width: 0;
-  padding: 0;
+  padding: 0 0 0.75rem;
   transition: box-shadow 120ms ease;
 }
 
 .dropTarget {
-  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 22%);
+  box-shadow: 0 1px rgb(255 255 255 / 32%);
+}
+
+.personTitle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem 0.7rem;
+}
+
+.personName {
+  display: inline-flex;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
 }
 
 .alphabetRow {
@@ -264,32 +195,21 @@
   max-width: min(30vw, 15rem);
 }
 
-.smallAction,
-.entryActions button,
-.attachImage {
-  border: 0;
-  padding: 0;
-  background: transparent;
-  color: var(--kin-light-gray);
+.personDelete,
+.deleteEntry {
+  flex: 0 0 auto;
+  color: var(--kin-white) !important;
   cursor: pointer;
-  font: 400 0.65rem/1.3 var(--kin-ui-sans);
-}
-
-.smallAction:hover,
-.entryActions button:hover,
-.attachImage:hover {
-  color: var(--kin-white);
-}
-
-.personDelete {
+  font-size: 0.9em !important;
+  line-height: 1 !important;
   opacity: 0;
-  transition: opacity 120ms ease, color 120ms ease;
-  font-size: 1.05rem;
-  line-height: 1;
+  transition: opacity 120ms ease;
 }
 
 .person:hover .personDelete,
-.person:focus-within .personDelete {
+.person:focus-within .personDelete,
+.entry:hover .deleteEntry,
+.entry:focus-within .deleteEntry {
   opacity: 1;
 }
 
@@ -299,9 +219,19 @@
   gap: 0.5rem;
 }
 
-.renameForm button {
+.renameForm input {
+  min-width: 0;
+  flex: 1;
   border: 0;
+  border-bottom: 1px solid rgb(255 255 255 / 40%);
+  border-radius: 0;
+  padding: 0.4rem 0;
   background: transparent;
+  color: var(--kin-white);
+  font: 400 0.8rem/1.35 var(--kin-ui-sans);
+}
+
+.renameForm button {
   color: var(--kin-white);
   cursor: pointer;
   font: 500 0.72rem/1.3 var(--kin-ui-sans);
@@ -309,7 +239,6 @@
 
 .entries {
   display: block;
-  min-height: 2rem;
   margin-top: 0.85rem;
 }
 
@@ -323,6 +252,11 @@
   max-width: 100%;
   align-items: center;
   gap: 0.35rem;
+}
+
+.textEntry,
+.imageEntry {
+  color: inherit;
 }
 
 .entry p {
@@ -343,44 +277,6 @@
   vertical-align: middle;
 }
 
-.entryActions {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.2rem;
-  opacity: 0.65;
-}
-
-.entry:hover .entryActions,
-.entry:focus-within .entryActions {
-  opacity: 1;
-}
-
-.moveLabel {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.15rem;
-  color: var(--kin-light-gray);
-  font: 400 0.58rem/1.2 var(--kin-ui-sans);
-}
-
-.moveLabel select {
-  max-width: 5rem;
-  border: 0;
-  background: var(--kin-black);
-  color: var(--kin-light-gray);
-  font: inherit;
-}
-
-.attachImage {
-  align-self: center;
-  opacity: 0;
-}
-
-.entryLine:hover .attachImage,
-.entryLine:focus-within .attachImage {
-  opacity: 1;
-}
-
 .hiddenInput {
   position: absolute;
   width: 1px;
@@ -389,19 +285,6 @@
   clip: rect(0, 0, 0, 0);
   clip-path: inset(50%);
   white-space: nowrap;
-}
-
-.shareButton {
-  margin-top: 0.5rem;
-  color: var(--kin-light-gray);
-}
-
-.shareLink {
-  display: block;
-  max-width: 100%;
-  overflow-wrap: anywhere;
-  color: var(--kin-light-gray);
-  font-size: 0.62rem;
 }
 
 .sendFooter {
@@ -424,9 +307,7 @@
 }
 
 .sendFooter button {
-  border: 0;
   padding: 0.35rem 0.5rem;
-  background: transparent;
   color: var(--kin-white);
   cursor: pointer;
   font: 500 0.75rem/1.3 var(--kin-ui-sans);
