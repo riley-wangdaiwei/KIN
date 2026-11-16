@@ -4,6 +4,7 @@ import type { DragEvent, FormEvent } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   createCanvasImage,
+  createCanvasImageFromUrl,
   createCanvasPerson,
   createCanvasShare,
   createCanvasSticker,
@@ -16,11 +17,29 @@ import {
   renameCanvasPerson,
   subscribeToCanvasAuth,
 } from "@/lib/storage/canvas-adapter";
+import { storage } from "@/lib/storage";
 import { getBrowserSupabase } from "@/lib/supabase/browser";
 import type { CanvasEntry, CanvasPerson, GiftingCanvas } from "@/features/canvas/types";
 import styles from "./canvas-workspace.module.css";
 
 const emptyCanvas: GiftingCanvas = { people: [], unsorted: [] };
+const waterfallWords = ["details", "people", "stickers", "images", "jars"] as const;
+type WaterfallWord = (typeof waterfallWords)[number];
+type FallingWord = {
+  id: number;
+  label: WaterfallWord;
+  x: number;
+  y: number;
+  speed: number;
+  dragging?: boolean;
+};
+
+type InlinePrompt = {
+  kind: "details" | "people";
+  personId: string | null;
+  x: number;
+  y: number;
+};
 
 function messageFrom(error: unknown): string {
   return error instanceof Error ? error.message : "Something went wrong. Please try again.";
@@ -43,9 +62,183 @@ export default function CanvasWorkspace() {
   const [sendState, setSendState] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const imageInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const generalImageInputRef = useRef<HTMLInputElement>(null);
+  const [waterfallHidden, setWaterfallHidden] = useState<boolean>(() => {
+    if (typeof window === "undefined") return true;
+    return storage.getWaterfallHidden();
+  });
+  const [fallingWords, setFallingWords] = useState<FallingWord[]>([]);
+  const [inlinePrompt, setInlinePrompt] = useState<InlinePrompt | null>(null);
+  const [inlineValue, setInlineValue] = useState("");
+  const [pendingImagePerson, setPendingImagePerson] = useState<string | null>(null);
+  const [dropTargetPerson, setDropTargetPerson] = useState<string | null>(null);
+  const nextWordId = useRef(1);
+  const jarFrame = useRef(0);
+  const draggingWordRef = useRef<FallingWord | null>(null);
+  const wordsRef = useRef<FallingWord[]>([]);
+
+  const reducedMotion = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  useEffect(() => {
+    wordsRef.current = fallingWords;
+  }, [fallingWords]);
+
+  useEffect(() => {
+    if (waterfallHidden || !userId || loading || reducedMotion) {
+      wordsRef.current = [];
+      return;
+    }
+
+    let frame = 0;
+    let lastSpawn = 0;
+    let previous = 0;
+
+    const tick = (now: number) => {
+      if (document.visibilityState !== "visible") {
+        frame = requestAnimationFrame(tick);
+        return;
+      }
+
+      const delta = previous ? Math.min((now - previous) / 16.67, 3) : 1;
+      previous = now;
+
+      const hitAreas = [...document.querySelectorAll<HTMLElement>(`.${styles.unsorted}, .${styles.person}, .${styles.canvasTools}`)].map((element) => element.getBoundingClientRect());
+      let words = wordsRef.current.filter((word) => !draggingWordRef.current || word.id !== draggingWordRef.current.id);
+
+      if (now - lastSpawn > 2200 && words.filter((word) => word.y < window.innerHeight + 80).length < 6) {
+        const label = waterfallWords[Math.floor(Math.random() * waterfallWords.length)];
+        words = [...words, {
+          id: nextWordId.current++,
+          label,
+          x: window.innerWidth * (0.7 + Math.random() * 0.24),
+          y: -30,
+          speed: 1.1 + Math.random() * 0.5,
+        }];
+        lastSpawn = now;
+      }
+
+      words = words
+        .map((word) => {
+          if (draggingWordRef.current && draggingWordRef.current.id === word.id) return word;
+          let x = word.x;
+          const y = word.y + word.speed * delta;
+
+          const rect = {
+            left: x,
+            top: y,
+            right: x + 72,
+            bottom: y + 24,
+          };
+
+          const deflected = hitAreas.some((area) =>
+            rect.right > area.left && rect.left < area.right && rect.bottom > area.top && rect.top < area.bottom,
+          );
+
+          if (deflected) {
+            const rightSide = x + 96 < window.innerWidth;
+            x += rightSide ? 3 * delta : -3 * delta;
+          }
+
+          return { ...word, x, y };
+        })
+        .filter((word) => word.y < window.innerHeight + 40 && word.x > -100 && word.x < window.innerWidth + 100);
+
+      wordsRef.current = words;
+      setFallingWords(words);
+      frame = requestAnimationFrame(tick);
+    };
+
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [waterfallHidden, userId, loading, reducedMotion]);
+
+  const toggleWaterfall = useCallback(() => {
+    const nextHidden = !waterfallHidden;
+    storage.saveWaterfallHidden(nextHidden);
+    setWaterfallHidden(nextHidden);
+    if (nextHidden) {
+      wordsRef.current = [];
+      setFallingWords([]);
+    }
+  }, [waterfallHidden]);
+
+  const handlePointerMove = useCallback((event: PointerEvent) => {
+    const activeWord = draggingWordRef.current;
+    if (!activeWord) return;
+
+    const target = document.elementFromPoint(event.clientX, event.clientY);
+    const personEl = target?.closest<HTMLElement>("[data-person-id]");
+    const personId = personEl?.dataset.personId ?? "__unsorted__";
+    setDropTargetPerson(personId);
+
+    setFallingWords((current) =>
+      current.map((word) =>
+        word.id === activeWord.id ? { ...word, x: event.clientX + 18, y: event.clientY - 12, dragging: true } : word,
+      ),
+    );
+  }, []);
+
+  const stopDraggingWord = useCallback((event: PointerEvent) => {
+    const activeWord = draggingWordRef.current;
+    window.removeEventListener("pointermove", handlePointerMove);
+    window.removeEventListener("pointerup", stopDraggingWord);
+
+    if (!activeWord) {
+      setDropTargetPerson(null);
+      return;
+    }
+
+    const target = document.elementFromPoint(event.clientX, event.clientY);
+    const personEl = target?.closest<HTMLElement>("[data-person-id]");
+    const personId = personEl?.dataset.personId ?? null;
+    const isCanvasTarget = Boolean(target?.closest<HTMLElement>(`.${styles.unsorted}, .${styles.person}`));
+
+    setFallingWords((current) => current.filter((word) => word.id !== activeWord.id));
+    draggingWordRef.current = null;
+    setDropTargetPerson(null);
+
+    if (!isCanvasTarget) return;
+
+    if (activeWord.label === "details" || activeWord.label === "people") {
+      setInlinePrompt({ kind: activeWord.label, personId, x: event.clientX, y: event.clientY });
+      setInlineValue("");
+      return;
+    }
+
+    if (activeWord.label === "images") {
+      setPendingImagePerson(personId);
+      generalImageInputRef.current?.click();
+      return;
+    }
+
+    if (activeWord.label === "stickers") {
+      void perform(async () => {
+        await createCanvasSticker();
+        if (personId) {
+          const loaded = await loadCanvas();
+          const newest = [...loaded.unsorted, ...loaded.people.flatMap((item) => item.entries)].at(-1);
+          if (newest) await moveCanvasEntry(newest.id, personId);
+        }
+      });
+      return;
+    }
+
+    const frame = [0, 45, 90, 135, 180][jarFrame.current++ % 5];
+    void perform(() => createCanvasImageFromUrl(`/jar/frames/jar_${String(frame).padStart(3, "0")}.webp`, personId));
+  }, [handlePointerMove]);
+
+  const startDraggingWord = useCallback((word: FallingWord, event: React.PointerEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    draggingWordRef.current = word;
+    setFallingWords((current) =>
+      current.map((item) => (item.id === word.id ? { ...item, dragging: true } : item)),
+    );
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerup", stopDraggingWord);
+  }, [handlePointerMove, stopDraggingWord]);
 
   const refresh = useCallback(async () => {
     setLoading(true);
+    setFallingWords([]);
     try {
       setCanvas(await loadCanvas());
       setError("");
@@ -68,6 +261,7 @@ export default function CanvasWorkspace() {
         void refresh();
       } else {
         setCanvas(emptyCanvas);
+        setFallingWords([]);
         setLoading(false);
       }
     });
@@ -77,7 +271,10 @@ export default function CanvasWorkspace() {
         if (!active) return;
         setUserId(user?.id ?? null);
         if (user) void refresh();
-        else setLoading(false);
+        else {
+          setFallingWords([]);
+          setLoading(false);
+        }
       })
       .catch((sessionError: unknown) => {
         if (!active) return;
@@ -132,9 +329,28 @@ export default function CanvasWorkspace() {
     void perform(() => moveCanvasEntry(entryId, personId));
   }
 
-  async function handleImage(file: File | undefined, relatedEntryId: string | null) {
+  async function handleImage(
+    file: File | undefined,
+    relatedEntryId: string | null,
+    targetPersonId: string | null = null,
+  ) {
     if (!file) return;
-    await perform(() => createCanvasImage(file, relatedEntryId));
+    await perform(() => createCanvasImage(file, relatedEntryId, targetPersonId));
+  }
+
+  async function saveInlinePrompt(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!inlinePrompt || !inlineValue.trim()) return;
+
+    const value = inlineValue.trim();
+    const prompt = inlinePrompt;
+    await perform(() =>
+      prompt.kind === "details"
+        ? createCanvasText(value, prompt.personId)
+        : createCanvasPerson(value),
+    );
+    setInlinePrompt(null);
+    setInlineValue("");
   }
 
   async function share(personId: string | null) {
@@ -306,7 +522,10 @@ export default function CanvasWorkspace() {
             aria-label="Choose an image for your canvas"
             className={styles.hiddenInput}
             onChange={(event) => {
-              void handleImage(event.currentTarget.files?.[0], null);
+              const file = event.currentTarget.files?.[0];
+              const targetPersonId = pendingImagePerson;
+              setPendingImagePerson(null);
+              void handleImage(file, null, targetPersonId);
               event.currentTarget.value = "";
             }}
             ref={generalImageInputRef}
@@ -322,6 +541,9 @@ export default function CanvasWorkspace() {
           <button disabled={busy} onClick={() => void perform(createCanvasSticker)} type="button">
             Add re.KIN pot sticker
           </button>
+          <button className={styles.waterfallToggle} disabled={busy} onClick={toggleWaterfall} type="button">
+            {waterfallHidden ? "show waterfall" : "hide waterfall"}
+          </button>
         </div>
       </section>
       )}
@@ -329,6 +551,45 @@ export default function CanvasWorkspace() {
       <p aria-live="polite" className={styles.status} role={error ? "alert" : "status"}>
         {error}
       </p>
+
+      {inlinePrompt && (
+        <form
+          className={styles.dropPrompt}
+          onKeyDown={(event) => {
+            if (event.key === "Escape") {
+              setInlinePrompt(null);
+              setInlineValue("");
+            }
+          }}
+          onSubmit={saveInlinePrompt}
+          style={{ left: inlinePrompt.x, top: inlinePrompt.y }}
+        >
+          <input
+            autoFocus
+            maxLength={inlinePrompt.kind === "details" ? 1000 : 120}
+            onChange={(event) => setInlineValue(event.target.value)}
+            placeholder={inlinePrompt.kind === "details" ? "Add a detail" : "Their name"}
+            value={inlineValue}
+          />
+          <button type="submit">Save</button>
+        </form>
+      )}
+
+      {userId && !loading && !waterfallHidden && !reducedMotion && (
+        <div aria-hidden="true" className={styles.waterfallLayer}>
+          {fallingWords.map((word) => (
+            <button
+              className={`${styles.fallingWord} ${word.dragging ? styles.draggingWord : ""}`.trim()}
+              key={word.id}
+              onPointerDown={(event) => startDraggingWord(word, event)}
+              style={{ left: word.x, top: word.y }}
+              type="button"
+            >
+              {word.label}
+            </button>
+          ))}
+        </div>
+      )}
 
       {!configured ? (
         <div className={styles.notice}>
@@ -350,7 +611,8 @@ export default function CanvasWorkspace() {
         <div className={styles.canvasArea}>
           <div
             aria-label="Unsorted entries. Drag an entry into a person’s block."
-            className={styles.unsorted}
+            className={`${styles.unsorted} ${dropTargetPerson === "__unsorted__" ? styles.dropTarget : ""}`.trim()}
+            data-canvas-zone="unsorted"
             onDragOver={(event) => event.preventDefault()}
             onDrop={(event) => handleDrop(event, null)}
           >
@@ -382,6 +644,7 @@ export default function CanvasWorkspace() {
               return (
                   <PersonBlock
                     busy={busy}
+                    dropTarget={dropTargetPerson === person.id}
                     editing={editingPersonId === person.id}
                     key={person.id}
                     onDelete={() => {
@@ -496,6 +759,7 @@ function CanvasEntryItem({
 function PersonBlock({
   busy,
   children,
+  dropTarget = false,
   editing,
   onDelete,
   onDrop,
@@ -511,6 +775,7 @@ function PersonBlock({
 }: {
   busy: boolean;
   children: React.ReactNode;
+  dropTarget?: boolean;
   editing: boolean;
   onDelete: () => void;
   onDrop: (event: DragEvent<HTMLElement>) => void;
@@ -529,7 +794,8 @@ function PersonBlock({
   return (
     <section
       aria-label={`${person.name}’s block`}
-      className={styles.person}
+      className={`${styles.person} ${dropTarget ? styles.dropTarget : ""}`.trim()}
+      data-person-id={person.id}
       onDragOver={(event) => event.preventDefault()}
       onDrop={onDrop}
     >
@@ -572,8 +838,14 @@ function PersonBlock({
             Rename
           </button>
         )}
-        <button className={styles.smallAction} disabled={busy} onClick={onDelete} type="button">
-          Delete person
+        <button
+          aria-label={`Delete ${person.name}`}
+          className={styles.personDelete}
+          disabled={busy}
+          onClick={onDelete}
+          type="button"
+        >
+          ×
         </button>
       </div>
       <div className={styles.entries}>{children}</div>

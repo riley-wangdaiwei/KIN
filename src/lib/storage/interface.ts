@@ -12,6 +12,8 @@ export interface StorageAdapter {
   saveBoardIntroSeen(seen: boolean): void;
   getHomepageSeen(): boolean;
   saveHomepageSeen(seen: boolean): void;
+  getWaterfallHidden(): boolean;
+  saveWaterfallHidden(hidden: boolean): void;
   getGiftBrief(): GiftBrief | null;
   saveGiftBrief(brief: GiftBrief): void;
   getGiftIntents(): GiftIntent[];

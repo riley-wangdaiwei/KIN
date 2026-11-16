@@ -41,11 +41,14 @@ async function requireUser(): Promise<User> {
 async function toCanvasEntry(row: EntryRow): Promise<CanvasEntry> {
   let imageUrl: string | null = null;
   if (row.kind === "image" && row.storage_path) {
+    if (row.storage_path.startsWith("/")) imageUrl = row.storage_path;
+    else {
     const { data, error } = await requireSupabase()
       .storage.from("canvas-images")
       .createSignedUrl(row.storage_path, 3600);
     if (error) throw new Error(`Could not load a canvas image: ${error.message}`);
     imageUrl = data.signedUrl;
+    }
   } else if (row.kind === "sticker") {
     imageUrl = "/pot.jpg";
   }
@@ -145,13 +148,14 @@ export async function deleteCanvasPerson(personId: string): Promise<void> {
   if (error) throw new Error(`Could not delete this person: ${error.message}`);
 }
 
-export async function createCanvasText(content: string): Promise<void> {
+export async function createCanvasText(content: string, personId: string | null = null): Promise<void> {
   const user = await requireUser();
   const { error } = await requireSupabase()
     .from("canvas_entries")
     .insert({
       user_id: user.id,
       kind: "text",
+      person_id: personId,
       content: content.trim(),
     });
   if (error) throw new Error(`Could not add this note: ${error.message}`);
@@ -174,6 +178,7 @@ async function parentPersonId(
 export async function createCanvasImage(
   file: File,
   relatedEntryId: string | null = null,
+  targetPersonId: string | null = null,
 ): Promise<void> {
   if (!file.type.startsWith("image/")) {
     throw new Error("Choose an image file.");
@@ -186,7 +191,7 @@ export async function createCanvasImage(
   const supabase = requireSupabase();
   const id = crypto.randomUUID();
   const storagePath = `${user.id}/${id}`;
-  const personId = await parentPersonId(relatedEntryId);
+  const personId = relatedEntryId ? await parentPersonId(relatedEntryId) : targetPersonId;
   const { error: uploadError } = await supabase.storage
     .from("canvas-images")
     .upload(storagePath, file, { contentType: file.type, upsert: false });
@@ -222,6 +227,20 @@ export async function createCanvasSticker(): Promise<void> {
     content: "pot",
   });
   if (error) throw new Error(`Could not add the re.KIN pot sticker: ${error.message}`);
+}
+
+export async function createCanvasImageFromUrl(path: string, personId: string | null): Promise<void> {
+  if (!/^\/jar\/frames\/jar_\d{3}\.webp$/.test(path)) throw new Error("Invalid public canvas image.");
+  const user = await requireUser();
+  const { error } = await requireSupabase().from("canvas_entries").insert({
+    user_id: user.id, person_id: personId, kind: "image", content: "", storage_path: path,
+  });
+  if (error) throw new Error(`Could not add this image: ${error.message}`);
+}
+
+export async function setCanvasEntryPerson(entryId: string, personId: string | null): Promise<void> {
+  const { error } = await requireSupabase().from("canvas_entries").update({ person_id: personId }).eq("id", entryId);
+  if (error) throw new Error(`Could not move this entry: ${error.message}`);
 }
 
 export async function moveCanvasEntry(
@@ -266,7 +285,7 @@ export async function deleteCanvasEntry(entryId: string): Promise<void> {
         throw new Error(`The entry was deleted, but its images could not be removed: ${cleanupError.message}`);
       }
     }
-  } else if (data.storage_path) {
+  } else if (data.storage_path && !data.storage_path.startsWith("/")) {
     const { error: cleanupError } = await supabase.storage
       .from("canvas-images")
       .remove([data.storage_path]);

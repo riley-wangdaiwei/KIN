@@ -112,11 +112,14 @@ export async function GET(
   async function toEntry(row: EntryRow): Promise<CanvasEntry> {
     let imageUrl: string | null = null;
     if (row.kind === "image" && row.storage_path) {
+      if (row.storage_path.startsWith("/")) imageUrl = row.storage_path;
+      else {
       const { data, error } = await supabase.storage
         .from("canvas-images")
         .createSignedUrl(row.storage_path, 600);
       if (error) throw new Error("Could not load an image for this share.");
       imageUrl = data.signedUrl;
+      }
     } else if (row.kind === "sticker") {
       imageUrl = "/pot.jpg";
     }
