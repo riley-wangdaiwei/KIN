@@ -282,7 +282,12 @@ export default function PlaygroundExperience() {
           className={`${styles.ending} ${showEnding ? styles.visible : styles.hidden}`}
         >
           <Link href="/my-gifting-identity">
-            Tell us who you have in mind.
+            <Image
+              src="/rekin-tell-us-white.png"
+              alt="Tell us who you have in mind."
+              width={3334}
+              height={345}
+            />
           </Link>
         </div>
       </div>

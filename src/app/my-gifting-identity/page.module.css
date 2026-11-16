@@ -27,13 +27,19 @@
 }
 
 .questionnaire h1 {
-  max-width: 13ch;
+  max-width: none;
   margin: 1rem 0 0;
   font-family: var(--kin-display-serif);
   font-size: clamp(2.7rem, 7vw, 6rem);
   font-weight: 400;
   letter-spacing: -0.045em;
   line-height: 0.88;
+}
+
+.questionnaire h1 img {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
 .canvasLink {

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import PlaygroundChrome from "@/components/site/PlaygroundChrome";
 import IdentityQuestionnaire from "./identity-questionnaire";
@@ -20,7 +21,14 @@ export default function MyGiftingIdentityPage() {
           id="start-a-project"
         >
           <span className={styles.metadata}>START A PROJECT / 01</span>
-          <h1 id="project-title">Tell us who you have in mind.</h1>
+          <h1 id="project-title">
+            <Image
+              src="/rekin-tell-us-white.png"
+              alt="Tell us who you have in mind."
+              width={3334}
+              height={345}
+            />
+          </h1>
           <p className={styles.intro}>
             Share a few details to begin a curation conversation.
           </p>
