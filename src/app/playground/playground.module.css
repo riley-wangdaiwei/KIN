@@ -48,6 +48,7 @@
   transition: width 700ms ease, top 700ms ease, left 700ms ease, opacity 450ms ease;
 }
 .vase canvas { display: block; width: 100%; height: 100%; }
+.vaseChapter2 { left: 50%; width: min(34vw, 27rem); }
 .vaseEnding { top: 75%; left: 78%; width: min(22vw, 18rem); }
 
 .story {
@@ -156,40 +157,76 @@
   position: absolute;
   z-index: 3;
   inset: 0;
+  --orbit-radius: min(12.5vw, 20vh);
+  --orbit-center-y: 60%;
+  --orbit-jar-size: clamp(3.6rem, 5.6vw, 5.2rem);
   pointer-events: none;
 }
 .orbitItem {
   position: absolute;
   display: grid;
-  grid-template-columns: clamp(4.5rem, 9vw, 7.5rem) minmax(0, 1fr);
+  grid-template-columns: var(--orbit-jar-size) minmax(0, 1fr);
   align-items: center;
   gap: 0.7rem;
-  width: min(29vw, 24rem);
+  width: min(28vw, 24rem);
   opacity: 0;
-  transform: translate(32vw, 18vh) scale(0.2);
+  transform: translate(30vw, 18vh) scale(0.2);
   transition: opacity 420ms ease, transform 560ms cubic-bezier(0.2, 0.75, 0.25, 1);
 }
-.orbitItem2 { transform: translate(-32vw, 18vh) scale(0.2); }
-.orbitItem3 { transform: translate(32vw, -18vh) scale(0.2); }
-.orbitItem4 { transform: translate(-32vw, -18vh) scale(0.2); }
+.orbitItem2 {
+  top: calc(var(--orbit-center-y) - var(--orbit-radius) - var(--orbit-jar-size) / 2);
+  left: calc(50% - min(11.5vw, 9.5rem));
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+  width: min(23vw, 19rem);
+  transform: translate(0, var(--orbit-radius)) scale(0.2);
+}
+.orbitItem3 {
+  top: calc(var(--orbit-center-y) + var(--orbit-radius) - var(--orbit-jar-size) / 2);
+  left: calc(50% - min(12.5vw, 10.5rem));
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+  width: min(25vw, 21rem);
+  transform: translate(0, calc(0px - var(--orbit-radius))) scale(0.2);
+}
+.orbitItem4 {
+  top: calc(var(--orbit-center-y) - var(--orbit-jar-size) / 2);
+  left: calc(50% + var(--orbit-radius) - var(--orbit-jar-size) / 2);
+  width: min(28vw, 24rem);
+  transform: translate(calc(0px - var(--orbit-radius)), 0) scale(0.2);
+}
 .orbitItemVisible {
   opacity: 1;
   transform: translate(0, 0) scale(1);
 }
-.orbitItem1 { top: 30%; left: 4%; }
-.orbitItem2 { top: 30%; right: 4%; }
-.orbitItem3 { bottom: 5%; left: 4%; }
-.orbitItem4 { right: 4%; bottom: 5%; }
+.orbitItem1 {
+  top: calc(var(--orbit-center-y) - var(--orbit-jar-size) / 2);
+  left: auto;
+  right: calc(50% + var(--orbit-radius) - var(--orbit-jar-size) / 2);
+  grid-template-columns: minmax(0, 1fr) var(--orbit-jar-size);
+  width: min(34vw, 29rem);
+}
+.orbitItem1 .orbitCopy,
+.orbitItem4 .orbitJar { order: 1; }
+.orbitItem1 .orbitJar { order: 2; }
+.orbitItem4 .orbitCopy { order: 2; }
+.orbitItem2 .orbitCopy { order: 1; }
+.orbitItem2 .orbitJar { order: 2; }
+.orbitItem1 .orbitJar { transform: scale(1.08); }
+.orbitItem2 .orbitJar { transform: scale(1.04); }
+.orbitItem3 .orbitJar { transform: scale(1.25); }
+.orbitItem4 .orbitJar { transform: scale(1.02); }
 .orbitJar {
   display: block;
-  width: 100%;
-  height: auto;
-  max-height: 9rem;
+  width: var(--orbit-jar-size);
+  height: var(--orbit-jar-size);
   object-fit: contain;
 }
 .orbitCopy {
+  min-width: 0;
   opacity: 0;
   transform: translateY(0.35rem);
+  text-align: left;
   transition: opacity 350ms ease 260ms, transform 350ms ease 260ms;
 }
 .orbitItemVisible .orbitCopy {
@@ -211,6 +248,8 @@
   font-size: clamp(0.66rem, 0.85vw, 0.78rem);
   line-height: 1.16;
 }
+.orbitItem2 .orbitCopy,
+.orbitItem3 .orbitCopy { width: 100%; }
 .visible { opacity: 1; pointer-events: auto; visibility: visible; }
 .hidden { opacity: 0; pointer-events: none; visibility: hidden; }
 .sideNav {
@@ -254,6 +293,7 @@
 @media (max-width: 700px) {
   .sticky { min-height: 38rem; }
   .vase { top: 32%; left: 50%; width: 88vw; }
+  .vaseChapter2 { top: 56%; left: 50%; width: 42vw; }
   .vaseEnding { top: 73%; left: 70%; width: 66vw; }
   .story { top: 54%; left: 7vw; width: 86vw; transform: translateY(-38%); }
   .storyChapter2 { top: 5%; left: 7vw; width: 86vw; transform: none; }
@@ -265,15 +305,37 @@
   .packageItem dt { font-size: 0.98rem; }
   .packageItem dd { font-size: 0.7rem; }
   .orbitItem {
-    grid-template-columns: 3.4rem minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) 3rem;
     gap: 0.35rem;
-    width: 42vw;
+    width: 44vw;
   }
-  .orbitItem1 { top: 29%; left: 2%; }
-  .orbitItem2 { top: 29%; right: 2%; }
-  .orbitItem3 { bottom: 4%; left: 2%; }
-  .orbitItem4 { right: 2%; bottom: 4%; }
-  .orbitJar { max-height: 4.5rem; }
+  .packageOrbit {
+    --orbit-radius: min(21vw, 14vh);
+    --orbit-center-y: 60%;
+    --orbit-jar-size: 2.72rem;
+  }
+  .orbitItem1 {
+    right: calc(50% + var(--orbit-radius) - var(--orbit-jar-size) / 2);
+    width: 32vw;
+    grid-template-columns: minmax(0, 1fr) var(--orbit-jar-size);
+  }
+  .orbitItem2 {
+    top: calc(var(--orbit-center-y) - var(--orbit-radius) - var(--orbit-jar-size) / 2);
+    left: calc(50% - 18vw);
+    grid-template-columns: minmax(0, 1fr);
+    width: 36vw;
+  }
+  .orbitItem3 {
+    top: calc(var(--orbit-center-y) + var(--orbit-radius) - var(--orbit-jar-size) / 2);
+    left: calc(50% - 18vw);
+    grid-template-columns: minmax(0, 1fr);
+    width: 36vw;
+  }
+  .orbitItem4 {
+    top: calc(var(--orbit-center-y) - var(--orbit-jar-size) / 2);
+    left: calc(50% + var(--orbit-radius) - var(--orbit-jar-size) / 2);
+    width: 32vw;
+  }
   .orbitCopy h3 { font-size: 0.72rem; }
   .orbitCopy p { font-size: 0.62rem; line-height: 1.1; }
   .sideNav { top: auto; right: 0.8rem; bottom: 5.2rem; gap: 0.55rem; transform: none; }

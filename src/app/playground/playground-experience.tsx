@@ -180,13 +180,13 @@ export default function PlaygroundExperience() {
   const packageProgress = Math.min(1, Math.max(0, (chapterProgress - 0.5) * 2));
   const visiblePackageCount = reducedMotion
     ? packageStep?.rows?.length ?? 0
-    : Math.floor(packageProgress * (packageStep?.rows?.length ?? 0));
+    : Math.ceil(packageProgress * (packageStep?.rows?.length ?? 0));
 
   return (
     <section className={styles.experience} ref={experienceRef}>
       <div className={styles.sticky}>
         <div
-          className={`${styles.vase} ${isOpening || activeChapter === 0 ? styles.vaseIntro : ""} ${showEnding ? styles.vaseEnding : ""}`}
+          className={`${styles.vase} ${isOpening || activeChapter === 0 ? styles.vaseIntro : ""} ${activeChapter === 1 ? styles.vaseChapter2 : ""} ${showEnding ? styles.vaseEnding : ""}`}
           aria-hidden="true"
         >
           <JarScroll progress={progress} reducedMotion={reducedMotion} />
