@@ -8,6 +8,7 @@ export interface CanvasEntry {
   content: string;
   storagePath: string | null;
   imageUrl: string | null;
+  imageSize: number | null;
   createdAt: string;
 }
 

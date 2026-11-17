@@ -3,27 +3,21 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { giftPackages } from "@/data/gifts";
 import { artistPartnerNames, identityExamples } from "@/data/hover-lists";
 import { storage } from "@/lib/storage";
 import JarScroll from "@/components/site/JarScroll";
 import HoverRingMenu from "@/components/site/HoverRingMenu";
 import styles from "./playground.module.css";
 
-const twoPlaces = giftPackages.find((gift) => gift.slug === "two-places-one-sky");
-
-if (!twoPlaces) {
-  throw new Error('The "Two Places, One Sky" gift package is missing.');
-}
-
 type StoryStep = {
   body?: string[];
   introduction?: string;
   conclusion?: string;
   rows?: { label: string; description: string | string[] }[];
+  circles?: boolean;
 };
 
-const chapters: { title: string; steps: StoryStep[] }[] = [
+const chapters: { title: string; subtitle?: string; steps: StoryStep[] }[] = [
   {
     title: "less generic gifting",
     steps: [
@@ -41,6 +35,7 @@ const chapters: { title: string; steps: StoryStep[] }[] = [
   },
   {
     title: "more oddly specific art about your favorite people",
+    subtitle: "A private gift web page, with a QR code to share it any way you like.",
     steps: [
       {
         body: [
@@ -48,30 +43,23 @@ const chapters: { title: string; steps: StoryStep[] }[] = [
         ],
       },
       {
-        introduction: "For two people who share a history across two places.",
+        circles: true,
         rows: [
           {
             label: "Hero gift",
-            description: twoPlaces.heroGift,
+            description: "One custom piece made with the artist, like a poem, photo album, or small game.",
           },
           {
             label: "Fillings",
-            description: twoPlaces.fillings,
-          },
-          {
-            label: "Personal message",
-            description: twoPlaces.personalMessage,
+            description: "Optional extras: More digital works by the artist; A license to an existing piece, like a poem or photo; Flowers from partner florists (coming soon).",
           },
           {
             label: "README guide",
-            description: [
-              "Use the included key to find the places, dates, and shared markers.",
-              "Download the keepsake edition.",
-            ],
+            description: "How to use the page, what you own, and how it's stored and kept online.",
           },
           {
             label: "Artist's process note",
-            description: twoPlaces.artistProcessNote,
+            description: "How the artist turned what you shared about the recipient into this gift.",
           },
         ],
         conclusion: "When it's ready, you send them a private link.",
@@ -90,6 +78,7 @@ const chapters: { title: string; steps: StoryStep[] }[] = [
         body: [
           "Think of it as collaborating with artists to shape your own identity: not just a personal style, but artists you keep coming back to.",
           "We help you refine it, and you can share it whenever you like.",
+          "Keep collaborating and earn tokens — a way to stay engaged with the artists you love.",
         ],
       },
     ],
@@ -107,6 +96,13 @@ const sentenceImages = [
   { src: "/rekin-sentence1-white.png", width: 2589, height: 345 },
   { src: "/rekin-sentence2-white.png", width: 3764, height: 607 },
   { src: "/rekin-sentence3-white.png", width: 4067, height: 607 },
+];
+
+const packageImages = [
+  "/jars/jar_herogift.png",
+  "/jars/jar_fillings.png",
+  "/jars/jar_readme.png",
+  "/jars/jar_processnote.png",
 ];
 
 export default function PlaygroundExperience() {
@@ -180,6 +176,11 @@ export default function PlaygroundExperience() {
       ? sceneText.steps
       : [sceneText.steps[stepIndex]]
     : [];
+  const packageStep = sceneText?.steps[1];
+  const packageProgress = Math.min(1, Math.max(0, (chapterProgress - 0.5) * 2));
+  const visiblePackageCount = reducedMotion
+    ? packageStep?.rows?.length ?? 0
+    : Math.floor(packageProgress * (packageStep?.rows?.length ?? 0));
 
   return (
     <section className={styles.experience} ref={experienceRef}>
@@ -206,7 +207,7 @@ export default function PlaygroundExperience() {
           </div>
         ) : (
           <div
-            className={`${styles.story} ${sceneText ? styles.visible : styles.hidden}`}
+            className={`${styles.story} ${activeChapter === 1 ? styles.storyChapter2 : ""} ${sceneText ? styles.visible : styles.hidden}`}
             aria-live="polite"
             aria-atomic="true"
           >
@@ -221,6 +222,9 @@ export default function PlaygroundExperience() {
                     height={sentenceImages[activeChapter].height}
                   />
                 </h2>
+                {sceneText.subtitle && (
+                  <p className={styles.chapterSubtitle}>{sceneText.subtitle}</p>
+                )}
                 <div className={styles.storyContent}>
                   {visibleSteps.map((step, index) => (
                     <div
@@ -230,7 +234,7 @@ export default function PlaygroundExperience() {
                       {step.introduction && (
                         <p className={styles.introduction}>{step.introduction}</p>
                       )}
-                      {step.rows && (
+                      {step.rows && !step.circles && (
                         <dl className={styles.packageContents}>
                           {step.rows.map((row) => (
                             <div className={styles.packageItem} key={row.label}>
@@ -255,6 +259,36 @@ export default function PlaygroundExperience() {
                 </div>
               </>
             )}
+          </div>
+        )}
+
+        {activeChapter === 1 && packageStep?.circles && (
+          <div
+            className={styles.packageOrbit}
+            aria-label="What comes with the gift"
+          >
+            {packageStep.rows?.map((row, index) => {
+              const isVisible = index < visiblePackageCount;
+              return (
+                <article
+                  className={`${styles.orbitItem} ${styles[`orbitItem${index + 1}`]} ${isVisible ? styles.orbitItemVisible : ""}`}
+                  key={row.label}
+                  aria-hidden={!isVisible}
+                >
+                  <Image
+                    className={styles.orbitJar}
+                    src={packageImages[index]}
+                    alt=""
+                    width={128}
+                    height={128}
+                  />
+                  <div className={styles.orbitCopy}>
+                    <h3>{row.label}</h3>
+                    <p>{row.description}</p>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         )}
 

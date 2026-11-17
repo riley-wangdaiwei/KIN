@@ -256,6 +256,7 @@
 
 .textEntry,
 .imageEntry {
+  position: relative;
   color: inherit;
 }
 
@@ -272,9 +273,44 @@
   display: inline-block;
   width: auto;
   height: clamp(2rem, 4vw, 3.25rem);
-  max-width: min(35vw, 12rem);
-  object-fit: cover;
+  max-width: 100%;
+  object-fit: contain;
   vertical-align: middle;
+}
+
+.resizeHandle {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+  opacity: 0;
+  cursor: nwse-resize;
+  touch-action: none;
+  transition: opacity 120ms ease;
+}
+
+.resizeHandle::before,
+.resizeHandle::after {
+  position: absolute;
+  right: 0.18rem;
+  bottom: 0.18rem;
+  width: 0.65rem;
+  height: 1px;
+  background: rgb(255 255 255 / 75%);
+  content: "";
+  transform: rotate(-45deg);
+}
+
+.resizeHandle::after {
+  right: 0.22rem;
+  bottom: 0.4rem;
+  width: 0.4rem;
+}
+
+.entry:hover .resizeHandle,
+.entry:focus-within .resizeHandle {
+  opacity: 1;
 }
 
 .hiddenInput {

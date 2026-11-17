@@ -106,6 +106,7 @@ function EntryImage({ entry }: { entry: CanvasEntry }) {
       alt={entry.kind === "sticker" ? "re.KIN pot sticker" : "Canvas image"}
       className={styles.image}
       src={entry.imageUrl}
+      style={entry.imageSize === null ? undefined : { height: `${entry.imageSize}px` }}
     />
   );
 }

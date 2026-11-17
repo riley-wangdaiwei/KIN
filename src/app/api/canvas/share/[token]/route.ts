@@ -24,6 +24,7 @@ interface EntryRow {
   kind: "text" | "image" | "sticker";
   content: string;
   storage_path: string | null;
+  image_size: number | null;
   created_at: string;
 }
 
@@ -86,7 +87,7 @@ export async function GET(
       : peopleQuery,
     supabase
       .from("canvas_entries")
-      .select("id,person_id,related_entry_id,kind,content,storage_path,created_at")
+      .select("id,person_id,related_entry_id,kind,content,storage_path,image_size,created_at")
       .eq("user_id", shareRow.user_id)
       .is("person_id", null)
       .order("sort_order", { ascending: true }),
@@ -100,7 +101,7 @@ export async function GET(
     personRows.map((person) =>
       supabase
         .from("canvas_entries")
-        .select("id,person_id,related_entry_id,kind,content,storage_path,created_at")
+        .select("id,person_id,related_entry_id,kind,content,storage_path,image_size,created_at")
         .eq("user_id", shareRow.user_id)
         .eq("person_id", person.id)
         .order("sort_order", { ascending: true }),
@@ -142,6 +143,7 @@ export async function GET(
       content: row.content,
       storagePath: null,
       imageUrl,
+      imageSize: row.image_size,
       createdAt: row.created_at,
     };
   }

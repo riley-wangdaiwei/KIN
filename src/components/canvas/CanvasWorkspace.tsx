@@ -17,6 +17,7 @@ import {
   moveCanvasEntry,
   renameCanvasPerson,
   subscribeToCanvasAuth,
+  updateCanvasEntrySize,
 } from "@/lib/storage/canvas-adapter";
 import { getBrowserSupabase } from "@/lib/supabase/browser";
 import type { CanvasEntry, CanvasPerson, GiftingCanvas } from "@/features/canvas/types";
@@ -27,7 +28,6 @@ const providedStickerKeys = ["humankind", "rekin", "love", "foto"] as const;
 const STREAM_ROW_HEIGHT = 28;
 const STREAM_SPEED = 1.25;
 const stickerImageSources: Record<string, string> = {
-  pot: "/pot.jpg",
   humankind: "/stickers/humankind.png",
   rekin: "/stickers/rekin.png",
   love: "/stickers/love.png",
@@ -78,7 +78,6 @@ function buildStreamSequence() {
     { kind: "word", label: "people" },
     { kind: "word", label: "images" },
     { kind: "word", label: "jars" },
-    { kind: "image", imageSrc: stickerImageSources.pot, stickerKey: "pot" },
     ...stickerImages,
   ] as const;
 
@@ -90,9 +89,9 @@ function getColumnX() {
   return Math.max(48, window.innerWidth - 100);
 }
 
-function makeStreamItem(id: number, index: number): StreamItem {
+function makeStreamItem(id: number, index: number, startIndex: number, verticalOffset: number): StreamItem {
   const sequence = buildStreamSequence();
-  const template = sequence[index % sequence.length];
+  const template = sequence[(startIndex + index) % sequence.length];
 
   return {
     id,
@@ -101,15 +100,21 @@ function makeStreamItem(id: number, index: number): StreamItem {
     imageSrc: template.kind === "image" ? template.imageSrc : undefined,
     stickerKey: template.kind === "image" ? template.stickerKey : undefined,
     x: getColumnX(),
-    y: index * STREAM_ROW_HEIGHT - STREAM_ROW_HEIGHT,
+    y: index * STREAM_ROW_HEIGHT - STREAM_ROW_HEIGHT + verticalOffset,
     speed: STREAM_SPEED,
   };
 }
 
 function getInitialStreamItems() {
-  if (typeof window === "undefined") return [];
+  if (typeof window === "undefined") return { items: [] as StreamItem[], nextSequenceIndex: 0 };
   const count = Math.ceil(window.innerHeight / STREAM_ROW_HEIGHT) + 1;
-  return Array.from({ length: count }).map((_, index) => makeStreamItem(index + 1, index));
+  const sequenceLength = buildStreamSequence().length;
+  const startIndex = Math.floor(Math.random() * sequenceLength);
+  const verticalOffset = Math.random() * STREAM_ROW_HEIGHT;
+  return {
+    items: Array.from({ length: count }).map((_, index) => makeStreamItem(index + 1, index, startIndex, verticalOffset)),
+    nextSequenceIndex: startIndex + count,
+  };
 }
 
 export default function CanvasWorkspace() {
@@ -139,11 +144,28 @@ export default function CanvasWorkspace() {
   const nextStreamId = useRef(1);
   const nextSequenceIndex = useRef(0);
   const nextJarFrame = useRef(0);
+  const pointerNearStream = useRef(false);
   const reducedMotion = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   useEffect(() => {
     streamRef.current = streamItems;
   }, [streamItems]);
+
+  useEffect(() => {
+    const updatePointerProximity = (event: PointerEvent) => {
+      const columnX = getColumnX();
+      pointerNearStream.current = event.clientX >= columnX - 100 && event.clientX <= window.innerWidth;
+    };
+    const clearPointerProximity = () => {
+      pointerNearStream.current = false;
+    };
+    window.addEventListener("pointermove", updatePointerProximity);
+    window.addEventListener("pointerleave", clearPointerProximity);
+    return () => {
+      window.removeEventListener("pointermove", updatePointerProximity);
+      window.removeEventListener("pointerleave", clearPointerProximity);
+    };
+  }, []);
 
   useEffect(() => {
     if (!userId) {
@@ -155,9 +177,9 @@ export default function CanvasWorkspace() {
     if (loading || streamRef.current.length > 0) return;
 
     const initial = getInitialStreamItems();
-    const active = initial;
+    const active = initial.items;
     nextStreamId.current = active.length + 1;
-    nextSequenceIndex.current = active.length;
+    nextSequenceIndex.current = initial.nextSequenceIndex;
     setStreamItems(active);
     streamRef.current = active;
   }, [loading, reducedMotion, userId]);
@@ -167,6 +189,10 @@ export default function CanvasWorkspace() {
 
     let frame = 0;
     const tick = () => {
+      if (draggingWordRef.current || pointerNearStream.current) {
+        frame = requestAnimationFrame(tick);
+        return;
+      }
       const sequence = buildStreamSequence();
       const hitAreas = [...document.querySelectorAll<HTMLElement>(
         `.${styles.unsorted}, .${styles.person}, [data-canvas-obstacle]`,
@@ -383,7 +409,39 @@ export default function CanvasWorkspace() {
     setStreamDragging(false);
     const entryId = event.dataTransfer.getData("text/canvas-entry-id");
     if (!entryId) return;
-    void perform(() => moveCanvasEntry(entryId, personId));
+
+    const groupEntries = personId === null
+      ? canvas.unsorted
+      : canvas.people.find((person) => person.id === personId)?.entries ?? [];
+    const target = event.target instanceof HTMLElement ? event.target : null;
+    const entriesContainer = target?.closest<HTMLElement>(`.${styles.entries}`);
+    const root = event.currentTarget;
+    const targetElement = target?.closest<HTMLElement>("[data-canvas-entry-id]") ?? null;
+    if (targetElement?.dataset.canvasEntryId === entryId) return;
+    const targetRecord = targetElement
+      ? groupEntries.find((entry) => entry.id === targetElement.dataset.canvasEntryId)
+      : undefined;
+    const targetTopLevel = targetRecord?.relatedEntryId
+      ? groupEntries.find((entry) => entry.id === targetRecord.relatedEntryId)
+      : targetRecord;
+    const orderedEntries = groupEntries.filter((entry) => entry.id !== entryId && entry.relatedEntryId === null);
+    const targetVisual = targetRecord?.relatedEntryId
+      ? targetElement?.closest<HTMLElement>(`.${styles.entryLine}`) ?? targetElement
+      : targetElement;
+    const targetRect = targetVisual?.getBoundingClientRect();
+    const targetIsInSecondHalf = Boolean(targetRect && event.clientY >= targetRect.top + targetRect.height / 2);
+    const nextTarget = targetTopLevel
+      ? orderedEntries[orderedEntries.findIndex((entry) => entry.id === targetTopLevel.id) + 1]
+      : undefined;
+    const beforeEntryId = targetTopLevel
+      ? targetIsInSecondHalf ? nextTarget?.id ?? null : targetTopLevel.id
+      : entriesContainer
+        ? orderedEntries.find((entry) => {
+            const element = root.querySelector<HTMLElement>(`[data-canvas-entry-id="${entry.id}"]`);
+            return element ? event.clientY < element.getBoundingClientRect().top + element.getBoundingClientRect().height / 2 : false;
+          })?.id ?? null
+        : null;
+    void perform(() => moveCanvasEntry(entryId, personId, beforeEntryId));
   }
 
   async function handleImageSelection(file: File | undefined, relatedEntryId: string | null, targetPersonId: string | null) {
@@ -450,6 +508,7 @@ export default function CanvasWorkspace() {
                 busy={busy}
                 entry={entry}
                 onDelete={() => void perform(() => deleteCanvasEntry(entry.id))}
+                onResize={(size) => void perform(() => updateCanvasEntrySize(entry.id, size))}
                 onStartDrag={(event) => {
                   event.dataTransfer.setData("text/canvas-entry-id", entry.id);
                   event.dataTransfer.effectAllowed = "move";
@@ -461,6 +520,7 @@ export default function CanvasWorkspace() {
                   entry={image}
                   key={image.id}
                   onDelete={() => void perform(() => deleteCanvasEntry(image.id))}
+                  onResize={(size) => void perform(() => updateCanvasEntrySize(image.id, size))}
                   onStartDrag={(event) => {
                     event.stopPropagation();
                     event.dataTransfer.setData("text/canvas-entry-id", image.id);
@@ -477,6 +537,7 @@ export default function CanvasWorkspace() {
             entry={entry}
             key={entry.id}
             onDelete={() => void perform(() => deleteCanvasEntry(entry.id))}
+            onResize={(size) => void perform(() => updateCanvasEntrySize(entry.id, size))}
             onStartDrag={(event) => {
               event.dataTransfer.setData("text/canvas-entry-id", entry.id);
               event.dataTransfer.effectAllowed = "move";
@@ -614,6 +675,7 @@ export default function CanvasWorkspace() {
                       });
                     }}
                     onDeleteEntry={(entryId) => void perform(() => deleteCanvasEntry(entryId))}
+                    onResizeEntry={(entryId, size) => void perform(() => updateCanvasEntrySize(entryId, size))}
                     onDragOver={(event) => {
                       event.preventDefault();
                       setStreamDragging(true);
@@ -650,16 +712,65 @@ function CanvasEntryItem({
   busy,
   entry,
   onDelete,
+  onResize,
   onStartDrag,
 }: {
   busy: boolean;
   entry: CanvasEntry;
   onDelete: () => void;
+  onResize?: (size: number) => void;
   onStartDrag: (event: DragEvent<HTMLElement>) => void;
 }) {
+  const [previewSize, setPreviewSize] = useState<number | null>(null);
+  const resizeStart = useRef<{ x: number; y: number; size: number } | null>(null);
+  const imageSize = previewSize ?? entry.imageSize;
+
+  function startResize(event: ReactPointerEvent<HTMLButtonElement>) {
+    if (!onResize || entry.kind === "text" || event.button !== 0) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const image = event.currentTarget.closest(".entry")?.querySelector("img");
+    resizeStart.current = {
+      x: event.clientX,
+      y: event.clientY,
+      size: imageSize ?? image?.getBoundingClientRect().height ?? 48,
+    };
+    const updatePreview = (moveEvent: PointerEvent) => {
+      const start = resizeStart.current;
+      if (!start) return;
+      const availableWidth = document.querySelector<HTMLElement>(`.${styles.canvasArea}`)?.clientWidth ?? window.innerWidth;
+      const size = Math.round(Math.min(availableWidth, Math.max(16, start.size + (moveEvent.clientX - start.x + moveEvent.clientY - start.y) / 2)));
+      setPreviewSize(size);
+    };
+    const finishResize = (upEvent: PointerEvent) => {
+      const start = resizeStart.current;
+      if (!start) return;
+      const availableWidth = document.querySelector<HTMLElement>(`.${styles.canvasArea}`)?.clientWidth ?? window.innerWidth;
+      const size = Math.round(Math.min(availableWidth, Math.max(16, start.size + (upEvent.clientX - start.x + upEvent.clientY - start.y) / 2)));
+      resizeStart.current = null;
+      window.removeEventListener("pointermove", updatePreview);
+      window.removeEventListener("pointerup", finishResize);
+      window.removeEventListener("pointercancel", cancelResize);
+      setPreviewSize(size);
+      onResize(size);
+    };
+    const cancelResize = () => {
+      resizeStart.current = null;
+      window.removeEventListener("pointermove", updatePreview);
+      window.removeEventListener("pointerup", finishResize);
+      window.removeEventListener("pointercancel", cancelResize);
+      setPreviewSize(null);
+    };
+    window.addEventListener("pointermove", updatePreview);
+    window.addEventListener("pointerup", finishResize);
+    window.addEventListener("pointercancel", cancelResize);
+  }
+
   return (
     <article
       className={`${styles.entry} ${entry.kind === "text" ? styles.textEntry : styles.imageEntry}`}
+      data-canvas-entry-id={entry.id}
+      data-entry-id={entry.kind === "text" ? entry.id : undefined}
       draggable
       onDragStart={onStartDrag}
     >
@@ -672,8 +783,12 @@ function CanvasEntryItem({
             alt={entry.kind === "sticker" ? `re.KIN ${entry.content || "sticker"} sticker` : "Canvas image"}
             className={styles.entryImage}
             src={entry.imageUrl}
+            style={imageSize === null ? undefined : { height: `${imageSize}px` }}
           />
         )
+      )}
+      {entry.kind !== "text" && onResize && (
+        <button aria-label="Resize image" className={styles.resizeHandle} onPointerDown={startResize} type="button" />
       )}
       <button aria-label="Delete entry" className={styles.deleteEntry} disabled={busy} onClick={onDelete} type="button">
         ×
@@ -691,6 +806,7 @@ function PersonBlock({
   onDrop,
   onRename,
   onDeleteEntry,
+  onResizeEntry,
   onDragOver,
   onStartRename,
   person,
@@ -704,6 +820,7 @@ function PersonBlock({
   onDrop: (event: DragEvent<HTMLElement>) => void;
   onRename: (name: string) => void;
   onDeleteEntry: (entryId: string) => void;
+  onResizeEntry: (entryId: string, size: number) => void;
   onDragOver: (event: DragEvent<HTMLElement>) => void;
   onStartRename: () => void;
   person: CanvasPerson;
@@ -746,6 +863,7 @@ function PersonBlock({
             busy={busy}
             entry={firstImage}
             onDelete={() => onDeleteEntry(firstImage.id)}
+            onResize={(size) => onResizeEntry(firstImage.id, size)}
             onStartDrag={(event) => {
               event.dataTransfer.setData("text/canvas-entry-id", firstImage.id);
               event.dataTransfer.effectAllowed = "move";

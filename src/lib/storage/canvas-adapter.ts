@@ -20,6 +20,7 @@ interface EntryRow {
   kind: CanvasEntryKind;
   content: string;
   storage_path: string | null;
+  image_size: number | null;
   created_at: string;
 }
 
@@ -82,6 +83,7 @@ async function toCanvasEntry(row: EntryRow): Promise<CanvasEntry> {
     content: row.content,
     storagePath: row.storage_path,
     imageUrl,
+    imageSize: row.image_size,
     createdAt: row.created_at,
   };
 }
@@ -116,7 +118,7 @@ export async function loadCanvas(): Promise<GiftingCanvas> {
       .order("sort_order", { ascending: true }),
     supabase
       .from("canvas_entries")
-      .select("id,person_id,related_entry_id,kind,content,storage_path,created_at")
+      .select("id,person_id,related_entry_id,kind,content,storage_path,image_size,created_at")
       .order("sort_order", { ascending: true }),
   ]);
   if (peopleResult.error) {
@@ -330,12 +332,26 @@ export async function setCanvasEntryPerson(entryId: string, personId: string | n
 export async function moveCanvasEntry(
   entryId: string,
   personId: string | null,
+  beforeEntryId: string | null = null,
 ): Promise<void> {
-  const { error } = await requireSupabase().rpc("move_canvas_entry", {
+  const { error } = await requireSupabase().rpc("reorder_canvas_entry", {
     p_entry_id: entryId,
     p_person_id: personId,
+    p_before_entry_id: beforeEntryId,
   });
   if (error) throw new Error(`Could not move this entry: ${error.message}`);
+}
+
+export async function updateCanvasEntrySize(entryId: string, imageSize: number): Promise<void> {
+  if (!Number.isInteger(imageSize) || imageSize < 16 || imageSize > 10000) {
+    throw new Error("Choose an image size between 16 pixels and 10000 pixels.");
+  }
+  const { error } = await requireSupabase()
+    .from("canvas_entries")
+    .update({ image_size: imageSize })
+    .eq("id", entryId)
+    .neq("kind", "text");
+  if (error) throw new Error(`Could not resize this image: ${error.message}`);
 }
 
 export async function deleteCanvasEntry(entryId: string): Promise<void> {
