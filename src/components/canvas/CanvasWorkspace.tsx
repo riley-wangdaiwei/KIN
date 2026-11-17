@@ -1,7 +1,7 @@
 ﻿"use client";
 
-import type { DragEvent, FormEvent, PointerEvent as ReactPointerEvent } from "react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import type { FormEvent, PointerEvent as ReactPointerEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   createCanvasImage,
   createCanvasImageFromUrl,
@@ -14,13 +14,17 @@ import {
   deleteCanvasPerson,
   getCanvasUser,
   loadCanvas,
-  moveCanvasEntry,
+  placeCanvasEntry,
   renameCanvasPerson,
   subscribeToCanvasAuth,
+  updateCanvasEntryPosition,
   updateCanvasEntrySize,
+  updateCanvasPersonPosition,
 } from "@/lib/storage/canvas-adapter";
 import { getBrowserSupabase } from "@/lib/supabase/browser";
-import type { CanvasEntry, CanvasPerson, GiftingCanvas } from "@/features/canvas/types";
+import type { CanvasEntry, GiftingCanvas } from "@/features/canvas/types";
+import type { BoardPosition } from "@/features/canvas/positions";
+import { resolveBoardPositions } from "@/features/canvas/positions";
 import styles from "./canvas-workspace.module.css";
 
 const emptyCanvas: GiftingCanvas = { people: [], unsorted: [] };
@@ -51,16 +55,71 @@ type InlinePrompt = {
   personId: string | null;
   x: number;
   y: number;
+  boardX: number;
+  boardY: number;
 };
 
 type PendingUpload = {
   kind: "image" | "sticker";
   personId: string | null;
   relatedEntryId: string | null;
+  boardX: number;
+  boardY: number;
 };
 
 function messageFrom(error: unknown): string {
   return error instanceof Error ? error.message : "Something went wrong. Please try again.";
+}
+
+function applyBoardPosition(
+  previous: GiftingCanvas,
+  kind: "person" | "entry",
+  id: string,
+  position: BoardPosition,
+  personId?: string | null,
+): GiftingCanvas {
+  if (kind === "person") {
+    return {
+      ...previous,
+      people: previous.people.map((person) =>
+        person.id === id ? { ...person, posX: position.x, posY: position.y } : person,
+      ),
+    };
+  }
+  const allEntries = [
+    ...previous.unsorted,
+    ...previous.people.flatMap((person) => person.entries),
+  ];
+  const entry = allEntries.find((candidate) => candidate.id === id);
+  if (!entry) return previous;
+  const nextPersonId = personId === undefined ? entry.personId : personId;
+  const moved: CanvasEntry = { ...entry, posX: position.x, posY: position.y, personId: nextPersonId };
+  const removeFrom = (entries: CanvasEntry[]) => entries.filter((candidate) => candidate.id !== id);
+  const updateIn = (entries: CanvasEntry[]) =>
+    entries.map((candidate) => (candidate.id === id ? moved : candidate));
+  let people = previous.people;
+  let unsorted = previous.unsorted;
+  if (entry.personId === null) {
+    unsorted = nextPersonId === null ? updateIn(unsorted) : removeFrom(unsorted);
+  } else {
+    people = people.map((person) =>
+      person.id === entry.personId
+        ? {
+            ...person,
+            entries: nextPersonId === entry.personId ? updateIn(person.entries) : removeFrom(person.entries),
+          }
+        : person,
+    );
+  }
+  if (nextPersonId !== null && nextPersonId !== entry.personId) {
+    people = people.map((person) =>
+      person.id === nextPersonId ? { ...person, entries: [...person.entries, moved] } : person,
+    );
+  }
+  if (nextPersonId === null && entry.personId !== null) {
+    unsorted = [...unsorted, moved];
+  }
+  return { people, unsorted };
 }
 
 function buildStreamSequence() {
@@ -128,13 +187,13 @@ export default function CanvasWorkspace() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [editingPersonId, setEditingPersonId] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState("");
   const [sendState, setSendState] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const generalImageInputRef = useRef<HTMLInputElement>(null);
   const [inlinePrompt, setInlinePrompt] = useState<InlinePrompt | null>(null);
   const [inlineValue, setInlineValue] = useState("");
   const [pendingUpload, setPendingUpload] = useState<PendingUpload | null>(null);
   const [dropTargetPerson, setDropTargetPerson] = useState<string | null>(null);
-  const [dropTargetUnsorted, setDropTargetUnsorted] = useState(false);
   const [dropTargetCanvas, setDropTargetCanvas] = useState(false);
   const [streamDragging, setStreamDragging] = useState(false);
   const [draggingStreamId, setDraggingStreamId] = useState<number | null>(null);
@@ -145,11 +204,33 @@ export default function CanvasWorkspace() {
   const nextSequenceIndex = useRef(0);
   const nextJarFrame = useRef(0);
   const pointerNearStream = useRef(false);
+  const canvasAreaRef = useRef<HTMLDivElement>(null);
+  const boardDragRef = useRef<{
+    kind: "person" | "entry";
+    id: string;
+    startClientX: number;
+    startClientY: number;
+    startX: number;
+    startY: number;
+    moved: boolean;
+  } | null>(null);
+  const [dragOverride, setDragOverride] = useState<{
+    kind: "person" | "entry";
+    id: string;
+    x: number;
+    y: number;
+  } | null>(null);
+  const justDraggedRef = useRef(false);
   const reducedMotion = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   useEffect(() => {
     streamRef.current = streamItems;
   }, [streamItems]);
+
+  const board = useMemo(
+    () => resolveBoardPositions(canvas.people, canvas.unsorted),
+    [canvas],
+  );
 
   useEffect(() => {
     const updatePointerProximity = (event: PointerEvent) => {
@@ -195,7 +276,7 @@ export default function CanvasWorkspace() {
       }
       const sequence = buildStreamSequence();
       const hitAreas = [...document.querySelectorAll<HTMLElement>(
-        `.${styles.unsorted}, .${styles.person}, [data-canvas-obstacle]`,
+        `[data-board-element], [data-canvas-obstacle]`,
       )].map((element) => element.getBoundingClientRect());
       const items = streamRef.current.map((item) => {
         if (draggingWordRef.current?.id === item.id) return item;
@@ -271,19 +352,121 @@ export default function CanvasWorkspace() {
     }
   }, [refresh]);
 
+  const toBoardPoint = useCallback((clientX: number, clientY: number): BoardPosition => {
+    const rect = canvasAreaRef.current?.getBoundingClientRect();
+    if (!rect) return { x: Math.max(0, Math.round(clientX)), y: Math.max(0, Math.round(clientY)) };
+    return {
+      x: Math.max(0, Math.round(clientX - rect.left)),
+      y: Math.max(0, Math.round(clientY - rect.top)),
+    };
+  }, []);
+
+  const saveBoardPosition = useCallback(async (
+    kind: "person" | "entry",
+    id: string,
+    position: BoardPosition,
+    personId?: string | null,
+  ) => {
+    setCanvas((previous) => applyBoardPosition(previous, kind, id, position, personId));
+    try {
+      if (kind === "person") {
+        await updateCanvasPersonPosition(id, position);
+      } else if (personId !== undefined) {
+        await placeCanvasEntry(id, personId, position);
+      } else {
+        await updateCanvasEntryPosition(id, position);
+      }
+    } catch (saveError) {
+      setError(messageFrom(saveError));
+      await refresh();
+    }
+  }, [refresh]);
+
+  const handleBoardPointerMove = useCallback((event: PointerEvent) => {
+    const drag = boardDragRef.current;
+    if (!drag) return;
+    const dx = event.clientX - drag.startClientX;
+    const dy = event.clientY - drag.startClientY;
+    if (!drag.moved && Math.hypot(dx, dy) > 5) drag.moved = true;
+    if (!drag.moved) return;
+    setDragOverride({
+      kind: drag.kind,
+      id: drag.id,
+      x: Math.max(0, Math.round(drag.startX + dx)),
+      y: Math.max(0, Math.round(drag.startY + dy)),
+    });
+  }, []);
+
+  const cancelBoardDrag = useCallback(() => {
+    boardDragRef.current = null;
+    window.removeEventListener("pointermove", handleBoardPointerMove);
+    setDragOverride(null);
+  }, [handleBoardPointerMove]);
+
+  const handleBoardPointerUp = useCallback((event: PointerEvent) => {
+    const drag = boardDragRef.current;
+    boardDragRef.current = null;
+    window.removeEventListener("pointermove", handleBoardPointerMove);
+    window.removeEventListener("pointercancel", cancelBoardDrag);
+    if (!drag) return;
+    const position = {
+      x: Math.max(0, Math.round(drag.startX + event.clientX - drag.startClientX)),
+      y: Math.max(0, Math.round(drag.startY + event.clientY - drag.startClientY)),
+    };
+    setDragOverride(null);
+    if (!drag.moved) return;
+    justDraggedRef.current = true;
+    window.setTimeout(() => {
+      justDraggedRef.current = false;
+    }, 0);
+    let personId: string | null | undefined;
+    if (drag.kind === "entry") {
+      const target = document.elementFromPoint(event.clientX, event.clientY);
+      personId = target?.closest<HTMLElement>("[data-person-id]")?.dataset.personId ?? undefined;
+    }
+    void saveBoardPosition(drag.kind, drag.id, position, personId);
+  }, [handleBoardPointerMove, saveBoardPosition, cancelBoardDrag]);
+
+  const startBoardDrag = useCallback((
+    kind: "person" | "entry",
+    id: string,
+    x: number,
+    y: number,
+    event: ReactPointerEvent<HTMLElement>,
+  ) => {
+    if (event.pointerType === "mouse" && event.button !== 0) return;
+    const target = event.target as HTMLElement | null;
+    if (target?.closest("button, input, textarea, a, select")) return;
+    event.preventDefault();
+    boardDragRef.current = {
+      kind,
+      id,
+      startClientX: event.clientX,
+      startClientY: event.clientY,
+      startX: x,
+      startY: y,
+      moved: false,
+    };
+    setDragOverride({ kind, id, x, y });
+    window.removeEventListener("pointermove", handleBoardPointerMove);
+    window.addEventListener("pointermove", handleBoardPointerMove);
+    window.removeEventListener("pointerup", handleBoardPointerUp);
+    window.addEventListener("pointerup", handleBoardPointerUp, { once: true });
+    window.removeEventListener("pointercancel", cancelBoardDrag);
+    window.addEventListener("pointercancel", cancelBoardDrag, { once: true });
+  }, [handleBoardPointerMove, handleBoardPointerUp, cancelBoardDrag]);
+
   const handlePointerMove = useCallback((event: PointerEvent) => {
     const active = draggingWordRef.current;
     if (!active) return;
 
     const target = document.elementFromPoint(event.clientX, event.clientY);
     const personElement = target?.closest<HTMLElement>("[data-person-id]");
-    const unsortedElement = target?.closest<HTMLElement>(`.${styles.unsorted}`);
     const canvasElement = target?.closest<HTMLElement>(`.${styles.canvasArea}`);
-    const isCanvasTarget = Boolean(personElement || unsortedElement || canvasElement);
+    const isCanvasTarget = Boolean(personElement || canvasElement);
     setStreamDragging(isCanvasTarget);
     setDropTargetPerson(personElement?.dataset.personId ?? null);
-    setDropTargetUnsorted(Boolean(unsortedElement));
-    setDropTargetCanvas(Boolean(canvasElement && !personElement && !unsortedElement));
+    setDropTargetCanvas(Boolean(canvasElement && !personElement));
 
     setStreamItems((current) =>
       current.map((item) =>
@@ -301,12 +484,11 @@ export default function CanvasWorkspace() {
     const relatedEntryId = entryElement?.dataset.entryId ?? null;
     const personElement = target?.closest<HTMLElement>("[data-person-id]");
     const personId = personElement?.dataset.personId ?? null;
-    const isCanvasTarget = Boolean(target?.closest<HTMLElement>(`[data-person-id], .${styles.unsorted}, .${styles.canvasArea}`));
+    const isCanvasTarget = Boolean(target?.closest<HTMLElement>(`[data-person-id], .${styles.canvasArea}`));
 
     draggingWordRef.current = null;
     setDraggingStreamId(null);
     setDropTargetPerson(null);
-    setDropTargetUnsorted(false);
     setDropTargetCanvas(false);
     setStreamDragging(false);
     setStreamItems((current) => current.map((item) => item.id === active.id
@@ -318,20 +500,22 @@ export default function CanvasWorkspace() {
       return;
     }
 
+    const boardPoint = toBoardPoint(event.clientX, event.clientY);
+
     if (active.kind === "word" && (active.label === "details" || active.label === "people")) {
-      setInlinePrompt({ kind: active.label, personId, x: event.clientX, y: event.clientY });
+      setInlinePrompt({ kind: active.label, personId, x: event.clientX, y: event.clientY, boardX: boardPoint.x, boardY: boardPoint.y });
       setInlineValue("");
       return;
     }
 
     if (active.kind === "word" && active.label === "images") {
-      setPendingUpload({ kind: "image", personId, relatedEntryId });
+      setPendingUpload({ kind: "image", personId, relatedEntryId, boardX: boardPoint.x, boardY: boardPoint.y });
       generalImageInputRef.current?.click();
       return;
     }
 
     if (active.kind === "word" && active.label === "stickers") {
-      setPendingUpload({ kind: "sticker", personId, relatedEntryId });
+      setPendingUpload({ kind: "sticker", personId, relatedEntryId, boardX: boardPoint.x, boardY: boardPoint.y });
       generalImageInputRef.current?.click();
       return;
     }
@@ -339,17 +523,17 @@ export default function CanvasWorkspace() {
     if (active.kind === "word" && active.label === "jars") {
       const frame = [0, 45, 90, 135, 180][nextJarFrame.current % 5];
       nextJarFrame.current += 1;
-      void perform(() => createCanvasImageFromUrl(`/jar/frames/jar_${String(frame).padStart(3, "0")}.webp`, personId, relatedEntryId));
+      void perform(() => createCanvasImageFromUrl(`/jar/frames/jar_${String(frame).padStart(3, "0")}.webp`, personId, relatedEntryId, boardPoint));
       return;
     }
 
     if (active.kind === "image") {
       void perform(async () => {
         if (!active.stickerKey) return;
-        await createCanvasSticker(active.stickerKey, personId, relatedEntryId);
+        await createCanvasSticker(active.stickerKey, personId, relatedEntryId, boardPoint);
       });
     }
-  }, [handlePointerMove, perform]);
+  }, [handlePointerMove, perform, toBoardPoint]);
 
   const startDraggingItem = useCallback((item: StreamItem, event: ReactPointerEvent<HTMLButtonElement>) => {
     event.preventDefault();
@@ -357,7 +541,6 @@ export default function CanvasWorkspace() {
     setDraggingStreamId(item.id);
     setStreamDragging(true);
     setDropTargetPerson(null);
-    setDropTargetUnsorted(false);
     setDropTargetCanvas(false);
     window.removeEventListener("pointermove", handlePointerMove);
     window.addEventListener("pointermove", handlePointerMove);
@@ -400,58 +583,15 @@ export default function CanvasWorkspace() {
     };
   }, [refresh]);
 
-  function handleDrop(event: DragEvent<HTMLElement>, personId: string | null) {
-    event.preventDefault();
-    event.stopPropagation();
-    setDropTargetPerson(null);
-    setDropTargetUnsorted(false);
-    setDropTargetCanvas(false);
-    setStreamDragging(false);
-    const entryId = event.dataTransfer.getData("text/canvas-entry-id");
-    if (!entryId) return;
-
-    const groupEntries = personId === null
-      ? canvas.unsorted
-      : canvas.people.find((person) => person.id === personId)?.entries ?? [];
-    const target = event.target instanceof HTMLElement ? event.target : null;
-    const entriesContainer = target?.closest<HTMLElement>(`.${styles.entries}`);
-    const root = event.currentTarget;
-    const targetElement = target?.closest<HTMLElement>("[data-canvas-entry-id]") ?? null;
-    if (targetElement?.dataset.canvasEntryId === entryId) return;
-    const targetRecord = targetElement
-      ? groupEntries.find((entry) => entry.id === targetElement.dataset.canvasEntryId)
-      : undefined;
-    const targetTopLevel = targetRecord?.relatedEntryId
-      ? groupEntries.find((entry) => entry.id === targetRecord.relatedEntryId)
-      : targetRecord;
-    const orderedEntries = groupEntries.filter((entry) => entry.id !== entryId && entry.relatedEntryId === null);
-    const targetVisual = targetRecord?.relatedEntryId
-      ? targetElement?.closest<HTMLElement>(`.${styles.entryLine}`) ?? targetElement
-      : targetElement;
-    const targetRect = targetVisual?.getBoundingClientRect();
-    const targetIsInSecondHalf = Boolean(targetRect && event.clientY >= targetRect.top + targetRect.height / 2);
-    const nextTarget = targetTopLevel
-      ? orderedEntries[orderedEntries.findIndex((entry) => entry.id === targetTopLevel.id) + 1]
-      : undefined;
-    const beforeEntryId = targetTopLevel
-      ? targetIsInSecondHalf ? nextTarget?.id ?? null : targetTopLevel.id
-      : entriesContainer
-        ? orderedEntries.find((entry) => {
-            const element = root.querySelector<HTMLElement>(`[data-canvas-entry-id="${entry.id}"]`);
-            return element ? event.clientY < element.getBoundingClientRect().top + element.getBoundingClientRect().height / 2 : false;
-          })?.id ?? null
-        : null;
-    void perform(() => moveCanvasEntry(entryId, personId, beforeEntryId));
-  }
-
   async function handleImageSelection(file: File | undefined, relatedEntryId: string | null, targetPersonId: string | null) {
     if (!file) return;
+    const position = pendingUpload ? { x: pendingUpload.boardX, y: pendingUpload.boardY } : null;
     if (pendingUpload?.kind === "sticker") {
-      await perform(() => createCanvasStickerUpload(file, targetPersonId, relatedEntryId));
+      await perform(() => createCanvasStickerUpload(file, targetPersonId, relatedEntryId, position));
       setPendingUpload(null);
       return;
     }
-    await perform(() => createCanvasImage(file, relatedEntryId, targetPersonId));
+    await perform(() => createCanvasImage(file, relatedEntryId, targetPersonId, position));
     setPendingUpload(null);
   }
 
@@ -459,10 +599,11 @@ export default function CanvasWorkspace() {
     event.preventDefault();
     if (!inlinePrompt || !inlineValue.trim()) return;
     const value = inlineValue.trim();
+    const position = { x: inlinePrompt.boardX, y: inlinePrompt.boardY };
     await perform(() =>
       inlinePrompt.kind === "details"
-        ? createCanvasText(value, inlinePrompt.personId)
-        : createCanvasPerson(value),
+        ? createCanvasText(value, inlinePrompt.personId, position)
+        : createCanvasPerson(value, position),
     );
     setInlinePrompt(null);
     setInlineValue("");
@@ -489,63 +630,6 @@ export default function CanvasWorkspace() {
       setError(messageFrom(sendError));
       setSendState("error");
     }
-  }
-
-  function renderEntries(entries: CanvasEntry[]) {
-    const textEntries = entries.filter((entry) => entry.kind === "text");
-    const renderedIds = new Set<string>();
-
-    return (
-      <>
-        {textEntries.map((entry) => {
-          renderedIds.add(entry.id);
-          const images = entries.filter((candidate) => candidate.relatedEntryId === entry.id);
-          images.forEach((image) => renderedIds.add(image.id));
-
-          return (
-            <div className={styles.entryLine} data-entry-id={entry.id} key={entry.id}>
-              <CanvasEntryItem
-                busy={busy}
-                entry={entry}
-                onDelete={() => void perform(() => deleteCanvasEntry(entry.id))}
-                onResize={(size) => void perform(() => updateCanvasEntrySize(entry.id, size))}
-                onStartDrag={(event) => {
-                  event.dataTransfer.setData("text/canvas-entry-id", entry.id);
-                  event.dataTransfer.effectAllowed = "move";
-                }}
-              />
-              {images.map((image) => (
-                <CanvasEntryItem
-                  busy={busy}
-                  entry={image}
-                  key={image.id}
-                  onDelete={() => void perform(() => deleteCanvasEntry(image.id))}
-                  onResize={(size) => void perform(() => updateCanvasEntrySize(image.id, size))}
-                  onStartDrag={(event) => {
-                    event.stopPropagation();
-                    event.dataTransfer.setData("text/canvas-entry-id", image.id);
-                    event.dataTransfer.effectAllowed = "move";
-                  }}
-                />
-              ))}
-            </div>
-          );
-        })}
-        {entries.filter((entry) => !renderedIds.has(entry.id)).map((entry) => (
-          <CanvasEntryItem
-            busy={busy}
-            entry={entry}
-            key={entry.id}
-            onDelete={() => void perform(() => deleteCanvasEntry(entry.id))}
-            onResize={(size) => void perform(() => updateCanvasEntrySize(entry.id, size))}
-            onStartDrag={(event) => {
-              event.dataTransfer.setData("text/canvas-entry-id", entry.id);
-              event.dataTransfer.effectAllowed = "move";
-            }}
-          />
-        ))}
-      </>
-    );
   }
 
   return (
@@ -625,73 +709,86 @@ export default function CanvasWorkspace() {
           {error && <p className={styles.visuallyHidden} role="alert">{error}</p>}
           <div
             className={`${styles.canvasArea} ${dropTargetCanvas ? styles.canvasAreaDropTarget : ""}`.trim()}
-            onDragOver={(event) => {
-              const target = event.target as HTMLElement;
-              if (target.closest(`[data-person-id], .${styles.unsorted}`)) return;
-              event.preventDefault();
-              setStreamDragging(true);
-              setDropTargetPerson(null);
-              setDropTargetUnsorted(false);
-              setDropTargetCanvas(true);
-            }}
-            onDrop={(event) => handleDrop(event, null)}
+            ref={canvasAreaRef}
+            style={{ minHeight: board.contentHeight }}
           >
-            {canvas.unsorted.length > 0 && (
-              <div
-                className={`${styles.unsorted} ${streamDragging && dropTargetUnsorted ? styles.dropTarget : ""}`.trim()}
-                onDragOver={(event) => {
-                  event.preventDefault();
-                  setStreamDragging(true);
-                  setDropTargetPerson(null);
-                  setDropTargetUnsorted(true);
-                  setDropTargetCanvas(false);
-                }}
-                onDrop={(event) => handleDrop(event, null)}
-              >
-                <div className={styles.entries}>{renderEntries(canvas.unsorted)}</div>
-              </div>
-            )}
-
-            <div className={styles.columns}>
-              {canvas.people.map((person) => {
-                const firstImage = person.entries.find((entry) => entry.kind !== "text" && !entry.relatedEntryId);
-                const remainingEntries = firstImage ? person.entries.filter((entry) => entry.id !== firstImage.id) : person.entries;
-
-                return (
-                  <PersonBlock
+            {canvas.people.map((person) => {
+              const position = board.personPositions.get(person.id) ?? { x: 16, y: 16 };
+              const override = dragOverride?.kind === "person" && dragOverride.id === person.id ? dragOverride : null;
+              const x = override?.x ?? position.x;
+              const y = override?.y ?? position.y;
+              return (
+                <div
+                  className={`${styles.boardElement} ${streamDragging && dropTargetPerson === person.id ? styles.dropTarget : ""}`.trim()}
+                  data-board-element
+                  data-person-id={person.id}
+                  key={person.id}
+                  onPointerDown={(event) => startBoardDrag("person", person.id, x, y, event)}
+                  style={{ left: x, top: y, pointerEvents: override ? "none" : undefined }}
+                >
+                  {editingPersonId === person.id ? (
+                    <form
+                      className={styles.renameForm}
+                      onSubmit={(event) => {
+                        event.preventDefault();
+                        if (renameValue.trim()) {
+                          void perform(() => renameCanvasPerson(person.id, renameValue.trim())).then(() => {
+                            setEditingPersonId(null);
+                          });
+                        }
+                      }}
+                    >
+                      <input
+                        aria-label="Person name"
+                        maxLength={120}
+                        onChange={(event) => setRenameValue(event.target.value)}
+                        value={renameValue}
+                      />
+                      <button disabled={busy || !renameValue.trim()} type="submit">Save</button>
+                    </form>
+                  ) : (
+                    <button
+                      className={styles.personName}
+                      onClick={() => {
+                        if (justDraggedRef.current) return;
+                        setRenameValue(person.name);
+                        setEditingPersonId(person.id);
+                      }}
+                      type="button"
+                    >
+                      <AlphabetName name={person.name} />
+                    </button>
+                  )}
+                  <button aria-label={`Delete ${person.name}`} className={styles.personDelete} disabled={busy} onClick={() => { if (window.confirm(`Delete ${person.name}? Their entries will move to Unsorted.`)) { void perform(() => deleteCanvasPerson(person.id)); } }} type="button">
+                    ×
+                  </button>
+                </div>
+              );
+            })}
+            {[...canvas.unsorted, ...canvas.people.flatMap((person) => person.entries)].map((entry) => {
+              const position = board.entryPositions.get(entry.id) ?? { x: 16, y: 16 };
+              const override = dragOverride?.kind === "entry" && dragOverride.id === entry.id ? dragOverride : null;
+              const x = override?.x ?? position.x;
+              const y = override?.y ?? position.y;
+              return (
+                <div
+                  className={`${styles.boardElement} ${entry.kind === "text" ? styles.boardText : ""}`.trim()}
+                  data-board-element
+                  data-canvas-entry-id={entry.id}
+                  data-entry-id={entry.kind === "text" ? entry.id : undefined}
+                  key={entry.id}
+                  onPointerDown={(event) => startBoardDrag("entry", entry.id, x, y, event)}
+                  style={{ left: x, top: y, pointerEvents: override ? "none" : undefined }}
+                >
+                  <CanvasEntryItem
                     busy={busy}
-                    dropTarget={streamDragging && dropTargetPerson === person.id}
-                    editing={editingPersonId === person.id}
-                    key={person.id}
-                    onDelete={() => {
-                      if (window.confirm(`Delete ${person.name}? Their entries will move to Unsorted.`)) {
-                        void perform(() => deleteCanvasPerson(person.id));
-                      }
-                    }}
-                    onDrop={(event) => handleDrop(event, person.id)}
-                    onRename={(name) => {
-                      void perform(() => renameCanvasPerson(person.id, name)).then(() => {
-                        setEditingPersonId(null);
-                      });
-                    }}
-                    onDeleteEntry={(entryId) => void perform(() => deleteCanvasEntry(entryId))}
-                    onResizeEntry={(entryId, size) => void perform(() => updateCanvasEntrySize(entryId, size))}
-                    onDragOver={(event) => {
-                      event.preventDefault();
-                      setStreamDragging(true);
-                      setDropTargetPerson(person.id);
-                      setDropTargetUnsorted(false);
-                      setDropTargetCanvas(false);
-                    }}
-                    onStartRename={() => setEditingPersonId(person.id)}
-                    person={person}
-                    firstImage={firstImage}
-                  >
-                    {renderEntries(remainingEntries)}
-                  </PersonBlock>
-                );
-              })}
-            </div>
+                    entry={entry}
+                    onDelete={() => void perform(() => deleteCanvasEntry(entry.id))}
+                    onResize={(size) => void perform(() => updateCanvasEntrySize(entry.id, size))}
+                  />
+                </div>
+              );
+            })}
           </div>
         </>
       )}
@@ -713,13 +810,11 @@ function CanvasEntryItem({
   entry,
   onDelete,
   onResize,
-  onStartDrag,
 }: {
   busy: boolean;
   entry: CanvasEntry;
   onDelete: () => void;
   onResize?: (size: number) => void;
-  onStartDrag: (event: DragEvent<HTMLElement>) => void;
 }) {
   const [previewSize, setPreviewSize] = useState<number | null>(null);
   const resizeStart = useRef<{ x: number; y: number; size: number } | null>(null);
@@ -771,8 +866,6 @@ function CanvasEntryItem({
       className={`${styles.entry} ${entry.kind === "text" ? styles.textEntry : styles.imageEntry}`}
       data-canvas-entry-id={entry.id}
       data-entry-id={entry.kind === "text" ? entry.id : undefined}
-      draggable
-      onDragStart={onStartDrag}
     >
       {entry.kind === "text" ? (
         <p>{entry.content}</p>
@@ -782,6 +875,7 @@ function CanvasEntryItem({
           <img
             alt={entry.kind === "sticker" ? `re.KIN ${entry.content || "sticker"} sticker` : "Canvas image"}
             className={styles.entryImage}
+            draggable={false}
             src={entry.imageUrl}
             style={imageSize === null ? undefined : { height: `${imageSize}px` }}
           />
@@ -794,88 +888,6 @@ function CanvasEntryItem({
         ×
       </button>
     </article>
-  );
-}
-
-function PersonBlock({
-  busy,
-  children,
-  dropTarget = false,
-  editing,
-  onDelete,
-  onDrop,
-  onRename,
-  onDeleteEntry,
-  onResizeEntry,
-  onDragOver,
-  onStartRename,
-  person,
-  firstImage,
-}: {
-  busy: boolean;
-  children: React.ReactNode;
-  dropTarget?: boolean;
-  editing: boolean;
-  onDelete: () => void;
-  onDrop: (event: DragEvent<HTMLElement>) => void;
-  onRename: (name: string) => void;
-  onDeleteEntry: (entryId: string) => void;
-  onResizeEntry: (entryId: string, size: number) => void;
-  onDragOver: (event: DragEvent<HTMLElement>) => void;
-  onStartRename: () => void;
-  person: CanvasPerson;
-  firstImage?: CanvasEntry;
-}) {
-  const [name, setName] = useState(person.name);
-
-  return (
-    <section
-      aria-label={`${person.name}’s block`}
-      className={`${styles.person} ${dropTarget ? styles.dropTarget : ""}`.trim()}
-      data-person-id={person.id}
-      onDragOver={onDragOver}
-      onDrop={onDrop}
-    >
-      <div className={styles.personTitle}>
-        {editing ? (
-          <form
-            className={styles.renameForm}
-            onSubmit={(event) => {
-              event.preventDefault();
-              if (name.trim()) onRename(name.trim());
-            }}
-          >
-            <input
-              aria-label="Person name"
-              maxLength={120}
-              onChange={(event) => setName(event.target.value)}
-              value={name}
-            />
-            <button disabled={busy || !name.trim()} type="submit">Save</button>
-          </form>
-        ) : (
-          <button className={styles.personName} onClick={onStartRename} type="button">
-            <AlphabetName name={person.name} />
-          </button>
-        )}
-        {firstImage && (
-          <CanvasEntryItem
-            busy={busy}
-            entry={firstImage}
-            onDelete={() => onDeleteEntry(firstImage.id)}
-            onResize={(size) => onResizeEntry(firstImage.id, size)}
-            onStartDrag={(event) => {
-              event.dataTransfer.setData("text/canvas-entry-id", firstImage.id);
-              event.dataTransfer.effectAllowed = "move";
-            }}
-          />
-        )}
-        <button aria-label={`Delete ${person.name}`} className={styles.personDelete} disabled={busy} onClick={onDelete} type="button">
-          ×
-        </button>
-      </div>
-      <div className={styles.entries}>{children}</div>
-    </section>
   );
 }
 
@@ -896,6 +908,7 @@ function AlphabetName({ name }: { name: string }) {
               alt=""
               aria-hidden="true"
               className={styles.alphabetLetter}
+              draggable={false}
               key={`${index}-${character}`}
               src={`/alphabet/${asset}.png`}
             />

@@ -9,12 +9,16 @@ export interface CanvasEntry {
   storagePath: string | null;
   imageUrl: string | null;
   imageSize: number | null;
+  posX: number | null;
+  posY: number | null;
   createdAt: string;
 }
 
 export interface CanvasPerson {
   id: string;
   name: string;
+  posX: number | null;
+  posY: number | null;
   createdAt: string;
   entries: CanvasEntry[];
 }

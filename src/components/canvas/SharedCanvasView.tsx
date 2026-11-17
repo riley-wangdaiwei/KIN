@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { CanvasEntry, SharedCanvas } from "@/features/canvas/types";
+import { resolveBoardPositions } from "@/features/canvas/positions";
 import styles from "./shared-canvas-view.module.css";
 
 export default function SharedCanvasView({ token }: { token: string }) {
@@ -41,59 +42,30 @@ export default function SharedCanvasView({ token }: { token: string }) {
   if (error) return <p className={styles.status} role="alert">{error}</p>;
   if (!canvas) return <p className={styles.status}>Loading shared canvas…</p>;
 
-  return (
-    <div className={styles.canvas}>
-      {canvas.person ? (
-        <section className={styles.person}>
-          <h2>{canvas.person.name}</h2>
-          <SharedEntries entries={canvas.people[0]?.entries ?? []} />
-        </section>
-      ) : (
-        <>
-          <section className={styles.unsorted}>
-            <h2>Unsorted</h2>
-            <SharedEntries entries={canvas.unsorted} />
-          </section>
-          <div className={styles.columns}>
-            {canvas.people.map((person) => (
-              <section className={styles.person} key={person.id}>
-                <h2>{person.name}</h2>
-                <SharedEntries entries={person.entries} />
-              </section>
-            ))}
-          </div>
-        </>
-      )}
-    </div>
-  );
-}
-
-function SharedEntries({ entries }: { entries: CanvasEntry[] }) {
-  const textEntries = entries.filter((entry) => entry.kind === "text");
-  const rendered = new Set<string>();
+  const board = resolveBoardPositions(canvas.people, canvas.unsorted);
 
   return (
-    <div className={styles.entries}>
-      {textEntries.map((entry) => {
-        rendered.add(entry.id);
-        const images = entries.filter((candidate) => candidate.relatedEntryId === entry.id);
-        images.forEach((image) => rendered.add(image.id));
+    <div className={styles.canvas} style={{ minHeight: board.contentHeight }}>
+      {canvas.people.map((person) => {
+        const position = board.personPositions.get(person.id) ?? { x: 16, y: 16 };
         return (
-          <p className={styles.entryLine} key={entry.id}>
-            <span>{entry.content}</span>
-            {images.map((image) => (
-              <EntryImage entry={image} key={image.id} />
-            ))}
-          </p>
+          <h2 className={styles.personName} key={person.id} style={{ left: position.x, top: position.y }}>
+            {person.name}
+          </h2>
         );
       })}
-      {entries
-        .filter((entry) => !rendered.has(entry.id))
-        .map((entry) => (
-          <p className={styles.entryLine} key={entry.id}>
-            {entry.kind === "text" ? entry.content : <EntryImage entry={entry} />}
-          </p>
-        ))}
+      {[...canvas.unsorted, ...canvas.people.flatMap((person) => person.entries)].map((entry) => {
+        const position = board.entryPositions.get(entry.id) ?? { x: 16, y: 16 };
+        return (
+          <div
+            className={`${styles.boardElement} ${entry.kind === "text" ? styles.boardText : ""}`.trim()}
+            key={entry.id}
+            style={{ left: position.x, top: position.y }}
+          >
+            {entry.kind === "text" ? <p className={styles.entryText}>{entry.content}</p> : <EntryImage entry={entry} />}
+          </div>
+        );
+      })}
     </div>
   );
 }

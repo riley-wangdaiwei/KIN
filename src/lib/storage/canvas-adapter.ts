@@ -5,11 +5,14 @@ import type {
   CanvasPerson,
   GiftingCanvas,
 } from "@/features/canvas/types";
+import type { BoardPosition } from "@/features/canvas/positions";
 import { getBrowserSupabase } from "@/lib/supabase/browser";
 
 interface PersonRow {
   id: string;
   name: string;
+  pos_x: number | null;
+  pos_y: number | null;
   created_at: string;
 }
 
@@ -21,6 +24,8 @@ interface EntryRow {
   content: string;
   storage_path: string | null;
   image_size: number | null;
+  pos_x: number | null;
+  pos_y: number | null;
   created_at: string;
 }
 
@@ -84,6 +89,8 @@ async function toCanvasEntry(row: EntryRow): Promise<CanvasEntry> {
     storagePath: row.storage_path,
     imageUrl,
     imageSize: row.image_size,
+    posX: row.pos_x,
+    posY: row.pos_y,
     createdAt: row.created_at,
   };
 }
@@ -114,11 +121,11 @@ export async function loadCanvas(): Promise<GiftingCanvas> {
   const [peopleResult, entriesResult] = await Promise.all([
     supabase
       .from("canvas_people")
-      .select("id,name,created_at")
+      .select("id,name,pos_x,pos_y,created_at")
       .order("sort_order", { ascending: true }),
     supabase
       .from("canvas_entries")
-      .select("id,person_id,related_entry_id,kind,content,storage_path,image_size,created_at")
+      .select("id,person_id,related_entry_id,kind,content,storage_path,image_size,pos_x,pos_y,created_at")
       .order("sort_order", { ascending: true }),
   ]);
   if (peopleResult.error) {
@@ -135,6 +142,8 @@ export async function loadCanvas(): Promise<GiftingCanvas> {
   const people: CanvasPerson[] = peopleRows.map((row) => ({
     id: row.id,
     name: row.name,
+    posX: row.pos_x,
+    posY: row.pos_y,
     createdAt: row.created_at,
     entries: entries.filter((entry) => entry.personId === row.id),
   }));
@@ -144,11 +153,16 @@ export async function loadCanvas(): Promise<GiftingCanvas> {
   };
 }
 
-export async function createCanvasPerson(name: string): Promise<void> {
+export async function createCanvasPerson(name: string, position: BoardPosition | null = null): Promise<void> {
   const user = await requireUser();
   const { error } = await requireSupabase()
     .from("canvas_people")
-    .insert({ user_id: user.id, name: name.trim() });
+    .insert({
+      user_id: user.id,
+      name: name.trim(),
+      pos_x: position?.x ?? null,
+      pos_y: position?.y ?? null,
+    });
   if (error) throw new Error(`Could not add this person: ${error.message}`);
 }
 
@@ -171,7 +185,7 @@ export async function deleteCanvasPerson(personId: string): Promise<void> {
   if (error) throw new Error(`Could not delete this person: ${error.message}`);
 }
 
-export async function createCanvasText(content: string, personId: string | null = null): Promise<void> {
+export async function createCanvasText(content: string, personId: string | null = null, position: BoardPosition | null = null): Promise<void> {
   const user = await requireUser();
   const { error } = await requireSupabase()
     .from("canvas_entries")
@@ -180,6 +194,8 @@ export async function createCanvasText(content: string, personId: string | null 
       kind: "text",
       person_id: personId,
       content: content.trim(),
+      pos_x: position?.x ?? null,
+      pos_y: position?.y ?? null,
     });
   if (error) throw new Error(`Could not add this note: ${error.message}`);
 }
@@ -202,6 +218,7 @@ export async function createCanvasImage(
   file: File,
   relatedEntryId: string | null = null,
   targetPersonId: string | null = null,
+  position: BoardPosition | null = null,
 ): Promise<void> {
   if (!file.type.startsWith("image/")) {
     throw new Error("Choose an image file.");
@@ -228,6 +245,8 @@ export async function createCanvasImage(
     kind: "image",
     content: "",
     storage_path: storagePath,
+    pos_x: position?.x ?? null,
+    pos_y: position?.y ?? null,
   });
   if (insertError) {
     const { error: cleanupError } = await supabase.storage
@@ -246,6 +265,7 @@ export async function createCanvasSticker(
   key: string = "pot",
   personId: string | null = null,
   relatedEntryId: string | null = null,
+  position: BoardPosition | null = null,
 ): Promise<void> {
   const user = await requireUser();
   const stickerKey = key.trim() || "pot";
@@ -257,6 +277,8 @@ export async function createCanvasSticker(
     kind: "sticker",
     content: stickerKey,
     storage_path: canvasStickerPaths[stickerKey] ?? null,
+    pos_x: position?.x ?? null,
+    pos_y: position?.y ?? null,
   });
   if (error) throw new Error(`Could not add this sticker: ${error.message}`);
 }
@@ -265,6 +287,7 @@ export async function createCanvasStickerUpload(
   file: File,
   targetPersonId: string | null = null,
   relatedEntryId: string | null = null,
+  position: BoardPosition | null = null,
 ): Promise<void> {
   if (!file.type.startsWith("image/")) {
     throw new Error("Choose an image file.");
@@ -291,6 +314,8 @@ export async function createCanvasStickerUpload(
     kind: "sticker",
     content: file.name,
     storage_path: storagePath,
+    pos_x: position?.x ?? null,
+    pos_y: position?.y ?? null,
   });
   if (insertError) {
     const { error: cleanupError } = await supabase.storage
@@ -309,6 +334,7 @@ export async function createCanvasImageFromUrl(
   path: string,
   personId: string | null,
   relatedEntryId: string | null = null,
+  position: BoardPosition | null = null,
 ): Promise<void> {
   if (!/^\/jar\/frames\/jar_\d{3}\.webp$/.test(path)) throw new Error("Invalid public canvas image.");
   const user = await requireUser();
@@ -320,25 +346,47 @@ export async function createCanvasImageFromUrl(
     kind: "image",
     content: "",
     storage_path: path,
+    pos_x: position?.x ?? null,
+    pos_y: position?.y ?? null,
   });
   if (error) throw new Error(`Could not add this image: ${error.message}`);
 }
 
-export async function setCanvasEntryPerson(entryId: string, personId: string | null): Promise<void> {
-  const { error } = await requireSupabase().from("canvas_entries").update({ person_id: personId }).eq("id", entryId);
+export async function updateCanvasPersonPosition(
+  personId: string,
+  position: BoardPosition,
+): Promise<void> {
+  const { error } = await requireSupabase()
+    .from("canvas_people")
+    .update({ pos_x: Math.round(position.x), pos_y: Math.round(position.y) })
+    .eq("id", personId);
+  if (error) throw new Error(`Could not move this person: ${error.message}`);
+}
+
+export async function updateCanvasEntryPosition(
+  entryId: string,
+  position: BoardPosition,
+): Promise<void> {
+  const { error } = await requireSupabase()
+    .from("canvas_entries")
+    .update({ pos_x: Math.round(position.x), pos_y: Math.round(position.y) })
+    .eq("id", entryId);
   if (error) throw new Error(`Could not move this entry: ${error.message}`);
 }
 
-export async function moveCanvasEntry(
+export async function placeCanvasEntry(
   entryId: string,
   personId: string | null,
-  beforeEntryId: string | null = null,
+  position: BoardPosition,
 ): Promise<void> {
-  const { error } = await requireSupabase().rpc("reorder_canvas_entry", {
-    p_entry_id: entryId,
-    p_person_id: personId,
-    p_before_entry_id: beforeEntryId,
-  });
+  const { error } = await requireSupabase()
+    .from("canvas_entries")
+    .update({
+      person_id: personId,
+      pos_x: Math.round(position.x),
+      pos_y: Math.round(position.y),
+    })
+    .eq("id", entryId);
   if (error) throw new Error(`Could not move this entry: ${error.message}`);
 }
 

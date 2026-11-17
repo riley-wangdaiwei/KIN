@@ -96,8 +96,24 @@
 }
 
 .canvasArea {
+  position: relative;
   width: 100%;
   min-height: 60vh;
+}
+
+.boardElement {
+  position: absolute;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.boardElement:active {
+  cursor: grabbing;
+}
+
+.boardText {
+  max-width: min(46rem, 82vw);
 }
 
 .canvasAreaDropTarget {
@@ -208,6 +224,8 @@
 
 .person:hover .personDelete,
 .person:focus-within .personDelete,
+.boardElement:hover .personDelete,
+.boardElement:focus-within .personDelete,
 .entry:hover .deleteEntry,
 .entry:focus-within .deleteEntry {
   opacity: 1;
@@ -267,6 +285,7 @@
   overflow-wrap: break-word;
   color: var(--kin-white);
   font: 400 clamp(1.35rem, 3.2vw, 2.5rem)/1.22 var(--kin-ui-sans);
+  text-align: justify;
 }
 
 .entryImage {
