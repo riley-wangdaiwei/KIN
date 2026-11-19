@@ -17,12 +17,14 @@ import {
   placeCanvasEntry,
   renameCanvasPerson,
   subscribeToCanvasAuth,
+  updateCanvasEntryFontSize,
   updateCanvasEntryPosition,
   updateCanvasEntrySize,
   updateCanvasPersonPosition,
+  updateCanvasPersonSize,
 } from "@/lib/storage/canvas-adapter";
 import { getBrowserSupabase } from "@/lib/supabase/browser";
-import type { CanvasEntry, GiftingCanvas } from "@/features/canvas/types";
+import type { CanvasEntry, CanvasPerson, GiftingCanvas } from "@/features/canvas/types";
 import type { BoardPosition } from "@/features/canvas/positions";
 import { resolveBoardPositions } from "@/features/canvas/positions";
 import styles from "./canvas-workspace.module.css";
@@ -221,6 +223,8 @@ export default function CanvasWorkspace() {
     y: number;
   } | null>(null);
   const justDraggedRef = useRef(false);
+  const [namePreviewSize, setNamePreviewSize] = useState<{ id: string; size: number } | null>(null);
+  const personResizeStart = useRef<{ x: number; y: number; size: number; id: string } | null>(null);
   const reducedMotion = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   useEffect(() => {
@@ -436,7 +440,9 @@ export default function CanvasWorkspace() {
   ) => {
     if (event.pointerType === "mouse" && event.button !== 0) return;
     const target = event.target as HTMLElement | null;
-    if (target?.closest("button, input, textarea, a, select")) return;
+    // The person name is a button (click renames), but it is also the drag
+    // handle for the whole name block; every other control still blocks drag.
+    if (target?.closest("button, input, textarea, a, select") && !target.closest("[data-board-drag-handle]")) return;
     event.preventDefault();
     boardDragRef.current = {
       kind,
@@ -455,6 +461,44 @@ export default function CanvasWorkspace() {
     window.removeEventListener("pointercancel", cancelBoardDrag);
     window.addEventListener("pointercancel", cancelBoardDrag, { once: true });
   }, [handleBoardPointerMove, handleBoardPointerUp, cancelBoardDrag]);
+
+  const startPersonResize = useCallback((person: CanvasPerson, event: ReactPointerEvent<HTMLButtonElement>) => {
+    if (event.button !== 0) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const heading = event.currentTarget.closest("[data-person-id]")?.querySelector("h3");
+    const currentSize = namePreviewSize?.id === person.id
+      ? namePreviewSize.size
+      : person.nameSize ?? (heading ? Math.round(parseFloat(getComputedStyle(heading).fontSize)) : 96);
+    personResizeStart.current = { x: event.clientX, y: event.clientY, size: currentSize, id: person.id };
+    const clampSize = (size: number) => Math.round(Math.min(240, Math.max(24, size)));
+    const updatePreview = (moveEvent: PointerEvent) => {
+      const start = personResizeStart.current;
+      if (!start) return;
+      setNamePreviewSize({ id: start.id, size: clampSize(start.size + (moveEvent.clientX - start.x + moveEvent.clientY - start.y) / 2) });
+    };
+    const finishResize = (upEvent: PointerEvent) => {
+      const start = personResizeStart.current;
+      if (!start) return;
+      const size = clampSize(start.size + (upEvent.clientX - start.x + upEvent.clientY - start.y) / 2);
+      personResizeStart.current = null;
+      window.removeEventListener("pointermove", updatePreview);
+      window.removeEventListener("pointerup", finishResize);
+      window.removeEventListener("pointercancel", cancelResize);
+      setNamePreviewSize({ id: start.id, size });
+      void perform(() => updateCanvasPersonSize(start.id, size));
+    };
+    const cancelResize = () => {
+      personResizeStart.current = null;
+      window.removeEventListener("pointermove", updatePreview);
+      window.removeEventListener("pointerup", finishResize);
+      window.removeEventListener("pointercancel", cancelResize);
+      setNamePreviewSize(null);
+    };
+    window.addEventListener("pointermove", updatePreview);
+    window.addEventListener("pointerup", finishResize);
+    window.addEventListener("pointercancel", cancelResize);
+  }, [namePreviewSize, perform]);
 
   const handlePointerMove = useCallback((event: PointerEvent) => {
     const active = draggingWordRef.current;
@@ -717,6 +761,7 @@ export default function CanvasWorkspace() {
               const override = dragOverride?.kind === "person" && dragOverride.id === person.id ? dragOverride : null;
               const x = override?.x ?? position.x;
               const y = override?.y ?? position.y;
+              const nameSize = namePreviewSize?.id === person.id ? namePreviewSize.size : person.nameSize;
               return (
                 <div
                   className={`${styles.boardElement} ${streamDragging && dropTargetPerson === person.id ? styles.dropTarget : ""}`.trim()}
@@ -749,6 +794,7 @@ export default function CanvasWorkspace() {
                   ) : (
                     <button
                       className={styles.personName}
+                      data-board-drag-handle
                       onClick={() => {
                         if (justDraggedRef.current) return;
                         setRenameValue(person.name);
@@ -756,8 +802,11 @@ export default function CanvasWorkspace() {
                       }}
                       type="button"
                     >
-                      <AlphabetName name={person.name} />
+                      <AlphabetName name={person.name} size={nameSize} />
                     </button>
+                  )}
+                  {editingPersonId !== person.id && (
+                    <button aria-label={`Resize ${person.name}`} className={styles.resizeHandle} onPointerDown={(event) => startPersonResize(person, event)} type="button" />
                   )}
                   <button aria-label={`Delete ${person.name}`} className={styles.personDelete} disabled={busy} onClick={() => { if (window.confirm(`Delete ${person.name}? Their entries will move to Unsorted.`)) { void perform(() => deleteCanvasPerson(person.id)); } }} type="button">
                     ×
@@ -785,6 +834,7 @@ export default function CanvasWorkspace() {
                     entry={entry}
                     onDelete={() => void perform(() => deleteCanvasEntry(entry.id))}
                     onResize={(size) => void perform(() => updateCanvasEntrySize(entry.id, size))}
+                    onResizeText={(size) => void perform(() => updateCanvasEntryFontSize(entry.id, size))}
                   />
                 </div>
               );
@@ -810,44 +860,56 @@ function CanvasEntryItem({
   entry,
   onDelete,
   onResize,
+  onResizeText,
 }: {
   busy: boolean;
   entry: CanvasEntry;
   onDelete: () => void;
   onResize?: (size: number) => void;
+  onResizeText?: (size: number) => void;
 }) {
   const [previewSize, setPreviewSize] = useState<number | null>(null);
   const resizeStart = useRef<{ x: number; y: number; size: number } | null>(null);
   const imageSize = previewSize ?? entry.imageSize;
+  const fontSize = previewSize ?? entry.fontSize;
 
   function startResize(event: ReactPointerEvent<HTMLButtonElement>) {
-    if (!onResize || entry.kind === "text" || event.button !== 0) return;
+    if (event.button !== 0) return;
+    const isText = entry.kind === "text";
+    if ((isText && !onResizeText) || (!isText && !onResize)) return;
     event.preventDefault();
     event.stopPropagation();
-    const image = event.currentTarget.closest(".entry")?.querySelector("img");
+    const entryElement = event.currentTarget.closest(`.${styles.entry}`);
+    const textElement = entryElement?.querySelector("p");
+    const image = entryElement?.querySelector("img");
     resizeStart.current = {
       x: event.clientX,
       y: event.clientY,
-      size: imageSize ?? image?.getBoundingClientRect().height ?? 48,
+      size: isText
+        ? fontSize ?? (textElement ? Math.round(parseFloat(getComputedStyle(textElement).fontSize)) : 24)
+        : imageSize ?? image?.getBoundingClientRect().height ?? 48,
+    };
+    const clampSize = (size: number) => {
+      if (isText) return Math.round(Math.min(80, Math.max(14, size)));
+      const availableWidth = document.querySelector<HTMLElement>(`.${styles.canvasArea}`)?.clientWidth ?? window.innerWidth;
+      return Math.round(Math.min(availableWidth, Math.max(16, size)));
     };
     const updatePreview = (moveEvent: PointerEvent) => {
       const start = resizeStart.current;
       if (!start) return;
-      const availableWidth = document.querySelector<HTMLElement>(`.${styles.canvasArea}`)?.clientWidth ?? window.innerWidth;
-      const size = Math.round(Math.min(availableWidth, Math.max(16, start.size + (moveEvent.clientX - start.x + moveEvent.clientY - start.y) / 2)));
-      setPreviewSize(size);
+      setPreviewSize(clampSize(start.size + (moveEvent.clientX - start.x + moveEvent.clientY - start.y) / 2));
     };
     const finishResize = (upEvent: PointerEvent) => {
       const start = resizeStart.current;
       if (!start) return;
-      const availableWidth = document.querySelector<HTMLElement>(`.${styles.canvasArea}`)?.clientWidth ?? window.innerWidth;
-      const size = Math.round(Math.min(availableWidth, Math.max(16, start.size + (upEvent.clientX - start.x + upEvent.clientY - start.y) / 2)));
+      const size = clampSize(start.size + (upEvent.clientX - start.x + upEvent.clientY - start.y) / 2);
       resizeStart.current = null;
       window.removeEventListener("pointermove", updatePreview);
       window.removeEventListener("pointerup", finishResize);
       window.removeEventListener("pointercancel", cancelResize);
       setPreviewSize(size);
-      onResize(size);
+      if (isText) onResizeText?.(size);
+      else onResize?.(size);
     };
     const cancelResize = () => {
       resizeStart.current = null;
@@ -868,7 +930,7 @@ function CanvasEntryItem({
       data-entry-id={entry.kind === "text" ? entry.id : undefined}
     >
       {entry.kind === "text" ? (
-        <p>{entry.content}</p>
+        <p style={fontSize == null ? undefined : { fontSize: `${fontSize}px` }}>{entry.content}</p>
       ) : (
         entry.imageUrl && (
           // eslint-disable-next-line @next/next/no-img-element
@@ -881,8 +943,8 @@ function CanvasEntryItem({
           />
         )
       )}
-      {entry.kind !== "text" && onResize && (
-        <button aria-label="Resize image" className={styles.resizeHandle} onPointerDown={startResize} type="button" />
+      {((entry.kind !== "text" && onResize) || (entry.kind === "text" && onResizeText)) && (
+        <button aria-label={entry.kind === "text" ? "Resize text" : "Resize image"} className={styles.resizeHandle} onPointerDown={startResize} type="button" />
       )}
       <button aria-label="Delete entry" className={styles.deleteEntry} disabled={busy} onClick={onDelete} type="button">
         ×
@@ -891,9 +953,9 @@ function CanvasEntryItem({
   );
 }
 
-function AlphabetName({ name }: { name: string }) {
+function AlphabetName({ name, size }: { name: string; size?: number | null }) {
   return (
-    <h3 aria-label={name} className={styles.alphabetRow}>
+    <h3 aria-label={name} className={styles.alphabetRow} style={size == null ? undefined : { fontSize: `${size}px` }}>
       <span className={styles.visuallyHidden}>{name}</span>
       {Array.from(name).map((character, index) => {
         if (character === " ") {

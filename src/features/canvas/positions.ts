@@ -48,7 +48,13 @@ export function resolveBoardPositions(
   };
 
   for (const person of people) {
-    place(personPositions, person.id, person.posX, person.posY, NAME_HEIGHT);
+    place(
+      personPositions,
+      person.id,
+      person.posX,
+      person.posY,
+      person.nameSize ? Math.round(person.nameSize * 1.1) + 24 : NAME_HEIGHT,
+    );
     for (const entry of person.entries) {
       place(
         entryPositions,

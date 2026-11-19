@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import type { User } from "@supabase/supabase-js";
 import { getBrowserSupabase } from "@/lib/supabase/browser";
+import RedArrow from "./RedArrow";
 import styles from "./playground-chrome.module.css";
 
 const footerLinks = [
@@ -26,6 +27,7 @@ export default function PlaygroundChrome({
   const dialogRef = useRef<HTMLElement>(null);
   const bookingButtonRef = useRef<HTMLButtonElement>(null);
   const bookingDialogRef = useRef<HTMLElement>(null);
+  const bookingOverlayRef = useRef<HTMLDivElement>(null);
   const bookingReturnFocusRef = useRef<HTMLElement | null>(null);
   const bookingWasOpen = useRef(false);
   const wasOpen = useRef(false);
@@ -181,7 +183,7 @@ export default function PlaygroundChrome({
     document.body.style.overflow = "hidden";
     bookingDialogRef.current?.querySelector("button")?.focus();
 
-    const focusableElements = bookingDialogRef.current?.querySelectorAll<HTMLElement>(
+    const focusableElements = bookingOverlayRef.current?.querySelectorAll<HTMLElement>(
       'button:not([disabled]), a[href], iframe',
     );
     function handleBookingKeys(event: KeyboardEvent) {
@@ -256,6 +258,7 @@ export default function PlaygroundChrome({
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) setBookingOpen(false);
           }}
+          ref={bookingOverlayRef}
         >
           <section
             aria-label="Book a free curation meeting"
@@ -277,14 +280,14 @@ export default function PlaygroundChrome({
               src="https://cal.com/team.r3kin/30min?embed=true&theme=dark&layout=month_view"
               title="Book a free curation meeting with re.KIN"
             />
-            <Link
-              className={styles.canvasLink}
-              href="/canvas"
-              onClick={() => setBookingOpen(false)}
-            >
-              Too shy to talk? Use your canvas instead.
-            </Link>
           </section>
+          <Link
+            className={styles.canvasLink}
+            href="/canvas"
+            onClick={() => setBookingOpen(false)}
+          >
+            Too shy to talk? Use your canvas instead. <RedArrow />
+          </Link>
         </div>
       )}
 

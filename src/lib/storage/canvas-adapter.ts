@@ -11,6 +11,7 @@ import { getBrowserSupabase } from "@/lib/supabase/browser";
 interface PersonRow {
   id: string;
   name: string;
+  name_size: number | null;
   pos_x: number | null;
   pos_y: number | null;
   created_at: string;
@@ -24,6 +25,7 @@ interface EntryRow {
   content: string;
   storage_path: string | null;
   image_size: number | null;
+  font_size: number | null;
   pos_x: number | null;
   pos_y: number | null;
   created_at: string;
@@ -89,6 +91,7 @@ async function toCanvasEntry(row: EntryRow): Promise<CanvasEntry> {
     storagePath: row.storage_path,
     imageUrl,
     imageSize: row.image_size,
+    fontSize: row.font_size,
     posX: row.pos_x,
     posY: row.pos_y,
     createdAt: row.created_at,
@@ -121,11 +124,11 @@ export async function loadCanvas(): Promise<GiftingCanvas> {
   const [peopleResult, entriesResult] = await Promise.all([
     supabase
       .from("canvas_people")
-      .select("id,name,pos_x,pos_y,created_at")
+      .select("id,name,name_size,pos_x,pos_y,created_at")
       .order("sort_order", { ascending: true }),
     supabase
       .from("canvas_entries")
-      .select("id,person_id,related_entry_id,kind,content,storage_path,image_size,pos_x,pos_y,created_at")
+      .select("id,person_id,related_entry_id,kind,content,storage_path,image_size,font_size,pos_x,pos_y,created_at")
       .order("sort_order", { ascending: true }),
   ]);
   if (peopleResult.error) {
@@ -142,6 +145,7 @@ export async function loadCanvas(): Promise<GiftingCanvas> {
   const people: CanvasPerson[] = peopleRows.map((row) => ({
     id: row.id,
     name: row.name,
+    nameSize: row.name_size,
     posX: row.pos_x,
     posY: row.pos_y,
     createdAt: row.created_at,
@@ -400,6 +404,29 @@ export async function updateCanvasEntrySize(entryId: string, imageSize: number):
     .eq("id", entryId)
     .neq("kind", "text");
   if (error) throw new Error(`Could not resize this image: ${error.message}`);
+}
+
+export async function updateCanvasEntryFontSize(entryId: string, fontSize: number): Promise<void> {
+  if (!Number.isInteger(fontSize) || fontSize < 14 || fontSize > 80) {
+    throw new Error("Choose a text size between 14 and 80 pixels.");
+  }
+  const { error } = await requireSupabase()
+    .from("canvas_entries")
+    .update({ font_size: fontSize })
+    .eq("id", entryId)
+    .eq("kind", "text");
+  if (error) throw new Error(`Could not resize this note: ${error.message}`);
+}
+
+export async function updateCanvasPersonSize(personId: string, nameSize: number): Promise<void> {
+  if (!Number.isInteger(nameSize) || nameSize < 24 || nameSize > 240) {
+    throw new Error("Choose a name size between 24 and 240 pixels.");
+  }
+  const { error } = await requireSupabase()
+    .from("canvas_people")
+    .update({ name_size: nameSize })
+    .eq("id", personId);
+  if (error) throw new Error(`Could not resize this name: ${error.message}`);
 }
 
 export async function deleteCanvasEntry(entryId: string): Promise<void> {

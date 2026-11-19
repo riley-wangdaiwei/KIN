@@ -20,7 +20,6 @@ export default function MyGiftingIdentityPage() {
           className={styles.questionnaire}
           id="start-a-project"
         >
-          <span className={styles.metadata}>START A PROJECT / 01</span>
           <h1 id="project-title">
             <Image
               src="/rekin-tell-us-white.png"

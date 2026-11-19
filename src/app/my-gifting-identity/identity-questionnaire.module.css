@@ -80,10 +80,57 @@
   padding: 0;
   border: 0;
   background: transparent;
-  color: var(--kin-light-gray);
-  cursor: not-allowed;
+  color: var(--kin-white);
+  cursor: pointer;
   font-family: var(--kin-ui-sans);
   font-size: 0.85rem;
+}
+
+.submit:hover {
+  color: var(--kin-light-gray);
+}
+
+.submit:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+.otherInput {
+  width: min(100%, 28rem);
+  margin-top: 0.7rem;
+  border: 0;
+  border-bottom: 1px solid rgb(255 255 255 / 45%);
+  border-radius: 0;
+  padding: 0.4rem 0;
+  background: transparent;
+  color: var(--kin-white);
+  font-family: var(--kin-reading-serif);
+  font-size: 0.95rem;
+}
+
+.otherInput:focus-visible {
+  outline: 1px solid var(--kin-white);
+  outline-offset: 0.35rem;
+}
+
+.emailNote {
+  margin: 0.7rem 0 0;
+  color: var(--kin-light-gray);
+  font-family: var(--kin-ui-sans);
+  font-size: 0.85rem;
+}
+
+.sent,
+.error {
+  margin: 0;
+  color: var(--kin-light-gray);
+  font-family: var(--kin-ui-sans);
+  font-size: 0.85rem;
+  line-height: 1.35;
+}
+
+.error {
+  margin-top: 0.7rem;
 }
 
 @media (prefers-reduced-motion: reduce) {

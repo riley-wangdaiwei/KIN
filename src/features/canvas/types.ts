@@ -9,6 +9,7 @@ export interface CanvasEntry {
   storagePath: string | null;
   imageUrl: string | null;
   imageSize: number | null;
+  fontSize: number | null;
   posX: number | null;
   posY: number | null;
   createdAt: string;
@@ -17,6 +18,7 @@ export interface CanvasEntry {
 export interface CanvasPerson {
   id: string;
   name: string;
+  nameSize: number | null;
   posX: number | null;
   posY: number | null;
   createdAt: string;

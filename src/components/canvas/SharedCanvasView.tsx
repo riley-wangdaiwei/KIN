@@ -49,7 +49,7 @@ export default function SharedCanvasView({ token }: { token: string }) {
       {canvas.people.map((person) => {
         const position = board.personPositions.get(person.id) ?? { x: 16, y: 16 };
         return (
-          <h2 className={styles.personName} key={person.id} style={{ left: position.x, top: position.y }}>
+          <h2 className={styles.personName} key={person.id} style={{ left: position.x, top: position.y, fontSize: person.nameSize == null ? undefined : `${person.nameSize}px` }}>
             {person.name}
           </h2>
         );
@@ -62,7 +62,7 @@ export default function SharedCanvasView({ token }: { token: string }) {
             key={entry.id}
             style={{ left: position.x, top: position.y }}
           >
-            {entry.kind === "text" ? <p className={styles.entryText}>{entry.content}</p> : <EntryImage entry={entry} />}
+            {entry.kind === "text" ? <p className={styles.entryText} style={entry.fontSize == null ? undefined : { fontSize: `${entry.fontSize}px` }}>{entry.content}</p> : <EntryImage entry={entry} />}
           </div>
         );
       })}

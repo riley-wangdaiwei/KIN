@@ -1,69 +1,7 @@
 .page {
   min-height: 100vh;
-  padding: clamp(7rem, 12vh, 9rem) var(--kin-page-gutter)
-    clamp(6rem, 12vw, 10rem);
-  background: var(--kin-black);
+  background: transparent;
   color: var(--kin-white);
-}
-
-.content {
-  display: grid;
-  width: min(78vw, 66rem);
-  gap: clamp(2.4rem, 6vw, 5rem);
-  margin-left: var(--kin-page-gutter);
-}
-
-.section {
-  max-width: 62rem;
-}
-
-.sectionTitle,
-.contactTitle {
-  margin: 0 0 1rem;
-  font-family: var(--kin-display-serif);
-  font-size: clamp(2.2rem, 4.5vw, 4.5rem);
-  font-weight: 700;
-  letter-spacing: -0.045em;
-  line-height: 0.88;
-}
-
-.points {
-  display: grid;
-  gap: 0.45rem;
-  max-width: 58rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.point {
-  display: grid;
-  grid-template-columns: 2rem minmax(0, 1fr);
-  gap: 0.65rem;
-}
-
-.pointNumber {
-  padding-top: 0.2rem;
-  color: var(--kin-light-gray);
-  font-family: var(--kin-micro-mono);
-  font-size: var(--kin-caption-size);
-}
-
-.pointText {
-  max-width: 64ch;
-  color: var(--kin-white);
-  font-family: var(--kin-reading-serif);
-  font-size: clamp(1rem, 1.4vw, 1.2rem);
-  line-height: 1.2;
-}
-
-.contact {
-  max-width: 42rem;
-  scroll-margin-top: 6rem;
-}
-
-.contactTitle {
-  font-size: clamp(1.8rem, 3.2vw, 3rem);
 }
 
 .contactForm {
@@ -180,15 +118,4 @@
 
 .portfolioNote {
   margin-top: 0.65rem;
-}
-
-@media (max-width: 760px) {
-  .content {
-    width: auto;
-    margin-right: var(--kin-page-gutter);
-  }
-
-  .point {
-    grid-template-columns: 1.5rem minmax(0, 1fr);
-  }
 }

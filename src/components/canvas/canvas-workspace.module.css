@@ -328,7 +328,9 @@
 }
 
 .entry:hover .resizeHandle,
-.entry:focus-within .resizeHandle {
+.entry:focus-within .resizeHandle,
+.boardElement:hover .resizeHandle,
+.boardElement:focus-within .resizeHandle {
   opacity: 1;
 }
 
