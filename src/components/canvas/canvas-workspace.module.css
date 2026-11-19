@@ -222,6 +222,15 @@
   transition: opacity 120ms ease;
 }
 
+/* The delete × sits outside the name's right edge, vertically centered, so
+   it never lands on the resize handle at the name's bottom-right corner. */
+.personDelete {
+  position: absolute;
+  top: 50%;
+  right: -1.4rem;
+  transform: translateY(-50%);
+}
+
 .person:hover .personDelete,
 .person:focus-within .personDelete,
 .boardElement:hover .personDelete,
