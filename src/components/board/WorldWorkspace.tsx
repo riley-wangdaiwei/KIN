@@ -28,6 +28,7 @@ import TagGroup from "./TagGroup";
 import StickerTray from "./StickerTray";
 import WorldCanvas from "./WorldCanvas";
 import styles from "./board.module.css";
+import SiteArrow from "@/components/site/SiteArrow";
 
 function makeId(prefix: string): string {
   return `${prefix}-${crypto.randomUUID()}`;
@@ -365,7 +366,7 @@ export default function WorldWorkspace() {
               became a memory. A memory became a work of art.
             </p>
             <Link className={styles.storyCta} href="#board">
-              Start curating your own story →
+              Start curating your own story <SiteArrow />
             </Link>
           </div>
         </article>
@@ -387,7 +388,7 @@ export default function WorldWorkspace() {
               new. It&apos;s something you help someone remember.
             </p>
             <Link className={styles.storyCta} href="#board">
-              Turn a memory into something lasting →
+              Turn a memory into something lasting <SiteArrow />
             </Link>
           </div>
         </article>
@@ -412,7 +413,7 @@ export default function WorldWorkspace() {
               what you know into something they can hold onto.
             </p>
             <Link className={styles.storyCta} href="/order">
-              Create something only they could receive →
+              Create something only they could receive <SiteArrow />
             </Link>
           </div>
         </article>
@@ -422,7 +423,7 @@ export default function WorldWorkspace() {
             yours.
           </p>
           <Link className={styles.storyBoardCta} href="#board">
-            Return to the board →
+            Return to the board <SiteArrow />
           </Link>
         </div>
       </section>
@@ -438,10 +439,10 @@ export default function WorldWorkspace() {
             type="button"
             onClick={() => setCurationOpen(true)}
           >
-            Turn your curation into a gift →
+            Turn your curation into a gift <SiteArrow />
           </button>
           <Link className={styles.boardOrderLink} href="/order?source=board">
-            Start an order →
+            Start an order <SiteArrow />
           </Link>
         </div>
       </section>

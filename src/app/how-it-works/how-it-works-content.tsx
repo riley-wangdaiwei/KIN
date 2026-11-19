@@ -9,7 +9,7 @@ const navigation = [
   { href: "/how-it-works", label: "What is re.KIN" },
   { href: "/gifts", label: "Gift packages" },
   { href: "/artists", label: "For artists and partners" },
-  { href: "/my-gifting-identity", label: "My gifting identity" },
+  { href: "/my-gifting-identity", label: "A gifting identity" },
 ];
 
 const footerLinks = [

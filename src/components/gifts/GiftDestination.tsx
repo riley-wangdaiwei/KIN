@@ -5,6 +5,7 @@ import Link from "next/link";
 import type { GiftBrief } from "@/features/brief/types";
 import { storage } from "@/lib/storage";
 import styles from "./gift-destination.module.css";
+import SiteArrow from "@/components/site/SiteArrow";
 
 interface GiftDestinationProps {
   destination: "gifts" | "publication";
@@ -83,7 +84,7 @@ export default function GiftDestination({
           <section className={styles.noBrief}>
             <p>There is no gift brief saved on this device yet.</p>
             <Link className={styles.primary} href="/">
-              Return to your board →
+              Return to your board <SiteArrow />
             </Link>
           </section>
         )}
@@ -91,7 +92,7 @@ export default function GiftDestination({
           <nav className={styles.actions} aria-label="Continue exploring">
             {isPublication && (
               <Link className={styles.secondary} href="/gifts">
-                Explore Gift Ideas →
+                Explore Gift Ideas <SiteArrow />
               </Link>
             )}
             <Link className={styles.primary} href="/">

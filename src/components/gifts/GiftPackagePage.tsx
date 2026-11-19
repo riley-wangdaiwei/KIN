@@ -6,6 +6,7 @@ import type { GiftPackage } from "@/features/gifts/types";
 import { giftImagePaths, supportingGifts } from "@/data/gifts";
 import { storage } from "@/lib/storage";
 import styles from "./gift-package.module.css";
+import SiteArrow from "@/components/site/SiteArrow";
 
 interface GiftPackagePageProps {
   gift: GiftPackage;
@@ -56,13 +57,13 @@ export default function GiftPackagePage({ gift }: GiftPackagePageProps) {
                   className={styles.primary}
                   href="/order?package=conversation-recap&source=gift-page"
                 >
-                  Start a Gift Brief →
+                  Start a Gift Brief <SiteArrow />
                 </Link>
                 <Link
                   className={styles.secondary}
                   href="/order?package=conversation-recap&source=gift-page"
                 >
-                  Start order →
+                  Start order <SiteArrow />
                 </Link>
               </>
             ) : gift.action === "start-brief" ? (
@@ -70,15 +71,15 @@ export default function GiftPackagePage({ gift }: GiftPackagePageProps) {
                 className={styles.primary}
                 href={`/order?package=conversation-recap&source=gift-page&filling=${gift.category === "supporting-gift" ? "digital" : ""}`}
               >
-                {gift.actionLabel} →
+                {gift.actionLabel} <SiteArrow />
               </Link>
             ) : gift.action === "artist-inquiry" ? (
               <Link className={styles.primary} href="/artists">
-                {gift.actionLabel} →
+                {gift.actionLabel} <SiteArrow />
               </Link>
             ) : gift.action === "preorder-intent" ? (
               <a className={styles.primary} href="#preorder">
-                Preorder / register interest →
+                Preorder / register interest <SiteArrow />
               </a>
             ) : (
               <button className={styles.primary} type="button" onClick={registerInterest}>
@@ -171,13 +172,13 @@ export default function GiftPackagePage({ gift }: GiftPackagePageProps) {
               className={styles.primary}
               href={`/order?package=${gift.slug}&source=gift-page`}
             >
-              Start a Gift Brief →
+              Start a Gift Brief <SiteArrow />
             </Link>
             <Link
               className={styles.secondary}
               href="/order?package=conversation-recap&source=gift-page"
             >
-              Continue order →
+              Continue order <SiteArrow />
             </Link>
           </div>
         </section>
@@ -198,14 +199,14 @@ export default function GiftPackagePage({ gift }: GiftPackagePageProps) {
             </button>
           ) : gift.action === "artist-inquiry" ? (
             <Link className={styles.primary} href="/artists">
-              {gift.actionLabel} →
+              {gift.actionLabel} <SiteArrow />
             </Link>
           ) : (
             <Link
               className={styles.primary}
               href={`/order?package=conversation-recap&source=gift-page&filling=digital`}
             >
-              {gift.actionLabel} →
+              {gift.actionLabel} <SiteArrow />
             </Link>
           )}
           {interestSaved && (
@@ -217,7 +218,7 @@ export default function GiftPackagePage({ gift }: GiftPackagePageProps) {
       )}
 
       <footer className={styles.footer}>
-        <Link href="/gifts">← Back to all gifts</Link>
+        <Link href="/gifts"><SiteArrow direction="back" /> Back to all gifts</Link>
         <Link href="/">Return to your board</Link>
       </footer>
     </main>

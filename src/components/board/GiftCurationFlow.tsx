@@ -4,6 +4,7 @@ import { useMemo, useState, type FormEvent } from "react";
 import type { TasteTag } from "@/features/taste/types";
 import type { WorldFrame } from "@/features/world/types";
 import { createGiftBrief } from "@/features/brief/service";
+import SiteArrow from "@/components/site/SiteArrow";
 import type {
   BriefMaterial,
   GiftBrief,
@@ -305,7 +306,7 @@ export default function GiftCurationFlow({
               type="button"
               onClick={() => setStep((current) => current - 1)}
             >
-              ← Back
+              <SiteArrow direction="back" /> Back
             </button>
           ) : (
             <button className={styles.back} type="button" onClick={onClose}>
@@ -319,7 +320,7 @@ export default function GiftCurationFlow({
               disabled={step === 2 && !answers.intent}
               onClick={continueFlow}
             >
-              {step === 2 ? "Create my brief →" : "Continue →"}
+              {step === 2 ? <>Create my brief <SiteArrow /></> : <>Continue <SiteArrow /></>}
             </button>
           ) : (
             <div className={styles.exitActions}>
@@ -328,7 +329,7 @@ export default function GiftCurationFlow({
                 type="button"
                 onClick={() => onExploreGiftIdeas(currentBrief)}
               >
-                Explore Gift Ideas →
+                Explore Gift Ideas <SiteArrow />
               </button>
               <button
                 className={styles.secondary}

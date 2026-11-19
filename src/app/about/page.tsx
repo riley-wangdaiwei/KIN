@@ -1,5 +1,6 @@
 import EditorialPage from "@/components/site/EditorialPage";
 import styles from "@/components/site/site.module.css";
+import SiteArrow from "@/components/site/SiteArrow";
 
 export default function AboutPage() {
   return (
@@ -18,7 +19,7 @@ export default function AboutPage() {
             belong to one person. re.KIN gives them a place to collect, connect,
             and become a creative keepsake.
           </p>
-          <p>The loop is simple: Collect → Curate → Create → Give.</p>
+          <p>The loop is simple: Collect <SiteArrow /> Curate <SiteArrow /> Create <SiteArrow /> Give.</p>
         </div>
       </section>
       <section className={styles.section}>

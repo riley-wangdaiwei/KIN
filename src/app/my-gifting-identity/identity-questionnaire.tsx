@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { getCanvasUser, subscribeToCanvasAuth } from "@/lib/storage/canvas-adapter";
 import styles from "./identity-questionnaire.module.css";
+import SiteArrow from "@/components/site/SiteArrow";
 
 type Question = {
   name: string;
@@ -182,7 +183,7 @@ export default function IdentityQuestionnaire() {
           ) : (
             <>
               <button className={styles.submit} disabled={sending} onClick={() => void sendAnswers()} type="button">
-                {sending ? "Sending…" : <>Send us an email <span aria-hidden="true">→</span></>}
+                {sending ? "Sending…" : <>Send us an email <SiteArrow /></>}
               </button>
               {sendState === "error" && sendError && (
                 <p className={styles.error} role="alert">{sendError}</p>

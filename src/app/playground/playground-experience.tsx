@@ -7,7 +7,7 @@ import { artistPartnerNames, identityExamples } from "@/data/hover-lists";
 import { storage } from "@/lib/storage";
 import JarScroll from "@/components/site/JarScroll";
 import HoverRingMenu from "@/components/site/HoverRingMenu";
-import RedArrow from "@/components/site/RedArrow";
+import SiteArrow from "@/components/site/SiteArrow";
 import styles from "./playground.module.css";
 
 type StoryStep = {
@@ -307,7 +307,7 @@ export default function PlaygroundExperience() {
             <HoverRingMenu
               href="/canvas"
               items={identityExamples}
-              label="My Gifting Identity"
+              label="A Gifting Identity"
               menuSide="left"
             />
           )}
@@ -323,7 +323,7 @@ export default function PlaygroundExperience() {
               width={3334}
               height={345}
             />
-            <RedArrow className={styles.endingArrow} />
+            <SiteArrow className={styles.endingArrow} />
           </Link>
         </div>
       </div>

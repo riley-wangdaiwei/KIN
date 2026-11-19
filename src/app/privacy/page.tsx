@@ -32,7 +32,7 @@ export default function PrivacyPage() {
           can return without signing in again.
         </p>
         <p>
-          If you use My Gifting Identity, re.KIN stores the names of people,
+          If you use A Gifting Identity, re.KIN stores the names of people,
           notes, and images you add to your canvas in Supabase under your
           account. Uploaded images are kept in private storage and are
           available to your signed-in account.

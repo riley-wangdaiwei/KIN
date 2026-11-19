@@ -58,7 +58,7 @@ export default function GiftsPage() {
           <Link href="/how-it-works">What is re.KIN</Link>
           <Link href="/gifts">Gift packages</Link>
           <Link href="/artists">For artists and partners</Link>
-          <Link href="/my-gifting-identity">My gifting identity</Link>
+          <Link href="/my-gifting-identity">A gifting identity</Link>
           <BookingTrigger
             className={`${homepageStyles.navigationCta} kin-glass-hover`}
           >

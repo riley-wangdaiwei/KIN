@@ -1,6 +1,7 @@
 import Link from "next/link";
 import EditorialPage from "@/components/site/EditorialPage";
 import styles from "@/components/site/site.module.css";
+import SiteArrow from "@/components/site/SiteArrow";
 
 const partners = [
   {
@@ -77,7 +78,7 @@ export default function IntegrationsPage() {
                 <p>{partner.value}</p>
                 <em>EXAMPLE / {partner.example}</em>
                 <Link className={styles.cta} href="/partner-with-kin">
-                  Partner with re.KIN →
+                  Partner with re.KIN <SiteArrow />
                 </Link>
               </article>
             ))}

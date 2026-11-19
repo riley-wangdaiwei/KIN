@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import Link from "next/link";
+import SiteArrow from "@/components/site/SiteArrow";
 import type { GiftBrief } from "@/features/brief/types";
 import { isGiftBriefThin } from "@/features/orders/service";
 import type {
@@ -350,7 +351,7 @@ export default function OrderFlow({
               target="_blank"
               rel="noreferrer"
             >
-              Explore flowers with our partner ↗
+              Explore flowers with our partner <SiteArrow />
             </a>
           ) : (
             <p className={styles.partnerNote}>
@@ -590,11 +591,11 @@ export default function OrderFlow({
                           setStep((current) => current - 1);
                         }}
                       >
-                        ← Back
+                        <SiteArrow direction="back" /> Back
                       </button>
                     ) : (
                       <Link className={styles.backLink} href="/">
-                        ← Return to board
+                        <SiteArrow direction="back" /> Return to board
                       </Link>
                     )}
                     <button
@@ -605,8 +606,8 @@ export default function OrderFlow({
                       {submitting
                         ? "Sending order…"
                         : step === 4
-                          ? "Send order request →"
-                          : "Continue →"}
+                          ? <>Send order request <SiteArrow /></>
+                          : <>Continue <SiteArrow /></>}
                     </button>
                   </div>
                 </form>
@@ -616,7 +617,7 @@ export default function OrderFlow({
         </section>
       </section>
       <footer className={styles.footer}>
-        <Link href="/gifts">← Back to Gifts</Link>
+        <Link href="/gifts"><SiteArrow direction="back" /> Back to Gifts</Link>
         <span>NO PAYMENT IS COLLECTED IN THIS MVP</span>
       </footer>
     </main>

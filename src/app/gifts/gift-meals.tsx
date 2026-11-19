@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 import type { GiftPackage } from "@/features/gifts/types";
 import styles from "./gift-meals.module.css";
+import SiteArrow from "@/components/site/SiteArrow";
 
 type GiftMeal = {
   gift: GiftPackage;
@@ -125,7 +126,7 @@ export default function GiftMeals({ columns }: { columns: GiftColumn[] }) {
                         flip back
                       </button>
                       <Link className={styles.detailLink} href={`/gifts/${gift.slug}`}>
-                        explore package →
+                        explore package <SiteArrow />
                       </Link>
                     </div>
                   </div>

@@ -7,6 +7,7 @@ import type { GiftBrief } from "@/features/brief/types";
 import { giftImagePaths, giftPackages } from "@/data/gifts";
 import { storage } from "@/lib/storage";
 import styles from "./gifts.module.css";
+import SiteArrow from "@/components/site/SiteArrow";
 
 export default function GiftCatalog() {
   const [brief, setBrief] = useState<GiftBrief | null>(null);
@@ -65,7 +66,7 @@ export default function GiftCatalog() {
           <span className={styles.kicker}>YOUR GIFT BRIEF IS READY</span>
           <p>{brief.gift}</p>
           <Link href="/gifts/conversation-recap">
-            Explore Conversation Recap →
+            Explore Conversation Recap <SiteArrow />
           </Link>
         </section>
       )}
@@ -122,12 +123,12 @@ export default function GiftCatalog() {
                       </span>
                       <Link href={`/gifts/${gift.slug}`}>
                         {gift.category === "kin-meal"
-                          ? "Preorder / details →"
+                          ? <>Preorder / details <SiteArrow /></>
                           : gift.category === "artist-made"
-                            ? "Artist concept →"
+                            ? <>Artist concept <SiteArrow /></>
                             : gift.category === "supporting-gift"
-                              ? "Explore fillings →"
-                              : "View the first re.KIN Meal →"}
+                              ? <>Explore fillings <SiteArrow /></>
+                              : <>View the first re.KIN Meal <SiteArrow /></>}
                       </Link>
                     </div>
                     {index === 0 && gift.category === "hero" && (
@@ -142,7 +143,7 @@ export default function GiftCatalog() {
       </div>
       <footer className={styles.footer}>
         <span>re.KIN / GIFTS</span>
-        <Link href="/">Return to your board →</Link>
+        <Link href="/">Return to your board <SiteArrow /></Link>
       </footer>
     </main>
   );

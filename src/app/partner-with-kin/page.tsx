@@ -2,6 +2,7 @@ import Link from "next/link";
 import EditorialPage from "@/components/site/EditorialPage";
 import ArtistContactForm from "@/app/artists/artist-contact-form";
 import styles from "@/components/site/site.module.css";
+import SiteArrow from "@/components/site/SiteArrow";
 
 const artistSections = [
   {
@@ -45,7 +46,7 @@ export default function PartnerWithKinPage() {
           <div className={styles.cardGrid}>
             <article className={styles.card}>
               <span className={styles.cardNumber}>DIRECTION / 01</span>
-              <h3>Florist → re.KIN</h3>
+              <h3>Florist <SiteArrow /> re.KIN</h3>
               <p>
                 A florist customer can discover re.KIN after choosing flowers,
                 through a checkout message, order confirmation, or follow-up.
@@ -55,7 +56,7 @@ export default function PartnerWithKinPage() {
             </article>
             <article className={styles.card}>
               <span className={styles.cardNumber}>DIRECTION / 02</span>
-              <h3>re.KIN → florist</h3>
+              <h3>re.KIN <SiteArrow /> florist</h3>
               <p>
                 A re.KIN customer can choose flowers as an optional physical
                 filling and follow a partner link. The florist handles its
@@ -91,7 +92,7 @@ export default function PartnerWithKinPage() {
             responsibilities require a separate written agreement.
           </p>
           <Link className={styles.cta} href="/contact?topic=partnership">
-            Partner with re.KIN →
+            Partner with re.KIN <SiteArrow />
           </Link>
           <p>For now this opens the contact information page; it does not submit a partnership request.</p>
         </div>

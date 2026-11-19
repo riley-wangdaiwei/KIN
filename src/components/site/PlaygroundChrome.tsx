@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import type { User } from "@supabase/supabase-js";
 import { getBrowserSupabase } from "@/lib/supabase/browser";
-import RedArrow from "./RedArrow";
+import SiteArrow from "./SiteArrow";
 import styles from "./playground-chrome.module.css";
 
 const footerLinks = [
@@ -286,7 +286,7 @@ export default function PlaygroundChrome({
             href="/canvas"
             onClick={() => setBookingOpen(false)}
           >
-            Too shy to talk? Use your canvas instead. <RedArrow />
+            Too shy to talk? Use your canvas instead. <SiteArrow />
           </Link>
         </div>
       )}

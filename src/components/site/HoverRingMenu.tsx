@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import styles from "./hover-ring-menu.module.css";
+import SiteArrow from "./SiteArrow";
 
 export default function HoverRingMenu({
   href,
@@ -75,7 +76,7 @@ export default function HoverRingMenu({
         type="button"
       >
         {label}
-        <span aria-hidden="true" className={styles.arrow}>→</span>
+        <span aria-hidden="true" className={styles.arrow}><SiteArrow /></span>
       </button>
       <div
         aria-label={`${label} examples`}

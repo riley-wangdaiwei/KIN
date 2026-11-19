@@ -1,6 +1,7 @@
 import Link from "next/link";
 import EditorialPage from "@/components/site/EditorialPage";
 import styles from "@/components/site/site.module.css";
+import SiteArrow from "@/components/site/SiteArrow";
 
 export default function ContactPage() {
   return (
@@ -24,19 +25,19 @@ export default function ContactPage() {
               <span className={styles.cardNumber}>FOR ARTISTS</span>
               <h3>Make with re.KIN</h3>
               <p>Artist submissions are not open yet; see the current program notes.</p>
-              <Link className={styles.cta} href="/artists">Artist information →</Link>
+              <Link className={styles.cta} href="/artists">Artist information <SiteArrow /></Link>
             </article>
             <article className={styles.card}>
               <span className={styles.cardNumber}>FOR BUSINESSES</span>
               <h3>Partner with re.KIN</h3>
               <p>Learn how referral links, widgets, or deeper integrations may work.</p>
-              <Link className={styles.cta} href="/partner-with-kin">Partner information →</Link>
+              <Link className={styles.cta} href="/partner-with-kin">Partner information <SiteArrow /></Link>
             </article>
             <article className={styles.card}>
               <span className={styles.cardNumber}>FOR CUSTOMERS</span>
               <h3>Order questions</h3>
               <p>Order requests are not accepted as purchases; price and scope need confirmation.</p>
-              <Link className={styles.cta} href="/terms">Read order terms draft →</Link>
+              <Link className={styles.cta} href="/terms">Read order terms draft <SiteArrow /></Link>
             </article>
           </div>
         </div>

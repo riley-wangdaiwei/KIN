@@ -6,7 +6,7 @@ import IdentityQuestionnaire from "./identity-questionnaire";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = {
-  title: "My Gifting Identity | re.KIN",
+  title: "A Gifting Identity | re.KIN",
   description: "Share a few details to begin a curation conversation.",
 };
 
