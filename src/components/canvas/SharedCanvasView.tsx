@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import type { CanvasEntry, SharedCanvas } from "@/features/canvas/types";
 import { resolveBoardPositions } from "@/features/canvas/positions";
+import AlphabetName from "./AlphabetName";
 import styles from "./shared-canvas-view.module.css";
 
 export default function SharedCanvasView({ token }: { token: string }) {
@@ -49,9 +50,9 @@ export default function SharedCanvasView({ token }: { token: string }) {
       {canvas.people.map((person) => {
         const position = board.personPositions.get(person.id) ?? { x: 16, y: 16 };
         return (
-          <h2 className={styles.personName} key={person.id} style={{ left: position.x, top: position.y, fontSize: person.nameSize == null ? undefined : `${person.nameSize}px` }}>
-            {person.name}
-          </h2>
+          <div className={styles.personName} key={person.id} style={{ left: position.x, top: position.y }}>
+            <AlphabetName name={person.name} size={person.nameSize} />
+          </div>
         );
       })}
       {[...canvas.unsorted, ...canvas.people.flatMap((person) => person.entries)].map((entry) => {

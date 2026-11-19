@@ -1,0 +1,40 @@
+.alphabetRow {
+  display: inline-flex;
+  flex: 0 1 auto;
+  max-width: 100%;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.06em;
+  margin: 0;
+  color: var(--kin-white);
+  font: 500 clamp(3rem, 9vw, 7.5rem)/0.95 var(--kin-ui-sans);
+}
+
+.alphabetLetter {
+  display: inline-block;
+  width: auto;
+  height: 0.78em;
+  max-width: 0.72em;
+  object-fit: contain;
+}
+
+.letterSpace {
+  width: 0.2em;
+  flex: 0 0 0.2em;
+}
+
+.fallbackLetter {
+  font-family: var(--kin-ui-sans);
+  font-size: 0.72em;
+  line-height: 1;
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
