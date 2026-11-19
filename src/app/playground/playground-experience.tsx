@@ -88,9 +88,9 @@ const chapters: { title: string; subtitle?: string; steps: StoryStep[] }[] = [
 
 const openingHeadline = {
   src: "/rekin-headline-white.png",
-  width: 4067,
-  height: 1393,
-  alt: "Less generic gifting, more oddly specific art about your favorite people, and a more personal identity for the way you give.",
+  width: 2834,
+  height: 869,
+  alt: "Most gifts are bought. Ours are made. From your story.",
 };
 
 const sentenceImages = [
