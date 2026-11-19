@@ -1,8 +1,6 @@
-import Link from "next/link";
 import EditorialPage from "@/components/site/EditorialPage";
 import ArtistContactForm from "@/app/artists/artist-contact-form";
 import styles from "@/components/site/site.module.css";
-import SiteArrow from "@/components/site/SiteArrow";
 
 const artistSections = [
   {
@@ -22,8 +20,8 @@ const artistSections = [
   {
     title: "Physical gifts, integrated",
     points: [
-      "re.KIN brings the meaning; physical gifts add use. We encourage artists to weave connected gifts—like flowers or perfume—into curation.",
-      "Florists, bookstores, and other shops can explore mutual storefront promotion and API integration with us.",
+      "re.KIN brings the meaning; physical gifts add use. We partner with florists and other shops so a real gift can carry the digital one.",
+      "How it works: we recommend your shop, the customer orders on your own site, and when our gift page is ready you print a QR code linking to it and include it with the delivery — the recipient scans it and opens the gift. We provide the print template.",
     ],
   },
 ];
@@ -36,67 +34,6 @@ export default function PartnerWithKinPage() {
       intro="re.KIN can complement a partner's existing offer with relationship-led curation. Start with a clear hand-off; build more only when it helps both sides."
       homepageChrome
     >
-      <section className={styles.section}>
-        <h2 className={styles.sectionHeading}>A florist, both ways</h2>
-        <div className={styles.sectionBody}>
-          <p>
-            A partnership can work in either direction without turning two
-            distinct businesses into one product.
-          </p>
-          <div className={styles.cardGrid}>
-            <article className={styles.card}>
-              <span className={styles.cardNumber}>DIRECTION / 01</span>
-              <h3>Florist <SiteArrow /> re.KIN</h3>
-              <p>
-                A florist customer can discover re.KIN after choosing flowers,
-                through a checkout message, order confirmation, or follow-up.
-                The florist sells and fulfills flowers; re.KIN offers a separate
-                digital creative gift.
-              </p>
-            </article>
-            <article className={styles.card}>
-              <span className={styles.cardNumber}>DIRECTION / 02</span>
-              <h3>re.KIN <SiteArrow /> florist</h3>
-              <p>
-                A re.KIN customer can choose flowers as an optional physical
-                filling and follow a partner link. The florist handles its
-                own stock, checkout, delivery, and returns.
-              </p>
-            </article>
-          </div>
-        </div>
-      </section>
-      <section className={styles.section}>
-        <h2 className={styles.sectionHeading}>Start at the right scale</h2>
-        <div className={styles.sectionBody}>
-          <div className={styles.cardGrid}>
-            <article className={styles.card}>
-              <span className={styles.cardNumber}>LEVEL 01</span>
-              <h3>Referral</h3>
-              <p>A simple, clearly described link or recommendation.</p>
-            </article>
-            <article className={styles.card}>
-              <span className={styles.cardNumber}>LEVEL 02</span>
-              <h3>Widget</h3>
-              <p>An embedded entry point with agreed placement and customer hand-off.</p>
-            </article>
-            <article className={styles.card}>
-              <span className={styles.cardNumber}>LEVEL 03</span>
-              <h3>API</h3>
-              <p>A deeper technical connection only when the use case warrants it.</p>
-            </article>
-          </div>
-          <p className={styles.notice}>
-            No inventory, checkout, attribution, or API integration is live in
-            this preview. Commercial terms, data sharing, service levels, and
-            responsibilities require a separate written agreement.
-          </p>
-          <Link className={styles.cta} href="/contact?topic=partnership">
-            Partner with re.KIN <SiteArrow />
-          </Link>
-          <p>For now this opens the contact information page; it does not submit a partnership request.</p>
-        </div>
-      </section>
       {artistSections.map((section) => (
         <section className={styles.section} key={section.title}>
           <h2 className={styles.sectionHeading}>{section.title}</h2>
