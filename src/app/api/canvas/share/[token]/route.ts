@@ -14,6 +14,7 @@ interface ShareRow {
 interface PersonRow {
   id: string;
   name: string;
+  name_size: number | null;
   pos_x: number | null;
   pos_y: number | null;
   created_at: string;
@@ -27,6 +28,7 @@ interface EntryRow {
   content: string;
   storage_path: string | null;
   image_size: number | null;
+  font_size: number | null;
   pos_x: number | null;
   pos_y: number | null;
   created_at: string;
@@ -82,7 +84,7 @@ export async function GET(
   const shareRow = share as ShareRow;
   const peopleQuery = supabase
     .from("canvas_people")
-    .select("id,name,pos_x,pos_y,created_at")
+    .select("id,name,name_size,pos_x,pos_y,created_at")
     .eq("user_id", shareRow.user_id)
     .order("sort_order", { ascending: true });
   const [peopleResult, unsortedResult] = await Promise.all([
@@ -91,7 +93,7 @@ export async function GET(
       : peopleQuery,
     supabase
       .from("canvas_entries")
-      .select("id,person_id,related_entry_id,kind,content,storage_path,image_size,pos_x,pos_y,created_at")
+      .select("id,person_id,related_entry_id,kind,content,storage_path,image_size,font_size,pos_x,pos_y,created_at")
       .eq("user_id", shareRow.user_id)
       .is("person_id", null)
       .order("sort_order", { ascending: true }),
@@ -105,7 +107,7 @@ export async function GET(
     personRows.map((person) =>
       supabase
         .from("canvas_entries")
-        .select("id,person_id,related_entry_id,kind,content,storage_path,image_size,pos_x,pos_y,created_at")
+        .select("id,person_id,related_entry_id,kind,content,storage_path,image_size,font_size,pos_x,pos_y,created_at")
         .eq("user_id", shareRow.user_id)
         .eq("person_id", person.id)
         .order("sort_order", { ascending: true }),
@@ -148,6 +150,7 @@ export async function GET(
       storagePath: null,
       imageUrl,
       imageSize: row.image_size,
+      fontSize: row.font_size,
       posX: row.pos_x,
       posY: row.pos_y,
       createdAt: row.created_at,
@@ -164,6 +167,7 @@ export async function GET(
   const people: CanvasPerson[] = personRows.map((row) => ({
     id: row.id,
     name: row.name,
+    nameSize: row.name_size,
     posX: row.pos_x,
     posY: row.pos_y,
     createdAt: row.created_at,
