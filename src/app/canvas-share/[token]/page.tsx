@@ -18,8 +18,6 @@ export default async function CanvasSharePage({
     <>
       <PlaygroundChrome />
       <main className={styles.page} data-homepage>
-        <p className={styles.eyebrow}>SHARED WITH YOU</p>
-        <h1>A personal practice of giving.</h1>
         <SharedCanvasView token={token} />
       </main>
     </>
