@@ -43,7 +43,7 @@
   top: 50%;
   left: 58%;
   width: min(38vw, 30rem);
-  aspect-ratio: 630 / 656;
+  aspect-ratio: 1 / 1;
   transform: translate(-50%, -50%);
   transition: width 700ms ease, top 700ms ease, left 700ms ease, opacity 450ms ease;
 }

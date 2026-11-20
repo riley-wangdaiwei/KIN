@@ -340,7 +340,7 @@ export async function createCanvasImageFromUrl(
   relatedEntryId: string | null = null,
   position: BoardPosition | null = null,
 ): Promise<void> {
-  if (!/^\/jar\/frames\/jar_\d{3}\.webp$/.test(path)) throw new Error("Invalid public canvas image.");
+  if (!/^\/jar\/frames\/vase_\d{2}\.webp$/.test(path)) throw new Error("Invalid public canvas image.");
   const user = await requireUser();
   const targetPersonId = relatedEntryId ? await parentPersonId(relatedEntryId) : personId;
   const { error } = await requireSupabase().from("canvas_entries").insert({

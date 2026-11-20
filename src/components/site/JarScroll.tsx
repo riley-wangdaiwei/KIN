@@ -2,9 +2,9 @@
 
 import { useEffect, useRef } from "react";
 
-const FRAME_COUNT = 181;
-const FRAME_WIDTH = 630;
-const FRAME_HEIGHT = 656;
+const FRAME_COUNT = 19;
+const FRAME_WIDTH = 900;
+const FRAME_HEIGHT = 900;
 const SMOOTHING = 0.12;
 
 type JarScrollProps = {
@@ -29,8 +29,6 @@ export default function JarScroll({ progress, reducedMotion }: JarScrollProps) {
     let currentFrame = 0;
     let lastDrawnFrame = -1;
     let animationFrame = 0;
-    let deferredLoadTimeout = 0;
-    let remainingLoadTimeout = 0;
     let cancelled = false;
 
     const draw = (frame: number, force = false) => {
@@ -62,7 +60,7 @@ export default function JarScroll({ progress, reducedMotion }: JarScrollProps) {
       frame.onload = () => {
         if (!cancelled) draw(reducedMotion ? 0 : currentFrame, true);
       };
-      frame.src = `/jar/frames/jar_${String(index).padStart(3, "0")}.webp`;
+      frame.src = `/jar/frames/vase_${String(index + 1).padStart(2, "0")}.webp`;
     };
 
     const loadRange = (start: number, end: number) => {
@@ -77,12 +75,8 @@ export default function JarScroll({ progress, reducedMotion }: JarScrollProps) {
       draw(reducedMotion ? 0 : currentFrame, true);
     };
 
-    loadRange(0, 5);
+    loadRange(0, FRAME_COUNT - 1);
     resize();
-    deferredLoadTimeout = window.setTimeout(() => loadRange(96, 180), 180);
-
-    const loadRemainingFrames = () => loadRange(6, 95);
-    remainingLoadTimeout = window.setTimeout(loadRemainingFrames, 700);
 
     window.addEventListener("resize", resize);
 
@@ -106,8 +100,6 @@ export default function JarScroll({ progress, reducedMotion }: JarScrollProps) {
     return () => {
       cancelled = true;
       window.cancelAnimationFrame(animationFrame);
-      window.clearTimeout(deferredLoadTimeout);
-      window.clearTimeout(remainingLoadTimeout);
       window.removeEventListener("resize", resize);
     };
   }, [reducedMotion]);

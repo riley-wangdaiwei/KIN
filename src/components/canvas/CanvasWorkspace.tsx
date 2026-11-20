@@ -566,9 +566,9 @@ export default function CanvasWorkspace() {
     }
 
     if (active.kind === "word" && active.label === "jars") {
-      const frame = [0, 45, 90, 135, 180][nextJarFrame.current % 5];
+      const frame = [0, 4, 9, 14, 18][nextJarFrame.current % 5];
       nextJarFrame.current += 1;
-      void perform(() => createCanvasImageFromUrl(`/jar/frames/jar_${String(frame).padStart(3, "0")}.webp`, personId, relatedEntryId, boardPoint));
+      void perform(() => createCanvasImageFromUrl(`/jar/frames/vase_${String(frame + 1).padStart(2, "0")}.webp`, personId, relatedEntryId, boardPoint));
       return;
     }
 
