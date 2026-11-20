@@ -25,11 +25,14 @@
   text-transform: uppercase;
 }
 
+/* The big question title, spelled out with the hand-drawn alphabet letters
+   (same as person names on the canvas). The row's own font size comes from
+   --alphabet-size; the 1.8–3rem range matches the old plain-text title so
+   the 48-character question wraps to about two lines in this column. */
 .question {
+  --alphabet-size: clamp(1.8rem, 4vw, 3rem);
   max-width: 46rem;
   margin: 0 0 2.5rem;
-  font: 400 clamp(1.8rem, 4vw, 3rem)/1.2 var(--kin-ui-sans);
-  letter-spacing: -0.02em;
   text-transform: lowercase;
 }
 

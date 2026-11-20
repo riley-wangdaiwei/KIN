@@ -7,7 +7,18 @@
   gap: 0.06em;
   margin: 0;
   color: var(--kin-white);
-  font: 500 clamp(3rem, 9vw, 7.5rem)/0.95 var(--kin-ui-sans);
+  /* Size override point: a caller can set --alphabet-size (see the
+     community question page) instead of the default person-name size.
+     The inline `size` prop still wins where it is passed. */
+  font: 500 var(--alphabet-size, clamp(3rem, 9vw, 7.5rem))/0.95 var(--kin-ui-sans);
+}
+
+/* One word of letters: letters never split across a line break inside here,
+   so a long title wraps between words only. */
+.word {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.06em;
 }
 
 .alphabetLetter {
