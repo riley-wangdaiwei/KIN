@@ -18,11 +18,9 @@ const stickerImageSources: Record<string, string> = {
   foto: "/stickers/foto.png",
 };
 
-// One row of the stream: the cycle expanded so the weekly question rides
-// as one contiguous block of words — consecutive rows, one shared lateral
-// fraction, readable top-to-bottom as a phrase. Dragging any one word
-// answers the whole question (questionLabel keeps the full question for
-// the row's accessible name).
+// One row of the stream: the weekly question rides as a single row
+// labelled "prompt" — dragging it answers the whole question
+// (questionLabel keeps the full question for the row's accessible name).
 export type StreamRowTemplate = {
   kind: "word" | "image" | "question";
   label?: string;
@@ -30,30 +28,21 @@ export type StreamRowTemplate = {
   stickerKey?: string;
   questionId?: string;
   questionLabel?: string;
-  // Fixed lateral fraction inside the fall; the question's words share one
-  // (the fall's center, full opacity) so they stay together as a block.
-  // Other rows get a fresh random fraction on each fall.
+  // Fixed lateral fraction inside the fall (0 = left edge, 1 = right
+  // edge). Rows without one get a fresh random fraction on each fall.
   frac?: number;
 };
 
 export function buildStreamRows(question: CommunityQuestion | null = null): StreamRowTemplate[] {
-  return buildStreamCycle(question).flatMap((item) =>
+  return buildStreamCycle(question).map((item) =>
     item.kind === "question"
-      ? (item.label ?? "")
-          .split(/\s+/)
-          .filter(Boolean)
-          // The stream lays out top-to-bottom in reverse sequence order
-          // (new items enter above the top), so the words are stored
-          // reversed — on screen they read top-to-bottom as the question.
-          .reverse()
-          .map((word) => ({
-            kind: "question" as const,
-            label: word,
-            questionId: item.questionId,
-            questionLabel: item.label,
-            frac: 0.5,
-          }))
-      : [item],
+      ? {
+          kind: "question" as const,
+          label: "prompt",
+          questionId: item.questionId,
+          questionLabel: item.label,
+        }
+      : item,
   );
 }
 

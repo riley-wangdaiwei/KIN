@@ -10,8 +10,8 @@ import { buildStreamRows } from "@/features/canvas/stream";
 import type { CommunityQuestion } from "@/lib/storage/canvas-adapter";
 
 // The canvas stream: the shared flowing waterfall, fed with the canvas
-// cycle — words, provided images, jars, and the weekly question as one
-// readable block. The drag-to-add dispatch lives in CanvasWorkspace.
+// cycle — words, provided images, jars, and the weekly question as the
+// single word "prompt". The drag-to-add dispatch lives in CanvasWorkspace.
 export type StreamDropItem = WaterfallDropItem;
 export type StreamDropTarget = WaterfallDropTarget;
 export type StreamDragState = WaterfallDragState;

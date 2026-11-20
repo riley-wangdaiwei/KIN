@@ -14,6 +14,9 @@ type Publication = {
 type CommunityCanvasItem = {
   id: string;
   question: string;
+  // Short title for the waterfall (e.g. "special gifts"); null when the
+  // question has none — the waterfall falls back to the full question.
+  shortTitle: string | null;
   createdAt: string;
 };
 
@@ -60,13 +63,18 @@ export default function CommunityContent() {
   }, []);
 
   // Each half runs the same flowing waterfall as the canvas: a narrow
-  // column on the right side of the half, full page height, waterfall
-  // shape. Items are links to their canvases (click, not drag).
+  // column, full page height, waterfall shape. Both falls sit LEFT of
+  // their kettle — the left one in a left-aligned region (left of the
+  // round jar, clear of the note beside it), the right one shifted left
+  // inside its right-aligned region (left of the pitcher, off the far
+  // right edge). Items are links to their canvases (click, not drag).
+  // The left waterfall shows each question's short title when it has one
+  // ("special gifts"), falling back to the truncated full question.
   const questionTemplates: WaterfallTemplate[] = useMemo(
     () =>
       communityCanvases.map((canvas) => ({
         kind: "word" as const,
-        label: canvas.question,
+        label: canvas.shortTitle ?? canvas.question,
         href: `/community/questions/${canvas.id}`,
         truncate: true,
       })),
@@ -101,7 +109,9 @@ export default function CommunityContent() {
           ) : (
             <Waterfall
               refreshKey={communityCanvases.map((canvas) => canvas.id).join("|")}
+              regionAlign="left"
               regionRef={leftHalfRef}
+              shapeCenter={0.4}
               templates={questionTemplates}
             />
           )}
@@ -127,6 +137,7 @@ export default function CommunityContent() {
             <Waterfall
               refreshKey={publications.map((publication) => publication.token).join("|")}
               regionRef={rightHalfRef}
+              shapeCenter={0.55}
               templates={peopleTemplates}
             />
           )}

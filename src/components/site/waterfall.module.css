@@ -40,9 +40,9 @@
   object-fit: contain;
 }
 
-/* The weekly question rides the stream as one contiguous block of words —
-   dragging any one word answers the whole question. Same size as the other
-   words so the block reads clearly; never lowercased. */
+/* The weekly question rides the stream as the single word "prompt" —
+   dragging it answers the whole question. Same size as the other words;
+   never lowercased. */
 .fallingQuestion {
   height: 28px;
   max-width: min(12rem, 58vw);

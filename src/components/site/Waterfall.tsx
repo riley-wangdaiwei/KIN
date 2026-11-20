@@ -22,7 +22,7 @@ export type WaterfallTemplate = {
   // Link items (community): clicking opens the canvas instead of dragging.
   href?: string;
   // Fixed lateral fraction inside the fall (0 = left edge, 1 = right edge).
-  // The weekly question's words share one fraction so they read as a block.
+  // Rows without one get a fresh random fraction on each fall.
   frac?: number;
   // Long labels (community question titles) truncate to one row.
   truncate?: boolean;
@@ -58,6 +58,14 @@ type WaterfallProps = {
   // The element the column flows in (the right 38% of it). Defaults to the
   // viewport — the canvas. The community halves pass their section.
   regionRef?: RefObject<HTMLElement | null>;
+  // Which side of the region element the column flows in (default right).
+  regionAlign?: "left" | "right";
+  // Lateral center of the fall inside its region (0 = left edge, 1 = right
+  // edge). Default 0.72 — hugs the right edge. The community halves move
+  // their falls left: the left half flows in a left-aligned region at 0.4
+  // (left of its jar), the right half in a right-aligned region at 0.55
+  // (left of its pitcher, clear of the right edge).
+  shapeCenter?: number;
   onDragState?: (state: WaterfallDragState) => void;
   onDropItem?: (item: WaterfallDropItem, target: WaterfallDropTarget) => void;
 };
@@ -130,6 +138,8 @@ export default function Waterfall({
   templates,
   refreshKey = "",
   regionRef,
+  regionAlign = "right",
+  shapeCenter = SHAPE_CENTER,
   onDragState,
   onDropItem,
 }: WaterfallProps) {
@@ -152,21 +162,23 @@ export default function Waterfall({
   const syncRegion = useCallback(() => {
     if (typeof window === "undefined") return;
     const element = regionRef?.current;
-    // The column flows in the right 38% of the region element (or of the
-    // viewport, when no element is given).
+    // The column flows in 38% of the region element (or of the viewport,
+    // when no element is given), on the side regionAlign names.
     if (element) {
       const rect = element.getBoundingClientRect();
+      const width = rect.width * REGION_SHARE;
       region.current = {
-        left: rect.left + rect.width * (1 - REGION_SHARE),
-        width: rect.width * REGION_SHARE,
+        left: regionAlign === "left" ? rect.left : rect.left + rect.width - width,
+        width,
       };
     } else {
+      const width = window.innerWidth * REGION_SHARE;
       region.current = {
-        left: window.innerWidth * (1 - REGION_SHARE),
-        width: window.innerWidth * REGION_SHARE,
+        left: regionAlign === "left" ? 0 : window.innerWidth - width,
+        width,
       };
     }
-  }, [regionRef]);
+  }, [regionAlign, regionRef]);
 
   useEffect(() => {
     syncRegion();
@@ -185,9 +197,9 @@ export default function Waterfall({
     const t = clamp01(y / Math.max(1, innerHeight));
     const share = SHAPE_TOP + (SHAPE_BOTTOM - SHAPE_TOP) * Math.pow(t, SHAPE_CURVE);
     const half = (share * regionWidth) / 2;
-    const center = regionLeft + SHAPE_CENTER * regionWidth;
+    const center = regionLeft + shapeCenter * regionWidth;
     return [center - half, center + half];
-  }, []);
+  }, [shapeCenter]);
 
   const shapeX = useCallback(
     (y: number, frac: number): number => {
@@ -238,10 +250,7 @@ export default function Waterfall({
     const startIndex = Math.floor(Math.random() * sequence.length);
     const verticalOffset = Math.random() * STREAM_ROW_HEIGHT;
     // The stream lays out top-to-bottom in reverse sequence order (new
-    // items enter above the top), so templates are placed in reverse: the
-    // item at index i is sequence[startIndex - i]. Blocks like the weekly
-    // question therefore read top-to-bottom in sequence order from the
-    // first frame, and stay that way as items recycle.
+    // items enter above the top), so templates are placed in reverse.
     const items = Array.from({ length: count }).map((_, index) => {
       const template = sequence[mod(startIndex - index, sequence.length)];
       const y = index * STREAM_ROW_HEIGHT - STREAM_ROW_HEIGHT + verticalOffset;

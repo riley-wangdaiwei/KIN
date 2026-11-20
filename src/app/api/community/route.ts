@@ -23,10 +23,22 @@ export async function GET() {
       .from("canvas_publications")
       .select("token,name,created_at")
       .order("created_at", { ascending: false }),
-    supabase
-      .from("community_questions")
-      .select("id,question,created_at")
-      .order("created_at", { ascending: false }),
+    // short_title may not exist yet (migration not applied): fall back to
+    // the columns that do, and the page renders the truncated full
+    // question instead of breaking.
+    (async () => {
+      const withShortTitle = await supabase
+        .from("community_questions")
+        .select("id,question,short_title,created_at")
+        .order("created_at", { ascending: false });
+      if (withShortTitle.error) {
+        return supabase
+          .from("community_questions")
+          .select("id,question,created_at")
+          .order("created_at", { ascending: false });
+      }
+      return withShortTitle;
+    })(),
   ]);
   if (publicationsResult.error || questionsResult.error) {
     return NextResponse.json(
@@ -45,6 +57,8 @@ export async function GET() {
       communityCanvases: (questionsResult.data ?? []).map((row) => ({
         id: row.id as string,
         question: row.question as string,
+        shortTitle:
+          (row as { short_title?: string | null }).short_title ?? null,
         createdAt: row.created_at as string,
       })),
     },

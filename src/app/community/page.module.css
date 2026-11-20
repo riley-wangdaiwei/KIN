@@ -14,8 +14,9 @@
 }
 
 /* One half per kettle. Each half holds a kettle, a note, and the shared
-   flowing waterfall — a narrow column on the half's right side, full page
-   height, waterfall shape. */
+   flowing waterfall — a narrow column, full page height, waterfall shape,
+   sitting left of its kettle (see the Waterfall props in
+   community-content.tsx). */
 .half {
   position: relative;
   min-height: 34rem;
