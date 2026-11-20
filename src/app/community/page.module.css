@@ -13,51 +13,67 @@
   grid-template-columns: 1fr 1fr;
 }
 
-/* One half per kettle. The transform makes the half the containing block
-   for the fixed-position falling items, so each waterfall scrolls with its
-   own half and is clipped to it. */
+/* One half per kettle. Each half is a TextFlow section: the text fills it
+   and wraps around the kettle and the note. */
 .half {
   position: relative;
   min-height: 34rem;
   overflow: hidden;
-  transform: translateZ(0);
 }
 
-.streamZone {
-  position: absolute;
-  inset: 0;
+/* TextFlow words. Plain words are faint; names and question words are
+   solid white, like the preview. */
+.half :global(.tf-w) {
+  color: rgb(255 255 255 / 55%);
+  font-size: 15px;
 }
 
+.half :global(.tf-w.name) {
+  color: var(--kin-white);
+  font-weight: 600;
+}
+
+/* The kettle is a TextFlow obstacle, so it must sit where offsetLeft and
+   offsetTop say it sits — no transform centering (TextFlow ignores
+   transforms when it works out what to wrap around). Margin auto centers
+   it instead, with its size in --kettle-size. */
 .kettle {
   position: absolute;
-  top: 50%;
-  left: 50%;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   z-index: 1;
+  width: var(--kettle-size);
+  height: auto;
+  margin: auto;
   pointer-events: none;
-  transform: translate(-50%, -50%);
 }
 
 .kettleJar {
-  width: min(20vw, 17rem);
+  --kettle-size: min(20vw, 17rem);
 }
 
 .kettlePitcher {
-  width: min(18vw, 15rem);
+  --kettle-size: min(18vw, 15rem);
 }
 
 /* The explanatory text beside each kettle: a narrow column, tall by
-   wrapping. Each note sits on its kettle's inner side, and its waterfall
-   deflects outward, away from the note. */
+   wrapping. Each note sits on its kettle's inner side. It is a TextFlow
+   obstacle too, so the fill wraps around it — and, like the kettle, it is
+   centered without transforms (top/bottom 0 with auto margins). */
 .sideNote {
   position: absolute;
-  top: 50%;
+  top: 0;
+  bottom: 0;
   z-index: 1;
   width: 7rem;
-  margin: 0;
+  height: fit-content;
+  margin-top: auto;
+  margin-bottom: auto;
   color: var(--kin-light-gray);
   font-size: 0.85rem;
   line-height: 1.5;
-  transform: translateY(-50%);
 }
 
 .half:first-child .sideNote {
@@ -80,6 +96,7 @@
   position: absolute;
   top: 50%;
   left: 50%;
+  z-index: 1;
   width: max-content;
   max-width: 90%;
   margin: 0;
@@ -106,43 +123,36 @@
 
 @media (max-width: 1100px) {
   .kettleJar {
-    width: min(28vw, 15rem);
+    --kettle-size: min(28vw, 15rem);
   }
 
   .kettlePitcher {
-    width: min(24vw, 13rem);
+    --kettle-size: min(24vw, 13rem);
   }
 
-  /* The half is too narrow here for a note beside the kettle — a 6rem
-     column at center + 8.5rem would run past the half's edge and be cut
-     off by its overflow: hidden. Like on phones, the note sits below the
-     kettle, out of the fall path, so the stream never has to go around it. */
-  .streamZone {
-    top: 0;
-    right: 0;
-    bottom: auto;
-    left: 0;
-    height: 72%;
-  }
-
+  /* The half is too narrow here for a note beside the kettle — a 7rem
+     column at center + 10rem would run past the half's edge and be cut
+     off by its overflow: hidden. The note sits below the kettle instead,
+     and the fill wraps around it there. */
   .sideNote {
     top: auto;
+    right: 0;
     bottom: 1.5rem;
-    left: 50%;
+    left: 0;
     width: min(20rem, 86%);
-    transform: translateX(-50%);
+    margin-right: auto;
+    margin-left: auto;
   }
 
   .half:first-child .sideNote,
   .half:last-child .sideNote {
-    left: 50%;
-    right: auto;
+    right: 0;
+    left: 0;
   }
 }
 
 @media (max-width: 700px) {
-  /* Stacked: one kettle and waterfall at a time. The note moves below the
-     kettle, out of the fall path, so the stream never has to go around it. */
+  /* Stacked: one kettle and waterfall at a time. */
   .halves {
     grid-template-columns: 1fr;
   }
@@ -151,37 +161,16 @@
     min-height: 100svh;
   }
 
-  .streamZone {
-    top: 0;
-    right: 0;
-    bottom: auto;
-    left: 0;
-    height: 72%;
-  }
-
-  /* Each kettle shifts slightly toward the side its waterfall deflects
-     away from, so a detouring item fits without touching the half's edge. */
+  /* Each kettle shifts slightly toward its outer side, as before. */
   .kettleJar {
-    left: 54%;
-    width: min(46vw, 13rem);
+    right: 0;
+    left: 8%;
+    --kettle-size: min(46vw, 13rem);
   }
 
   .kettlePitcher {
-    left: 46%;
-    width: min(42vw, 12rem);
-  }
-
-  .sideNote {
-    top: auto;
-    bottom: 1.5rem;
-    left: 50%;
-    width: min(20rem, 86%);
-    transform: translateX(-50%);
-  }
-
-  .half:first-child .sideNote,
-  .half:last-child .sideNote {
-    left: 50%;
-    right: auto;
+    right: 8%;
+    left: 0;
+    --kettle-size: min(42vw, 12rem);
   }
 }

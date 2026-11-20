@@ -1,10 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import CommunityWaterfall, {
-  type CommunityWaterfallEntry,
-} from "@/components/canvas/CommunityWaterfall";
+import TextFlowSection from "@/components/site/TextFlowSection";
 import styles from "./page.module.css";
 
 type Publication = {
@@ -24,10 +22,6 @@ export default function CommunityContent() {
   const [communityCanvases, setCommunityCanvases] = useState<CommunityCanvasItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const leftHalfRef = useRef<HTMLElement>(null);
-  const rightHalfRef = useRef<HTMLElement>(null);
-  const leftZoneRef = useRef<HTMLDivElement>(null);
-  const rightZoneRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let active = true;
@@ -63,99 +57,108 @@ export default function CommunityContent() {
     };
   }, []);
 
-  const peopleEntries: CommunityWaterfallEntry[] = useMemo(
-    () =>
-      publications.map((publication) => ({
-        key: `pub-${publication.token}`,
-        label: publication.name,
-        href: `/canvas-share/${publication.token}`,
-      })),
-    [publications],
-  );
-
-  const communityEntries: CommunityWaterfallEntry[] = useMemo(
-    () =>
-      communityCanvases.map((canvas) => ({
-        key: `question-${canvas.id}`,
-        label: canvas.question,
-        href: `/community/questions/${canvas.id}`,
-      })),
-    [communityCanvases],
-  );
-
   if (loading) return <p className={styles.status}>Loading the community…</p>;
   if (error) return <p className={styles.status} role="alert">{error}</p>;
 
   return (
     <>
       <div className={styles.halves}>
-        <section aria-label="Community canvases" className={styles.half} ref={leftHalfRef}>
-          <div className={styles.streamZone} ref={leftZoneRef}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              alt=""
-              className={`${styles.kettle} ${styles.kettleJar}`}
-              data-canvas-obstacle
-              src="/jar-community-canvases.png"
-            />
-            {communityEntries.length > 0 ? (
-              <CommunityWaterfall
-                detourSide="left"
-                entries={communityEntries}
-                halfRef={leftHalfRef}
-                zoneRef={leftZoneRef}
-              />
-            ) : (
-              <p className={styles.zoneStatus}>No community questions yet.</p>
-            )}
+        <TextFlowSection
+          ariaLabel="Community canvases"
+          className={styles.half}
+          refreshKey={communityCanvases.map((canvas) => canvas.id).join("|")}
+          separator="·"
+          shape="waterfall"
+        >
+          {/* The question words are links so the fall stays clickable; the
+              words of one question all point at the same canvas. The source
+              links are tabIndex -1 — the list below is the keyboard path. */}
+          <div data-flow-source>
+            {communityCanvases.map((canvas) => (
+              <span key={canvas.id}>
+                {canvas.question.split(/\s+/).map((word, index) => (
+                  <a
+                    className="name"
+                    href={`/community/questions/${canvas.id}`}
+                    key={`${canvas.id}-${index}`}
+                    tabIndex={-1}
+                  >
+                    {word}
+                  </a>
+                ))}
+              </span>
+            ))}
           </div>
-          <p className={styles.sideNote} data-canvas-obstacle>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            alt=""
+            className={`${styles.kettle} ${styles.kettleJar}`}
+            data-flow-obstacle
+            src="/jar-community-canvases.png"
+          />
+          {communityCanvases.length === 0 && (
+            <p className={styles.zoneStatus}>No community questions yet.</p>
+          )}
+          <p className={styles.sideNote} data-flow-obstacle>
             To publish your own canvas, name it from{" "}
             <Link href="/canvas">your canvas</Link>. Every week a new question
             appears in your canvas waterfall — answer it there, and your answer
             joins the community canvas for that question.
           </p>
-        </section>
+        </TextFlowSection>
 
-        <section aria-label="People's canvases" className={styles.half} ref={rightHalfRef}>
-          <div className={styles.streamZone} ref={rightZoneRef}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              alt=""
-              className={`${styles.kettle} ${styles.kettlePitcher}`}
-              data-canvas-obstacle
-              src="/pitcher-peoples-canvases.png"
-            />
-            {peopleEntries.length > 0 ? (
-              <CommunityWaterfall
-                detourSide="right"
-                entries={peopleEntries}
-                halfRef={rightHalfRef}
-                zoneRef={rightZoneRef}
-              />
-            ) : (
-              <p className={styles.zoneStatus}>No canvases published yet.</p>
-            )}
+        <TextFlowSection
+          ariaLabel="People's canvases"
+          className={styles.half}
+          refreshKey={publications.map((publication) => publication.token).join("|")}
+          separator="·"
+          shape="waterfall"
+        >
+          <div data-flow-source>
+            {publications.map((publication) => (
+              <span key={publication.token}>
+                {publication.name.split(/\s+/).map((word, index) => (
+                  <a
+                    className="name"
+                    href={`/canvas-share/${publication.token}`}
+                    key={`${publication.token}-${index}`}
+                    tabIndex={-1}
+                  >
+                    {word}
+                  </a>
+                ))}
+              </span>
+            ))}
           </div>
-          <p className={styles.sideNote} data-canvas-obstacle>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            alt=""
+            className={`${styles.kettle} ${styles.kettlePitcher}`}
+            data-flow-obstacle
+            src="/pitcher-peoples-canvases.png"
+          />
+          {publications.length === 0 && (
+            <p className={styles.zoneStatus}>No canvases published yet.</p>
+          )}
+          <p className={styles.sideNote} data-flow-obstacle>
             Published canvases from the community, and the questions we&rsquo;re
             answering together. Open one to see how someone else keeps what they
             notice about the people they love.
           </p>
-        </section>
+        </TextFlowSection>
       </div>
 
-      {/* The falling columns are a browsing surface; this list is the same
+      {/* The falling text is a browsing surface; this list is the same
           canvases for keyboard and screen-reader access. */}
       <ul className={styles.visuallyHidden}>
-        {peopleEntries.map((entry) => (
-          <li key={entry.key}>
-            <Link href={entry.href}>{entry.label}</Link>
+        {publications.map((publication) => (
+          <li key={publication.token}>
+            <Link href={`/canvas-share/${publication.token}`}>{publication.name}</Link>
           </li>
         ))}
-        {communityEntries.map((entry) => (
-          <li key={entry.key}>
-            <Link href={entry.href}>{entry.label}</Link>
+        {communityCanvases.map((canvas) => (
+          <li key={canvas.id}>
+            <Link href={`/community/questions/${canvas.id}`}>{canvas.question}</Link>
           </li>
         ))}
       </ul>
