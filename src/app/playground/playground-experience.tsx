@@ -400,7 +400,7 @@ export default function PlaygroundExperience() {
         />
         {(returningVisitor || activeChapter >= 2 || showEnding) && (
           <HoverRingMenu
-            href="/canvas"
+            href="/profile"
             items={identityExamples}
             label="A Gifting Identity"
             menuSide="left"

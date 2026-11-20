@@ -68,6 +68,10 @@ type WaterfallProps = {
   shapeCenter?: number;
   onDragState?: (state: WaterfallDragState) => void;
   onDropItem?: (item: WaterfallDropItem, target: WaterfallDropTarget) => void;
+  // Hovering a link item (community): the parent shows a preview of that
+  // canvas. Null when the pointer leaves the item. Drag items (canvas)
+  // never fire this.
+  onHoverItem?: (item: { label?: string; href?: string } | null) => void;
 };
 
 // A narrow column on the right edge, items scrolling steadily down and
@@ -142,6 +146,7 @@ export default function Waterfall({
   shapeCenter = SHAPE_CENTER,
   onDragState,
   onDropItem,
+  onHoverItem,
 }: WaterfallProps) {
   const templatesRef = useRef(templates);
   useEffect(() => {
@@ -526,6 +531,8 @@ export default function Waterfall({
               data-stream-id={item.id}
               href={item.href}
               key={item.id}
+              onMouseEnter={() => onHoverItem?.({ label: item.label, href: item.href })}
+              onMouseLeave={() => onHoverItem?.(null)}
               style={style}
               tabIndex={-1}
             >

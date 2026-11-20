@@ -25,13 +25,17 @@
 
 /* The kettle is a waterfall obstacle, so it must sit where its rect says
    it sits — no transform centering. Margin auto centers it instead, with
-   its size in --kettle-size. */
+   its size in --kettle-size. It sits a little toward the bottom-right:
+   top/left offsets shift its center down ~1.5rem and right ~1rem (the
+   margin-auto center moves half the offset). The right shift stays small
+   on purpose — the left kettle's right edge must clear the note beside
+   it (1rem of clearance left). */
 .kettle {
   position: absolute;
-  top: 0;
+  top: 3rem;
   right: 0;
   bottom: 0;
-  left: 0;
+  left: 2rem;
   z-index: 1;
   width: var(--kettle-size);
   height: auto;
@@ -101,6 +105,38 @@
   font-size: 0.9rem;
 }
 
+/* Hover preview: a small rectangular thumbnail of the hovered canvas,
+   centered in the gap between the two kettles. The gap is narrow — at
+   desktop widths the notes sit inside it, leaving only ~150–230px
+   between them — so the width stays inside the note gap (the 10vw cap)
+   and never covers a kettle or a note. It never takes the pointer — the
+   waterfall links keep their clicks. On mobile the halves stack, so it
+   sits centered on screen instead, at a readable width. */
+.hoverPreview {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  z-index: 15;
+  width: min(14rem, 10vw, 86vw);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.hoverPreviewStatus {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border: 1px solid rgb(255 255 255 / 25%);
+  background: rgb(255 255 255 / 6%);
+  color: var(--kin-light-gray);
+  font-size: 0.9rem;
+}
+
+.hoverPreviewCaption {
+  margin: 0.45rem 0 0;
+  color: var(--kin-light-gray);
+  font: 400 var(--kin-caption-size)/1.4 var(--kin-micro-mono);
+}
+
 .visuallyHidden {
   position: absolute;
   width: 1px;
@@ -162,5 +198,11 @@
     right: 8%;
     left: 0;
     --kettle-size: min(42vw, 12rem);
+  }
+
+  /* The halves stack, so there is no gap between the kettles — the hover
+     preview floats centered on screen instead, at a readable width. */
+  .hoverPreview {
+    width: min(20rem, 86vw);
   }
 }
