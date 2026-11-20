@@ -276,7 +276,8 @@ export default function CommunityContent() {
             To publish your own canvas, name it from{" "}
             <Link href="/canvas">your canvas</Link>. Every week a new question
             appears in your canvas waterfall — answer it there, and your answer
-            joins the community canvas for that question.
+            joins the community canvas for that question.{" "}
+            <Link href="/profile">Create your own canvas</Link>.
           </p>
         </section>
 

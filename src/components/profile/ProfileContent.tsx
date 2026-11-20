@@ -12,14 +12,24 @@ import {
   type CanvasPublication,
 } from "@/lib/storage/canvas-adapter";
 import {
+  addGiftingStyle,
+  createProfileCanvas,
+  listGiftingStyles,
+  listProfileCanvases,
+  removeGiftingStyle,
+  type ProfileCanvasRow,
+} from "@/lib/storage/profile-adapter";
+import {
   PLACEHOLDER_ARTISTS,
   PLACEHOLDER_PROFILE_STATS,
   SEED_GIFTING_STYLES,
   SUGGESTED_GIFTING_STYLES,
   buildProfileDirectory,
   profileDisplayName,
+  type ProfileCanvas,
 } from "@/features/profile/profile";
 import AlphabetName from "@/components/canvas/AlphabetName";
+import ProfileArtists from "./ProfileArtists";
 import ProfileDirectory from "./ProfileDirectory";
 import styles from "./profile-content.module.css";
 
@@ -40,12 +50,17 @@ export default function ProfileContent() {
   const [publication, setPublication] = useState<CanvasPublication | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [activeId, setActiveId] = useState<string | null>(null);
-  // Gifting styles live in page state only — there is no gifting-styles
-  // table, so additions and removals do not persist.
+  // Gifting styles persist in user_gifting_styles. Until a load succeeds
+  // (table missing, offline), the starter styles show and edits stay
+  // local — the page never breaks on a missing table.
   const [tags, setTags] = useState<string[]>(SEED_GIFTING_STYLES);
+  const [tagsPersisted, setTagsPersisted] = useState(false);
+  const [tagError, setTagError] = useState("");
   const [tagEditorOpen, setTagEditorOpen] = useState(false);
   const [tagInput, setTagInput] = useState("");
+  // Named canvases from profile_canvases; the board itself is always the
+  // first directory entry and is not a row here.
+  const [profileCanvases, setProfileCanvases] = useState<ProfileCanvas[]>([]);
   const [followNote, setFollowNote] = useState("");
 
   const refresh = useCallback(async () => {
@@ -60,6 +75,24 @@ export default function ProfileContent() {
     } finally {
       setLoading(false);
     }
+    // Styles + named canvases load best-effort: a missing table (migration
+    // not applied yet) leaves the local fallbacks in place.
+    void listGiftingStyles()
+      .then((saved) => {
+        setTags(saved);
+        setTagsPersisted(true);
+      })
+      .catch(() => {
+        setTags(SEED_GIFTING_STYLES);
+        setTagsPersisted(false);
+      });
+    void listProfileCanvases()
+      .then((rows: ProfileCanvasRow[]) =>
+        setProfileCanvases(
+          rows.map((row) => ({ id: row.id, name: row.name, personId: row.person_id })),
+        ),
+      )
+      .catch(() => setProfileCanvases([]));
   }, []);
 
   useEffect(() => {
@@ -72,6 +105,7 @@ export default function ProfileContent() {
       else {
         setCanvas(emptyCanvas);
         setPublication(null);
+        setProfileCanvases([]);
         setLoading(false);
       }
     });
@@ -94,32 +128,64 @@ export default function ProfileContent() {
   }, [refresh]);
 
   const directory = useMemo(
-    () => (user ? buildProfileDirectory(canvas, publication) : []),
-    [user, canvas, publication],
+    () => (user ? buildProfileDirectory(canvas, publication, profileCanvases) : []),
+    [user, canvas, publication, profileCanvases],
   );
 
-  // The active entry is derived during render: the hovered/selected entry,
-  // else the first entry. No effect keeps activeId in sync — a stale id
-  // simply falls back to the first entry.
-  const activeEntry =
-    directory.find((entry) => entry.id === activeId) ?? directory[0] ?? null;
   const displayName = profileDisplayName(user);
   const isGuest = authChecked && !user;
 
-  function addTag(value: string) {
+  async function addTag(value: string) {
     const trimmed = value.trim();
     if (trimmed === "" || trimmed.length > 40) return;
-    setTags((current) =>
-      current.some((tag) => tag.toLowerCase() === trimmed.toLowerCase())
-        ? current
-        : [...current, trimmed],
-    );
+    if (tags.some((tag) => tag.toLowerCase() === trimmed.toLowerCase())) {
+      setTagInput("");
+      return;
+    }
+    setTagError("");
+    if (tagsPersisted) {
+      try {
+        await addGiftingStyle(trimmed);
+      } catch (saveError) {
+        setTagError(messageFrom(saveError));
+        return;
+      }
+    }
+    setTags((current) => [...current, trimmed]);
     setTagInput("");
+  }
+
+  async function removeTag(value: string) {
+    setTagError("");
+    if (tagsPersisted) {
+      try {
+        await removeGiftingStyle(value);
+      } catch (saveError) {
+        setTagError(messageFrom(saveError));
+        return;
+      }
+    }
+    setTags((current) => current.filter((item) => item !== value));
   }
 
   function handleTagSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    addTag(tagInput);
+    void addTag(tagInput);
+  }
+
+  // Adds a named canvas: if the name matches a person on the board, the
+  // canvas links to them, so its preview shows their slice; otherwise it
+  // is a named canvas with an empty preview for now. Throws on failure —
+  // the directory shows the error.
+  async function handleAddCanvas(name: string): Promise<void> {
+    const person = canvas.people.find(
+      (candidate) => candidate.name.toLowerCase() === name.toLowerCase(),
+    );
+    const row = await createProfileCanvas(name, person?.id ?? null);
+    setProfileCanvases((current) => [
+      ...current,
+      { id: row.id, name: row.name, personId: row.person_id },
+    ]);
   }
 
   // PLACEHOLDER — Follow does nothing yet. Following, and what it unlocks
@@ -153,12 +219,13 @@ export default function ProfileContent() {
       <header className={styles.header}>
         <div className={styles.nameBlock}>
           <AlphabetName as="h1" className={styles.name} name={displayName} />
-          <p className={styles.workedWith}>
-            {/* PLACEHOLDER — no collaboration data exists yet. */}
-            Worked with {PLACEHOLDER_ARTISTS.join(", ")}
-          </p>
         </div>
         <div className={styles.metaBlock}>
+          {/* The artists the user worked with live here, top-right — a
+              hover ring (modeled on the homepage HoverRingMenu), not a
+              line under the name. PLACEHOLDER artists until real
+              collaboration data exists. */}
+          {!isGuest && <ProfileArtists artists={PLACEHOLDER_ARTISTS} />}
           {/* PLACEHOLDER — fake numbers until tokens, subscription levels
               and follows are real features. */}
           <p className={styles.stats}>
@@ -200,9 +267,7 @@ export default function ProfileContent() {
                   <button
                     aria-label={`Remove ${tag}`}
                     className={styles.tagRemove}
-                    onClick={() =>
-                      setTags((current) => current.filter((item) => item !== tag))
-                    }
+                    onClick={() => void removeTag(tag)}
                     type="button"
                   >
                     ×
@@ -221,6 +286,11 @@ export default function ProfileContent() {
                 </button>
               </li>
             </ul>
+            {tagError && (
+              <p className={styles.error} role="alert">
+                {tagError}
+              </p>
+            )}
             {tagEditorOpen && (
               <form className={styles.tagEditor} onSubmit={handleTagSubmit}>
                 <input
@@ -237,7 +307,7 @@ export default function ProfileContent() {
                     {suggestions.map((keyword) => (
                       <button
                         key={keyword}
-                        onClick={() => addTag(keyword)}
+                        onClick={() => void addTag(keyword)}
                         type="button"
                       >
                         {keyword}
@@ -271,9 +341,9 @@ export default function ProfileContent() {
           <p className={styles.status}>Loading your canvases…</p>
         ) : (
           <ProfileDirectory
-            activeId={activeEntry?.id ?? null}
             directory={directory}
-            onSelect={setActiveId}
+            onAddCanvas={handleAddCanvas}
+            people={canvas.people}
           />
         )}
       </section>

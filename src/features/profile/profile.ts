@@ -7,14 +7,15 @@ import type { CanvasPublication } from "@/lib/storage/canvas-adapter";
 // The data model has ONE canvas per user account (canvas_people +
 // canvas_entries on a single board), not one canvas row per person —
 // there is no per-person canvas, no per-person publish, and no gift
-// link on a canvas yet. So the directory is built from what exists:
+// link on a canvas yet. So the directory is user-managed:
 //   - the whole board first ("Your canvas", or the publication name when
 //     the user has published it), and
-//   - one entry per person on the board — "a canvas for each person you
-//     love", named after the person, showing that person's slice of the
-//     board.
-// What is missing for a true multi-canvas directory: a canvas record per
-// person (name, owner, gift link) instead of slicing one shared board.
+//   - one entry per canvas the user names with the "+" under the list
+//     (profile_canvases rows). A row linked to a person on the board
+//     shows that person's slice of the board; an unlinked row is a named
+//     canvas with an empty preview for now.
+// People on the board are NEVER auto-added as directory entries — the
+// user adds canvases herself.
 export interface ProfileGift {
   title: string;
   image: string;
@@ -22,10 +23,18 @@ export interface ProfileGift {
   href: string;
 }
 
+// One named canvas from profile_canvases: a row the user added, with the
+// board person it links to (null when it links to nobody).
+export interface ProfileCanvas {
+  id: string;
+  name: string;
+  personId: string | null;
+}
+
 export interface ProfileDirectoryEntry {
   id: string;
   label: string;
-  kind: "board" | "person";
+  kind: "board" | "userCanvas";
   people: CanvasPerson[];
   unsorted: GiftingCanvas["unsorted"];
   entryCount: number;
@@ -46,6 +55,7 @@ export const PLACEHOLDER_GIFT: ProfileGift = {
 export function buildProfileDirectory(
   canvas: GiftingCanvas,
   publication: CanvasPublication | null,
+  profileCanvases: ProfileCanvas[] = [],
 ): ProfileDirectoryEntry[] {
   const entries: ProfileDirectoryEntry[] = [
     {
@@ -61,14 +71,17 @@ export function buildProfileDirectory(
       gift: PLACEHOLDER_GIFT,
     },
   ];
-  for (const person of canvas.people) {
+  for (const row of profileCanvases) {
+    const person = row.personId
+      ? canvas.people.find((candidate) => candidate.id === row.personId) ?? null
+      : null;
     entries.push({
-      id: person.id,
-      label: person.name,
-      kind: "person",
-      people: [person],
+      id: `canvas:${row.id}`,
+      label: row.name,
+      kind: "userCanvas",
+      people: person ? [person] : [],
       unsorted: [],
-      entryCount: person.entries.length,
+      entryCount: person ? person.entries.length : 0,
     });
   }
   return entries;
@@ -87,8 +100,7 @@ export function profileDisplayName(user: User | null): string {
 // gift quiz vocabulary (src/features/quiz/quiz.ts: the result types and
 // the Q03/Q04/Q05 answer options, distilled to short keywords) plus a few
 // generic ones. The user has not approved this list — she should correct
-// it. There is no gifting-styles table yet, so picked styles live in page
-// state only and do not persist.
+// it. Picked styles save to user_gifting_styles and persist.
 export const SUGGESTED_GIFTING_STYLES: string[] = [
   // Q03 — their perfect Sunday.
   "bookish",
@@ -113,8 +125,9 @@ export const SUGGESTED_GIFTING_STYLES: string[] = [
   "personal",
 ];
 
-// Seed styles shown on first load. Local state only — there is no
-// gifting-styles table, so additions and removals do not persist.
+// Seed styles shown when the user has none saved yet. On first load the
+// page saves these three into user_gifting_styles (best effort); after
+// that the saved list is the truth, and additions and removals persist.
 export const SEED_GIFTING_STYLES: string[] = [
   "handmade",
   "tiny things",

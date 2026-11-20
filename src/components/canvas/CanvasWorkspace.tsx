@@ -366,8 +366,10 @@ export default function CanvasWorkspace() {
     const personId = target.personId;
     const relatedEntryId = target.relatedEntryId;
 
-    if (item.kind === "word" && (item.label === "details" || item.label === "people")) {
-      setInlinePrompt({ kind: item.label, personId, x: target.clientX, y: target.clientY, boardX: boardPoint.x, boardY: boardPoint.y });
+    // "title" is the stream word for adding a person (the add-person
+    // prompt wording stays as is); "details" adds a detail.
+    if (item.kind === "word" && (item.label === "details" || item.label === "title")) {
+      setInlinePrompt({ kind: item.label === "details" ? "details" : "people", personId, x: target.clientX, y: target.clientY, boardX: boardPoint.x, boardY: boardPoint.y });
       setInlineValue("");
       return;
     }
@@ -737,7 +739,10 @@ export default function CanvasWorkspace() {
       )}
 
       {configured && userId && !loading && (
-        <footer className={styles.sendFooter} data-canvas-obstacle>
+        // The footer is fixed at the bottom-right, but it is NOT a
+        // waterfall obstacle: the stream flows straight down past it
+        // instead of bending around the words.
+        <footer className={styles.sendFooter}>
           <p>When you finish, share your canvas with us and we will get you matched with an artist.</p>
           <button disabled={busy || sendState === "sending"} onClick={() => void sendCanvasToTeam()} type="button">
             {sendState === "sent" ? "Sent ✓" : sendState === "sending" ? "Sending…" : "Send to re.KIN"}

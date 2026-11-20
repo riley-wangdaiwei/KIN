@@ -363,6 +363,16 @@ export default function PlaygroundChrome({
                 </form>
               )}
             </div>
+            {/* Below the login form, in both states — /profile has a guest
+                view when logged out, so this works either way. Closes the
+                dialog, like the canvas link in the booking dialog. */}
+            <Link
+              className={styles.canvasLink}
+              href="/profile"
+              onClick={() => setLoginOpen(false)}
+            >
+              Go to your profile <SiteArrow />
+            </Link>
           </section>
         </div>
       )}

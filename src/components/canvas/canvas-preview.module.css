@@ -5,7 +5,8 @@
      canvas page — not a small icon (her refined sketch). */
   aspect-ratio: 16 / 9;
   overflow: hidden;
-  border: 1px solid rgb(255 255 255 / 25%);
+  /* No frame around the preview — the thumbnail sits bare on the page. */
+  border: 0;
   background: rgb(255 255 255 / 6%);
 }
 

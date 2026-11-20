@@ -57,10 +57,12 @@ export function buildStreamCycle(question: CommunityQuestion | null = null): Str
   const cycle = [
     { kind: "word", label: "stickers" },
     { kind: "word", label: "details" },
-    { kind: "word", label: "people" },
+    // "title" adds a person: dragging it opens the add-a-person prompt
+    // (the prompt wording stays "Their name").
+    { kind: "word", label: "title" },
     { kind: "word", label: "stickers" },
     { kind: "word", label: "details" },
-    { kind: "word", label: "people" },
+    { kind: "word", label: "title" },
     { kind: "word", label: "images" },
     { kind: "word", label: "jars" },
     ...stickerImages,

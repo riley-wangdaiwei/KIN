@@ -40,10 +40,21 @@
   --alphabet-size: clamp(2.2rem, 6vw, 4.5rem);
 }
 
-.workedWith {
-  margin: 0.75rem 0 0;
+/* The artists the user worked with, top-right: a small "worked with"
+   caption over the hover ring trigger (the ring itself lives in the
+   shared hover-ring-menu styles, modeled on the homepage side nav). */
+.artistsBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
+.artistsCaption {
+  margin: 0;
   color: var(--kin-light-gray);
-  font-size: 0.9rem;
+  font: 400 var(--kin-caption-size)/1.4 var(--kin-micro-mono);
+  text-transform: uppercase;
 }
 
 .metaBlock {
@@ -86,6 +97,7 @@
   margin: 0 0 1rem;
   font: 400 var(--kin-caption-size)/1.2 var(--kin-micro-mono);
   letter-spacing: 0.08em;
+  text-decoration: none;
   text-transform: uppercase;
 }
 
@@ -93,7 +105,9 @@
   min-width: 0;
 }
 
-/* Paper-like tags: light paper, dark ink, slightly askew. */
+/* Paper-like tags: light paper, dark ink, slightly askew. The paper
+   background is set explicitly (with a fallback value) on the tag and on
+   every state — hover, focus, newly added — so it never drops. */
 .tags {
   display: flex;
   flex-wrap: wrap;
@@ -109,11 +123,16 @@
   align-items: baseline;
   gap: 0.35rem;
   padding: 0.3rem 0.6rem;
-  background: var(--kin-paper);
+  background-color: var(--kin-paper, #f4f3ef);
   color: var(--kin-black);
   font-size: 0.95rem;
   line-height: 1.3;
   transform: rotate(-1deg);
+}
+
+.tag:hover,
+.tag:focus-within {
+  background-color: var(--kin-paper, #f4f3ef);
 }
 
 .tag:nth-child(even) {
@@ -230,13 +249,23 @@
   color: var(--kin-white);
 }
 
-/* The directory: a plain vertical list of names on the left, and a wide
-   rectangular page-preview thumbnail to its right, at the height of the
-   top rows (her sketches). */
-.directoryRow {
+/* The directory: two halves. The list sits in the middle of the left
+   half; the preview sits in the exact center of the right half — and
+   only while a name is hovered or focused, otherwise the right half is
+   empty. Canvas names never underline, in any state. */
+.directoryGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: clamp(20rem, 55vh, 32rem);
+}
+
+.directoryHalf {
   display: flex;
-  align-items: flex-start;
-  gap: clamp(1.5rem, 5vw, 4rem);
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
 }
 
 .directory {
@@ -262,16 +291,14 @@
   font-size: 1.15rem;
   line-height: 1.3;
   text-align: left;
+  text-decoration: none;
   cursor: pointer;
 }
 
-.directoryItem:hover {
+.directoryItem:hover,
+.directoryItem:focus-visible {
   color: var(--kin-light-gray);
-}
-
-.directoryItemActive {
-  text-decoration: underline;
-  text-underline-offset: 0.3em;
+  text-decoration: none;
 }
 
 .directoryCount {
@@ -281,9 +308,83 @@
   white-space: nowrap;
 }
 
+/* The small "+" under the list that adds a canvas. */
+.directoryAdd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 1px solid rgb(255 255 255 / 50%);
+  background: none;
+  color: var(--kin-white);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.directoryAdd:hover {
+  border-color: var(--kin-white);
+}
+
+/* The add-canvas form: name input + Add, with the board's people as
+   one-click suggestions (a canvas named after a person links to them). */
+.canvasEditor {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  max-width: 22rem;
+}
+
+.canvasEditor input {
+  width: min(16rem, 100%);
+  padding: 0.45rem 0.6rem;
+  border: 1px solid rgb(255 255 255 / 50%);
+  background: transparent;
+  color: var(--kin-white);
+  font: inherit;
+  font-size: 0.95rem;
+}
+
+.canvasEditor input::placeholder {
+  color: var(--kin-light-gray);
+}
+
+.canvasEditor button[type="submit"] {
+  padding: 0.45rem 0.9rem;
+  border: 1px solid rgb(255 255 255 / 50%);
+  background: none;
+  color: var(--kin-white);
+  font: inherit;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.canvasEditor button[type="submit"]:hover {
+  border-color: var(--kin-white);
+}
+
+.canvasEditor button[type="submit"]:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.canvasEditor .error {
+  width: 100%;
+}
+
+.previewHalf {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+}
+
 .previewColumn {
-  flex: 0 0 min(26rem, 55%);
-  width: min(26rem, 55%);
+  flex: 0 1 min(26rem, 100%);
+  width: min(26rem, 100%);
 }
 
 .gift {
@@ -315,9 +416,19 @@
     align-items: flex-start;
   }
 
-  .directoryRow {
-    flex-direction: column;
+  .directoryGrid {
+    grid-template-columns: 1fr;
+    min-height: 0;
     gap: 1.5rem;
+  }
+
+  .directoryHalf {
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
+
+  .previewHalf {
+    justify-content: flex-start;
   }
 
   .previewColumn {

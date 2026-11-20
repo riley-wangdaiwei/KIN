@@ -125,7 +125,8 @@
 .hoverPreviewStatus {
   margin: 0;
   padding: 0.75rem 1rem;
-  border: 1px solid rgb(255 255 255 / 25%);
+  /* No frame around the preview — the loading box sits bare like it. */
+  border: 0;
   background: rgb(255 255 255 / 6%);
   color: var(--kin-light-gray);
   font-size: 0.9rem;

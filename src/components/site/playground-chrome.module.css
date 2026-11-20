@@ -106,6 +106,8 @@
 
 .dialog {
   position: relative;
+  display: grid;
+  gap: 0.8rem;
   width: min(94vw, 56rem);
 }
 
