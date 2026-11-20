@@ -9,56 +9,70 @@
   font: inherit;
 }
 
-.waterfallLayer {
-  position: fixed;
-  inset: 0;
+/* The canvas stream is a TextFlow section fixed in the band between the
+   fixed site header (76px) and the fixed site footer (56px), so words
+   never pass behind the chrome. It sits above the board (z-index 30) but
+   takes no pointer events itself — only the words do. Its exact band is
+   set inline by CanvasStream. */
+.canvasFlow {
   z-index: 30;
   pointer-events: none;
 }
 
-.fallingWord {
-  position: fixed;
-  z-index: 31;
-  display: block;
-  height: 28px;
-  padding: 0;
-  pointer-events: auto;
+/* TextFlow words are the draggable stream items: same size and feel as
+   the old falling words. */
+.canvasFlow :global(.tf-w) {
   color: var(--kin-white);
   cursor: grab;
-  font: 400 clamp(1.15rem, 1.6vw, 1.7rem)/28px var(--kin-ui-sans);
+  font: 400 clamp(1.15rem, 1.6vw, 1.7rem)/1.15 var(--kin-ui-sans);
   letter-spacing: -0.04em;
   text-transform: lowercase;
-  transform: translate(-50%, -50%);
   user-select: none;
   white-space: nowrap;
+  pointer-events: auto;
 }
 
-.fallingWord:active {
+.canvasFlow :global(.tf-w):active {
   cursor: grabbing;
 }
 
-.fallingImage img {
+/* The provided sticker images ride the stream at one row tall, like before. */
+.canvasFlow :global(.tf-w).streamSticker {
   display: block;
-  width: auto;
+  width: 28px;
   height: 28px;
-  max-width: none;
   object-fit: contain;
 }
 
-/* The weekly question rides the waterfall on a single row like every other
-   item, so it can't spill over its neighbours. The full question stays in
-   the answer prompt when you drag it in. */
-.fallingQuestion {
-  height: 28px;
-  max-width: min(12rem, 58vw);
-  overflow: hidden;
+/* Question words are smaller and keep their own case, like the old
+   single-row question item. */
+.canvasFlow :global(.tf-w).questionWord {
   font-size: clamp(0.78rem, 1.05vw, 0.92rem);
-  line-height: 28px;
-  text-align: left;
-  text-transform: none;
   letter-spacing: 0;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  text-transform: none;
+}
+
+/* Mirror obstacles track the board elements so the fill wraps around
+   them. They must never eat pointer events meant for the board. */
+.canvasFlow :global([data-flow-obstacle]) {
+  pointer-events: none;
+}
+
+.streamMirror {
+  position: absolute;
+  pointer-events: none;
+}
+
+/* While a word is being dragged, every word ignores the pointer so
+   elementFromPoint sees the board underneath. */
+.canvasFlow.dragging :global(.tf-w) {
+  pointer-events: none !important;
+}
+
+/* Words stay hidden until the loop starts (or reduced motion shows them
+   straight away), so the fill never flashes in before its first fall. */
+.canvasFlow :global(.tf-layer:not(.tf-live) .tf-w) {
+  opacity: 0;
 }
 
 .dropPrompt {
