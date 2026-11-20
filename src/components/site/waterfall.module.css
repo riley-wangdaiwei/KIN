@@ -1,0 +1,66 @@
+/* The shared flowing waterfall, used on the canvas and on the community
+   page: one narrow column on the right edge of its region, items scrolling
+   steadily down and recycling at the top, full viewport height. It sits
+   above the board (z-index 10) but below the fixed header/footer chrome
+   (z-index 20), so items pass behind the chrome. The layer itself takes no
+   pointer events — only the words do. */
+.waterfallLayer {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.fallingWord {
+  position: fixed;
+  z-index: 31;
+  display: block;
+  height: 28px;
+  padding: 0;
+  pointer-events: auto;
+  color: var(--kin-white);
+  cursor: grab;
+  font: 400 clamp(1.15rem, 1.6vw, 1.7rem)/28px var(--kin-ui-sans);
+  letter-spacing: -0.04em;
+  text-transform: lowercase;
+  transform: translate(-50%, -50%);
+  user-select: none;
+  white-space: nowrap;
+}
+
+.fallingWord:active {
+  cursor: grabbing;
+}
+
+.fallingImage img {
+  display: block;
+  width: auto;
+  height: 28px;
+  max-width: none;
+  object-fit: contain;
+}
+
+/* The weekly question rides the stream as one contiguous block of words —
+   dragging any one word answers the whole question. Same size as the other
+   words so the block reads clearly; never lowercased. */
+.fallingQuestion {
+  height: 28px;
+  max-width: min(12rem, 58vw);
+  overflow: hidden;
+  line-height: 28px;
+  text-align: left;
+  text-transform: none;
+}
+
+/* Long link labels (community question titles) truncate to one row. */
+.fallingTruncated {
+  max-width: min(10rem, 24vw);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Link items (community) open a canvas instead of dragging. */
+.fallingLink {
+  cursor: pointer;
+  text-decoration: none;
+}

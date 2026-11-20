@@ -9,70 +9,24 @@
   font: inherit;
 }
 
-/* The canvas stream: a narrow column on the right edge, items scrolling
-   steadily down and recycling at the top. It sits above the board
-   (z-index 30) but takes no pointer events itself — only the words do. */
-.waterfallLayer {
-  position: fixed;
-  inset: 0;
-  z-index: 30;
-  pointer-events: none;
-}
-
-.fallingWord {
-  position: fixed;
-  z-index: 31;
-  display: block;
-  height: 28px;
-  padding: 0;
-  pointer-events: auto;
-  color: var(--kin-white);
-  cursor: grab;
-  font: 400 clamp(1.15rem, 1.6vw, 1.7rem)/28px var(--kin-ui-sans);
-  letter-spacing: -0.04em;
-  text-transform: lowercase;
-  transform: translate(-50%, -50%);
-  user-select: none;
-  white-space: nowrap;
-}
-
-.fallingWord:active {
-  cursor: grabbing;
-}
-
-.fallingImage img {
-  display: block;
-  width: auto;
-  height: 28px;
-  max-width: none;
-  object-fit: contain;
-}
-
-/* The weekly question rides the stream one word per row, like every other
-   item — dragging any one word answers the whole question. */
-.fallingQuestion {
-  height: 28px;
-  max-width: min(12rem, 58vw);
-  overflow: hidden;
-  font-size: clamp(0.78rem, 1.05vw, 0.92rem);
-  line-height: 28px;
-  text-align: left;
-  text-transform: none;
-  letter-spacing: 0;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .dropPrompt {
   position: fixed;
   z-index: 50;
   display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  padding: 0.4rem 0.6rem;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.35rem;
+  padding: 0.5rem 0.65rem;
   background: rgb(0 0 0 / 78%);
   border: 1px solid rgb(255 255 255 / 28%);
   transform: translate(-50%, -50%);
+}
+
+/* The answer row: the input plus Save, side by side. */
+.dropPromptRow {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
 }
 
 .dropPrompt input {
@@ -92,6 +46,31 @@
   color: var(--kin-white);
   cursor: pointer;
   font: 500 0.7rem/1.2 var(--kin-ui-sans);
+}
+
+/* The weekly-question prompt is wider and shows the whole question above
+   the answer box, wrapped and readable — the question is the prompt. */
+.dropPromptWide {
+  width: min(22rem, calc(100vw - 2rem));
+}
+
+.dropPromptWide input {
+  flex: 1;
+  min-width: 0;
+}
+
+.dropPromptLabel {
+  margin: 0;
+  color: rgb(255 255 255 / 55%);
+  font: 500 0.65rem/1.2 var(--kin-ui-sans);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.dropPromptQuestion {
+  margin: 0;
+  color: var(--kin-white);
+  font: 400 0.95rem/1.45 var(--kin-ui-sans);
 }
 
 .notice {

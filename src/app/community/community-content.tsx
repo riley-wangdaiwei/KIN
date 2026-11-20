@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import TextFlowSection from "@/components/site/TextFlowSection";
+import Waterfall, { type WaterfallTemplate } from "@/components/site/Waterfall";
 import styles from "./page.module.css";
 
 type Publication = {
@@ -22,6 +22,8 @@ export default function CommunityContent() {
   const [communityCanvases, setCommunityCanvases] = useState<CommunityCanvasItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const leftHalfRef = useRef<HTMLElement>(null);
+  const rightHalfRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     let active = true;
@@ -57,95 +59,83 @@ export default function CommunityContent() {
     };
   }, []);
 
+  // Each half runs the same flowing waterfall as the canvas: a narrow
+  // column on the right side of the half, full page height, waterfall
+  // shape. Items are links to their canvases (click, not drag).
+  const questionTemplates: WaterfallTemplate[] = useMemo(
+    () =>
+      communityCanvases.map((canvas) => ({
+        kind: "word" as const,
+        label: canvas.question,
+        href: `/community/questions/${canvas.id}`,
+        truncate: true,
+      })),
+    [communityCanvases],
+  );
+  const peopleTemplates: WaterfallTemplate[] = useMemo(
+    () =>
+      publications.map((publication) => ({
+        kind: "word" as const,
+        label: publication.name,
+        href: `/canvas-share/${publication.token}`,
+      })),
+    [publications],
+  );
+
   if (loading) return <p className={styles.status}>Loading the community…</p>;
   if (error) return <p className={styles.status} role="alert">{error}</p>;
 
   return (
     <>
       <div className={styles.halves}>
-        <TextFlowSection
-          ariaLabel="Community canvases"
-          className={styles.half}
-          refreshKey={communityCanvases.map((canvas) => canvas.id).join("|")}
-          separator="·"
-          shape="waterfall"
-        >
-          {/* The question words are links so the fall stays clickable; the
-              words of one question all point at the same canvas. The source
-              links are tabIndex -1 — the list below is the keyboard path. */}
-          <div data-flow-source>
-            {communityCanvases.map((canvas) => (
-              <span key={canvas.id}>
-                {canvas.question.split(/\s+/).map((word, index) => (
-                  <a
-                    className="name"
-                    href={`/community/questions/${canvas.id}`}
-                    key={`${canvas.id}-${index}`}
-                    tabIndex={-1}
-                  >
-                    {word}
-                  </a>
-                ))}
-              </span>
-            ))}
-          </div>
+        <section aria-label="Community canvases" className={styles.half} ref={leftHalfRef}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             alt=""
             className={`${styles.kettle} ${styles.kettleJar}`}
-            data-flow-obstacle
+            data-canvas-obstacle
             src="/jar-community-canvases.png"
           />
-          {communityCanvases.length === 0 && (
+          {communityCanvases.length === 0 ? (
             <p className={styles.zoneStatus}>No community questions yet.</p>
+          ) : (
+            <Waterfall
+              refreshKey={communityCanvases.map((canvas) => canvas.id).join("|")}
+              regionRef={leftHalfRef}
+              templates={questionTemplates}
+            />
           )}
-          <p className={styles.sideNote} data-flow-obstacle>
+          <p className={styles.sideNote} data-canvas-obstacle>
             To publish your own canvas, name it from{" "}
             <Link href="/canvas">your canvas</Link>. Every week a new question
             appears in your canvas waterfall — answer it there, and your answer
             joins the community canvas for that question.
           </p>
-        </TextFlowSection>
+        </section>
 
-        <TextFlowSection
-          ariaLabel="People's canvases"
-          className={styles.half}
-          refreshKey={publications.map((publication) => publication.token).join("|")}
-          separator="·"
-          shape="waterfall"
-        >
-          <div data-flow-source>
-            {publications.map((publication) => (
-              <span key={publication.token}>
-                {publication.name.split(/\s+/).map((word, index) => (
-                  <a
-                    className="name"
-                    href={`/canvas-share/${publication.token}`}
-                    key={`${publication.token}-${index}`}
-                    tabIndex={-1}
-                  >
-                    {word}
-                  </a>
-                ))}
-              </span>
-            ))}
-          </div>
+        <section aria-label="People's canvases" className={styles.half} ref={rightHalfRef}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             alt=""
             className={`${styles.kettle} ${styles.kettlePitcher}`}
-            data-flow-obstacle
+            data-canvas-obstacle
             src="/pitcher-peoples-canvases.png"
           />
-          {publications.length === 0 && (
+          {publications.length === 0 ? (
             <p className={styles.zoneStatus}>No canvases published yet.</p>
+          ) : (
+            <Waterfall
+              refreshKey={publications.map((publication) => publication.token).join("|")}
+              regionRef={rightHalfRef}
+              templates={peopleTemplates}
+            />
           )}
-          <p className={styles.sideNote} data-flow-obstacle>
+          <p className={styles.sideNote} data-canvas-obstacle>
             Published canvases from the community, and the questions we&rsquo;re
             answering together. Open one to see how someone else keeps what they
             notice about the people they love.
           </p>
-        </TextFlowSection>
+        </section>
       </div>
 
       {/* The falling text is a browsing surface; this list is the same

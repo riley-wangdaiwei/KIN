@@ -42,6 +42,19 @@ import styles from "./canvas-workspace.module.css";
 
 const emptyCanvas: GiftingCanvas = { people: [], unsorted: [] };
 
+// Keep a drop prompt on screen: it is centered on the drop point, so keep
+// its center at least half its size from each edge. The question prompt is
+// wider and taller than the detail/name ones.
+function clampPromptPoint(x: number, y: number, wide: boolean): { x: number; y: number } {
+  if (typeof window === "undefined") return { x, y };
+  const halfWidth = wide ? 184 : 128;
+  const halfHeight = wide ? 76 : 40;
+  return {
+    x: Math.max(halfWidth, Math.min(x, window.innerWidth - halfWidth)),
+    y: Math.max(halfHeight, Math.min(y, window.innerHeight - halfHeight)),
+  };
+}
+
 type InlinePrompt = {
   kind: "details" | "people" | "question";
   personId: string | null;
@@ -543,6 +556,12 @@ export default function CanvasWorkspace() {
     }
   }
 
+  // The prompt is centered on the drop point: keep its center far enough
+  // from each edge that the (wider) question prompt never clips off-screen.
+  const promptPoint = inlinePrompt
+    ? clampPromptPoint(inlinePrompt.x, inlinePrompt.y, inlinePrompt.kind === "question")
+    : { x: 0, y: 0 };
+
   return (
     <div className={styles.workspace}>
       <input
@@ -562,7 +581,7 @@ export default function CanvasWorkspace() {
 
       {inlinePrompt && (
         <form
-          className={styles.dropPrompt}
+          className={`${styles.dropPrompt} ${inlinePrompt.kind === "question" ? styles.dropPromptWide : ""}`.trim()}
           onKeyDown={(event) => {
             if (event.key === "Escape") {
               setInlinePrompt(null);
@@ -570,22 +589,35 @@ export default function CanvasWorkspace() {
             }
           }}
           onSubmit={saveInlinePrompt}
-          style={{ left: inlinePrompt.x, top: inlinePrompt.y }}
+          style={{ left: promptPoint.x, top: promptPoint.y }}
         >
-          <input
-            autoFocus
-            maxLength={inlinePrompt.kind === "people" ? 120 : 1000}
-            onChange={(event) => setInlineValue(event.target.value)}
-            placeholder={
-              inlinePrompt.kind === "details"
-                ? "Add a detail"
-                : inlinePrompt.kind === "question"
-                  ? (currentQuestion?.question ?? "Answer this week's question")
-                  : "Their name"
-            }
-            value={inlineValue}
-          />
-          <button type="submit">Save</button>
+          {/* The weekly question is a prompt: show the whole question,
+              wrapped and readable, above the answer box — never as a
+              truncated placeholder. */}
+          {inlinePrompt.kind === "question" && (
+            <>
+              <p className={styles.dropPromptLabel}>prompt</p>
+              <p className={styles.dropPromptQuestion}>
+                {currentQuestion?.question ?? "Answer this week's question"}
+              </p>
+            </>
+          )}
+          <div className={styles.dropPromptRow}>
+            <input
+              autoFocus
+              maxLength={inlinePrompt.kind === "people" ? 120 : 1000}
+              onChange={(event) => setInlineValue(event.target.value)}
+              placeholder={
+                inlinePrompt.kind === "details"
+                  ? "Add a detail"
+                  : inlinePrompt.kind === "question"
+                    ? "Write your answer…"
+                    : "Their name"
+              }
+              value={inlineValue}
+            />
+            <button type="submit">Save</button>
+          </div>
         </form>
       )}
 
