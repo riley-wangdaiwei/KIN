@@ -45,6 +45,19 @@
   object-fit: contain;
 }
 
+/* The weekly question rides the waterfall as a wrapped line, not a single
+   word, so it stays readable in the right-hand column. */
+.fallingQuestion {
+  height: auto;
+  max-width: min(15rem, 62vw);
+  font-size: clamp(0.85rem, 1.1vw, 1rem);
+  line-height: 1.35;
+  text-align: right;
+  text-transform: none;
+  letter-spacing: 0;
+  white-space: normal;
+}
+
 .dropPrompt {
   position: fixed;
   z-index: 50;
@@ -355,4 +368,37 @@
 .sendFooter button:disabled {
   cursor: wait;
   opacity: 0.55;
+}
+
+.sendFooter a {
+  color: var(--kin-white);
+}
+
+.sendFooter a:hover {
+  color: var(--kin-light-gray);
+}
+
+.publishForm {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.publishForm input {
+  min-width: 11rem;
+  border: 0;
+  border-bottom: 1px solid rgb(255 255 255 / 40%);
+  border-radius: 0;
+  padding: 0.35rem 0;
+  background: transparent;
+  color: var(--kin-white);
+  font: 400 0.8rem/1.35 var(--kin-ui-sans);
+}
+
+.publishForm input:focus {
+  outline: none;
+}
+
+.publishStatus {
+  color: var(--kin-white) !important;
 }

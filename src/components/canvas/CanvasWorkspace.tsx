@@ -12,17 +12,22 @@ import {
   createCanvasText,
   deleteCanvasEntry,
   deleteCanvasPerson,
+  getCanvasPublication,
   getCanvasUser,
+  getCurrentCommunityQuestion,
   loadCanvas,
   placeCanvasEntry,
+  publishCanvas,
   renameCanvasPerson,
   subscribeToCanvasAuth,
+  unpublishCanvas,
   updateCanvasEntryFontSize,
   updateCanvasEntryPosition,
   updateCanvasEntrySize,
   updateCanvasPersonPosition,
   updateCanvasPersonSize,
 } from "@/lib/storage/canvas-adapter";
+import type { CanvasPublication, CommunityQuestion } from "@/lib/storage/canvas-adapter";
 import { getBrowserSupabase } from "@/lib/supabase/browser";
 import type { CanvasEntry, CanvasPerson, GiftingCanvas } from "@/features/canvas/types";
 import type { BoardPosition } from "@/features/canvas/positions";
@@ -42,7 +47,7 @@ const stickerImageSources: Record<string, string> = {
 };
 type StreamItem = {
   id: number;
-  kind: "word" | "image";
+  kind: "word" | "image" | "question";
   label?: string;
   imageSrc?: string;
   x: number;
@@ -51,15 +56,17 @@ type StreamItem = {
   detourUntil?: number;
   detourX?: number;
   stickerKey?: string;
+  questionId?: string;
 };
 
 type InlinePrompt = {
-  kind: "details" | "people";
+  kind: "details" | "people" | "question";
   personId: string | null;
   x: number;
   y: number;
   boardX: number;
   boardY: number;
+  questionId?: string;
 };
 
 type PendingUpload = {
@@ -125,7 +132,7 @@ function applyBoardPosition(
   return { people, unsorted };
 }
 
-function buildStreamSequence() {
+function buildStreamSequence(question: CommunityQuestion | null = null) {
   const stickerImages = providedStickerKeys.map((key) => ({
     kind: "image" as const,
     imageSrc: stickerImageSources[key],
@@ -141,6 +148,11 @@ function buildStreamSequence() {
     { kind: "word", label: "images" },
     { kind: "word", label: "jars" },
     ...stickerImages,
+    // The weekly community question rides the waterfall once per cycle, so
+    // it shows up in the user's own stream without taking it over.
+    ...(question
+      ? [{ kind: "question" as const, label: question.question, questionId: question.id }]
+      : []),
   ] as const;
 
   return cycle.map((item) => ({ ...item }));
@@ -151,30 +163,31 @@ function getColumnX() {
   return Math.max(48, window.innerWidth - 100);
 }
 
-function makeStreamItem(id: number, index: number, startIndex: number, verticalOffset: number): StreamItem {
-  const sequence = buildStreamSequence();
+function makeStreamItem(id: number, index: number, startIndex: number, verticalOffset: number, question: CommunityQuestion | null = null): StreamItem {
+  const sequence = buildStreamSequence(question);
   const template = sequence[(startIndex + index) % sequence.length];
 
   return {
     id,
     kind: template.kind,
-    label: template.kind === "word" ? template.label : undefined,
+    label: template.kind === "word" || template.kind === "question" ? template.label : undefined,
     imageSrc: template.kind === "image" ? template.imageSrc : undefined,
     stickerKey: template.kind === "image" ? template.stickerKey : undefined,
+    questionId: template.kind === "question" ? template.questionId : undefined,
     x: getColumnX(),
     y: index * STREAM_ROW_HEIGHT - STREAM_ROW_HEIGHT + verticalOffset,
     speed: STREAM_SPEED,
   };
 }
 
-function getInitialStreamItems() {
+function getInitialStreamItems(question: CommunityQuestion | null = null) {
   if (typeof window === "undefined") return { items: [] as StreamItem[], nextSequenceIndex: 0 };
   const count = Math.ceil(window.innerHeight / STREAM_ROW_HEIGHT) + 1;
-  const sequenceLength = buildStreamSequence().length;
+  const sequenceLength = buildStreamSequence(question).length;
   const startIndex = Math.floor(Math.random() * sequenceLength);
   const verticalOffset = Math.random() * STREAM_ROW_HEIGHT;
   return {
-    items: Array.from({ length: count }).map((_, index) => makeStreamItem(index + 1, index, startIndex, verticalOffset)),
+    items: Array.from({ length: count }).map((_, index) => makeStreamItem(index + 1, index, startIndex, verticalOffset, question)),
     nextSequenceIndex: startIndex + count,
   };
 }
@@ -192,6 +205,13 @@ export default function CanvasWorkspace() {
   const [editingPersonId, setEditingPersonId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState("");
   const [sendState, setSendState] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [currentQuestion, setCurrentQuestion] = useState<CommunityQuestion | null>(null);
+  const [questionLoaded, setQuestionLoaded] = useState(false);
+  const [publication, setPublication] = useState<CanvasPublication | null>(null);
+  const [publishFormOpen, setPublishFormOpen] = useState(false);
+  const [publishName, setPublishName] = useState("");
+  const [publishBusy, setPublishBusy] = useState(false);
+  const [publishStatus, setPublishStatus] = useState("");
   const generalImageInputRef = useRef<HTMLInputElement>(null);
   const [inlinePrompt, setInlinePrompt] = useState<InlinePrompt | null>(null);
   const [inlineValue, setInlineValue] = useState("");
@@ -260,15 +280,15 @@ export default function CanvasWorkspace() {
       streamRef.current = [];
       return;
     }
-    if (loading || streamRef.current.length > 0) return;
+    if (loading || !questionLoaded || streamRef.current.length > 0) return;
 
-    const initial = getInitialStreamItems();
+    const initial = getInitialStreamItems(currentQuestion);
     const active = initial.items;
     nextStreamId.current = active.length + 1;
     nextSequenceIndex.current = initial.nextSequenceIndex;
     setStreamItems(active);
     streamRef.current = active;
-  }, [loading, reducedMotion, userId]);
+  }, [currentQuestion, loading, questionLoaded, reducedMotion, userId]);
 
   useEffect(() => {
     if (!userId || loading || reducedMotion) return;
@@ -279,7 +299,7 @@ export default function CanvasWorkspace() {
         frame = requestAnimationFrame(tick);
         return;
       }
-      const sequence = buildStreamSequence();
+      const sequence = buildStreamSequence(currentQuestion);
       const hitAreas = [...document.querySelectorAll<HTMLElement>(
         `[data-board-element], [data-canvas-obstacle]`,
       )].map((element) => element.getBoundingClientRect());
@@ -312,9 +332,10 @@ export default function CanvasWorkspace() {
           return {
             id: nextStreamId.current++,
             kind: template.kind,
-            label: template.kind === "word" ? template.label : undefined,
+            label: template.kind === "word" || template.kind === "question" ? template.label : undefined,
             imageSrc: template.kind === "image" ? template.imageSrc : undefined,
             stickerKey: template.kind === "image" ? template.stickerKey : undefined,
+            questionId: template.kind === "question" ? template.questionId : undefined,
             x: getColumnX(),
             y: Math.min(...streamRef.current.map((candidate) => candidate.y)) - STREAM_ROW_HEIGHT,
             speed: STREAM_SPEED,
@@ -330,7 +351,7 @@ export default function CanvasWorkspace() {
 
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
-  }, [loading, reducedMotion, userId]);
+  }, [currentQuestion, loading, reducedMotion, userId]);
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -553,6 +574,12 @@ export default function CanvasWorkspace() {
       return;
     }
 
+    if (active.kind === "question") {
+      setInlinePrompt({ kind: "question", personId, questionId: active.questionId, x: event.clientX, y: event.clientY, boardX: boardPoint.x, boardY: boardPoint.y });
+      setInlineValue("");
+      return;
+    }
+
     if (active.kind === "word" && active.label === "images") {
       setPendingUpload({ kind: "image", personId, relatedEntryId, boardX: boardPoint.x, boardY: boardPoint.y });
       generalImageInputRef.current?.click();
@@ -592,6 +619,40 @@ export default function CanvasWorkspace() {
     window.removeEventListener("pointerup", handlePointerUp);
     window.addEventListener("pointerup", handlePointerUp, { once: true });
   }, [handlePointerMove, handlePointerUp]);
+
+  // The weekly question and the publication state ride along with the
+  // session. A missing table (migration not applied yet) just means no
+  // question and no publication; the publish action surfaces real errors.
+  useEffect(() => {
+    if (!userId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setCurrentQuestion(null);
+      setQuestionLoaded(false);
+      setPublication(null);
+      return;
+    }
+    let active = true;
+    void getCurrentCommunityQuestion()
+      .then((question) => {
+        if (active) setCurrentQuestion(question);
+      })
+      .catch(() => {
+        if (active) setCurrentQuestion(null);
+      })
+      .finally(() => {
+        if (active) setQuestionLoaded(true);
+      });
+    void getCanvasPublication()
+      .then((row) => {
+        if (active) setPublication(row);
+      })
+      .catch(() => {
+        if (active) setPublication(null);
+      });
+    return () => {
+      active = false;
+    };
+  }, [userId]);
 
   useEffect(() => {
     let active = true;
@@ -645,13 +706,50 @@ export default function CanvasWorkspace() {
     if (!inlinePrompt || !inlineValue.trim()) return;
     const value = inlineValue.trim();
     const position = { x: inlinePrompt.boardX, y: inlinePrompt.boardY };
-    await perform(() =>
-      inlinePrompt.kind === "details"
+    await perform(() => {
+      if (inlinePrompt.kind === "question") {
+        // An answer is a normal text entry on the board, linked to its
+        // question so it is collected into the community canvas.
+        return createCanvasText(value, inlinePrompt.personId, position, inlinePrompt.questionId ?? null);
+      }
+      return inlinePrompt.kind === "details"
         ? createCanvasText(value, inlinePrompt.personId, position)
-        : createCanvasPerson(value, position),
-    );
+        : createCanvasPerson(value, position);
+    });
     setInlinePrompt(null);
     setInlineValue("");
+  }
+
+  async function publishCanvasWithName() {
+    if (!publishName.trim()) return;
+    setPublishBusy(true);
+    setPublishStatus("");
+    try {
+      const row = await publishCanvas(publishName.trim());
+      setPublication(row);
+      setPublishFormOpen(false);
+      setPublishName("");
+      setPublishStatus(`Published as “${row.name}”.`);
+    } catch (publishError) {
+      setPublishStatus(messageFrom(publishError));
+    } finally {
+      setPublishBusy(false);
+    }
+  }
+
+  async function unpublishCanvasNow() {
+    if (!window.confirm("Unpublish your canvas? The public link will stop working.")) return;
+    setPublishBusy(true);
+    setPublishStatus("");
+    try {
+      await unpublishCanvas();
+      setPublication(null);
+      setPublishStatus("Unpublished. Your public link no longer works.");
+    } catch (unpublishError) {
+      setPublishStatus(messageFrom(unpublishError));
+    } finally {
+      setPublishBusy(false);
+    }
   }
 
   async function sendCanvasToTeam() {
@@ -708,9 +806,15 @@ export default function CanvasWorkspace() {
         >
           <input
             autoFocus
-            maxLength={inlinePrompt.kind === "details" ? 1000 : 120}
+            maxLength={inlinePrompt.kind === "people" ? 120 : 1000}
             onChange={(event) => setInlineValue(event.target.value)}
-            placeholder={inlinePrompt.kind === "details" ? "Add a detail" : "Their name"}
+            placeholder={
+              inlinePrompt.kind === "details"
+                ? "Add a detail"
+                : inlinePrompt.kind === "question"
+                  ? (currentQuestion?.question ?? "Answer this week's question")
+                  : "Their name"
+            }
             value={inlineValue}
           />
           <button type="submit">Save</button>
@@ -721,17 +825,19 @@ export default function CanvasWorkspace() {
         <div className={styles.waterfallLayer}>
           {streamItems.map((item) => (
             <button
-              className={`${styles.fallingWord} ${item.kind === "image" ? styles.fallingImage : ""}`.trim()}
+              className={`${styles.fallingWord} ${item.kind === "image" ? styles.fallingImage : ""} ${item.kind === "question" ? styles.fallingQuestion : ""}`.trim()}
               data-stream-id={item.id}
               key={item.id}
               onPointerDown={(event) => startDraggingItem(item, event)}
               style={{ left: item.x, top: item.y, pointerEvents: draggingStreamId === item.id ? "none" : "auto" }}
-              aria-label={item.kind === "word" ? `Add ${item.label}` : `Add ${item.stickerKey} image`}
+              aria-label={item.kind === "word" ? `Add ${item.label}` : item.kind === "question" ? `Answer this week's question: ${item.label}` : `Add ${item.stickerKey} image`}
               type="button"
             >
-              {item.kind === "word" ? item.label : (
+              {item.kind === "image" ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img alt="" src={item.imageSrc} />
+              ) : (
+                item.label
               )}
             </button>
           ))}
@@ -850,6 +956,66 @@ export default function CanvasWorkspace() {
           <button disabled={busy || sendState === "sending"} onClick={() => void sendCanvasToTeam()} type="button">
             {sendState === "sent" ? "Sent ✓" : sendState === "sending" ? "Sending…" : "Send to re.KIN"}
           </button>
+          {publication ? (
+            <>
+              <p>
+                Published as “{publication.name}” —{" "}
+                <a href={`/canvas-share/${publication.token}`} rel="noreferrer" target="_blank">
+                  public link
+                </a>
+              </p>
+              <button disabled={publishBusy} onClick={() => void unpublishCanvasNow()} type="button">
+                Unpublish
+              </button>
+            </>
+          ) : publishFormOpen ? (
+            <form
+              className={styles.publishForm}
+              onSubmit={(event) => {
+                event.preventDefault();
+                void publishCanvasWithName();
+              }}
+            >
+              <input
+                aria-label="Name your canvas"
+                autoFocus
+                maxLength={120}
+                onChange={(event) => setPublishName(event.target.value)}
+                placeholder="Name your canvas"
+                value={publishName}
+              />
+              <button disabled={publishBusy || !publishName.trim()} type="submit">
+                Publish
+              </button>
+              <button
+                disabled={publishBusy}
+                onClick={() => {
+                  setPublishFormOpen(false);
+                  setPublishName("");
+                  setPublishStatus("");
+                }}
+                type="button"
+              >
+                Cancel
+              </button>
+            </form>
+          ) : (
+            <button
+              disabled={publishBusy}
+              onClick={() => {
+                setPublishStatus("");
+                setPublishFormOpen(true);
+              }}
+              type="button"
+            >
+              Publish your canvas
+            </button>
+          )}
+          {publishStatus && (
+            <p aria-live="polite" className={styles.publishStatus} role="status">
+              {publishStatus}
+            </p>
+          )}
         </footer>
       )}
     </div>

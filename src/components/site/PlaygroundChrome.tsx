@@ -250,6 +250,9 @@ export default function PlaygroundChrome({
             {link.label}
           </Link>
         ))}
+        <Link className={styles.communityLink} href="/community">
+          re.KIN community
+        </Link>
       </nav>}
 
       {bookingOpen && (

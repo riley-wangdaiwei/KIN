@@ -189,7 +189,7 @@ export async function deleteCanvasPerson(personId: string): Promise<void> {
   if (error) throw new Error(`Could not delete this person: ${error.message}`);
 }
 
-export async function createCanvasText(content: string, personId: string | null = null, position: BoardPosition | null = null): Promise<void> {
+export async function createCanvasText(content: string, personId: string | null = null, position: BoardPosition | null = null, questionId: string | null = null): Promise<void> {
   const user = await requireUser();
   const { error } = await requireSupabase()
     .from("canvas_entries")
@@ -200,6 +200,7 @@ export async function createCanvasText(content: string, personId: string | null 
       content: content.trim(),
       pos_x: position?.x ?? null,
       pos_y: position?.y ?? null,
+      question_id: questionId,
     });
   if (error) throw new Error(`Could not add this note: ${error.message}`);
 }
@@ -481,4 +482,75 @@ export async function createCanvasShare(
     .single();
   if (error) throw new Error(`Could not create a share link: ${error.message}`);
   return data.token as string;
+}
+
+export interface CanvasPublication {
+  token: string;
+  name: string;
+  createdAt: string;
+}
+
+export interface CommunityQuestion {
+  id: string;
+  question: string;
+}
+
+// A published canvas is a public share with its own token, separate from the
+// re.KIN share. One publication per user (the canvas is one per account);
+// publishing again keeps the same token and renames it.
+export async function getCanvasPublication(): Promise<CanvasPublication | null> {
+  const user = await requireUser();
+  const { data, error } = await requireSupabase()
+    .from("canvas_publications")
+    .select("token,name,created_at")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  if (error) throw new Error(`Could not check your publication: ${error.message}`);
+  if (!data) return null;
+  return {
+    token: data.token as string,
+    name: data.name as string,
+    createdAt: data.created_at as string,
+  };
+}
+
+export async function publishCanvas(name: string): Promise<CanvasPublication> {
+  const user = await requireUser();
+  const trimmed = name.trim();
+  if (!trimmed) throw new Error("Give your canvas a name to publish it.");
+  if (trimmed.length > 120) throw new Error("Keep the name to 120 characters or fewer.");
+  const { data, error } = await requireSupabase()
+    .from("canvas_publications")
+    .upsert({ user_id: user.id, name: trimmed }, { onConflict: "user_id" })
+    .select("token,name,created_at")
+    .single();
+  if (error) throw new Error(`Could not publish your canvas: ${error.message}`);
+  return {
+    token: data.token as string,
+    name: data.name as string,
+    createdAt: data.created_at as string,
+  };
+}
+
+// Unpublishing deletes the publication, so the public link stops working.
+export async function unpublishCanvas(): Promise<void> {
+  const user = await requireUser();
+  const { error } = await requireSupabase()
+    .from("canvas_publications")
+    .delete()
+    .eq("user_id", user.id);
+  if (error) throw new Error(`Could not unpublish your canvas: ${error.message}`);
+}
+
+export async function getCurrentCommunityQuestion(): Promise<CommunityQuestion | null> {
+  const response = await fetch("/api/community/questions/current", {
+    cache: "no-store",
+  });
+  const result = (await response.json().catch(() => null)) as
+    | { question?: CommunityQuestion | null; error?: string }
+    | null;
+  if (!response.ok) {
+    throw new Error(result?.error ?? "Could not load this week's question.");
+  }
+  return result?.question ?? null;
 }

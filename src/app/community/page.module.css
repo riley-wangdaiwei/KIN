@@ -1,0 +1,155 @@
+.page {
+  min-height: 100vh;
+  padding: clamp(7rem, 12vh, 9rem) var(--kin-page-gutter) 8rem;
+  background: transparent;
+  color: var(--kin-white);
+}
+
+.title {
+  margin: 0 0 0.75rem;
+  font: 400 clamp(1.8rem, 4vw, 3rem)/1.15 var(--kin-ui-sans);
+  letter-spacing: -0.02em;
+  text-transform: lowercase;
+}
+
+.intro {
+  max-width: 34rem;
+  margin: 0 0 2.5rem;
+  color: var(--kin-light-gray);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.sectionHeading {
+  margin: 0 0 0.9rem;
+  color: var(--kin-light-gray);
+  font: 400 var(--kin-caption-size)/1.4 var(--kin-ui-sans);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.list {
+  display: grid;
+  gap: 0.85rem;
+  max-width: 34rem;
+  margin: 0 0 3rem;
+  padding: 0;
+  list-style: none;
+}
+
+.list a {
+  color: var(--kin-white);
+  font-size: 1.05rem;
+  line-height: 1.35;
+  text-decoration: none;
+  text-transform: lowercase;
+}
+
+.list a:hover {
+  color: var(--kin-light-gray);
+}
+
+.list a svg {
+  width: 0.8em;
+  height: 0.8em;
+  margin-left: 0.3rem;
+  vertical-align: baseline;
+}
+
+.note {
+  max-width: 34rem;
+  margin: 0;
+  color: var(--kin-light-gray);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.note a {
+  color: var(--kin-white);
+}
+
+.note a:hover {
+  color: var(--kin-light-gray);
+}
+
+.status {
+  color: var(--kin-light-gray);
+  font-size: 0.9rem;
+}
+
+/* The community waterfall: a steady column of published canvases and
+   community canvases falling down the right edge, like the canvas stream.
+   Hovering near it pauses the fall. It is a browsing surface; the lists
+   below are the same items for direct access. */
+.waterfall {
+  position: fixed;
+  top: 0;
+  right: var(--kin-page-gutter);
+  bottom: 0;
+  z-index: 30;
+  width: min(15rem, 30vw);
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.track {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  display: grid;
+  gap: 1.4rem;
+  animation: community-fall linear infinite;
+  will-change: transform;
+}
+
+.waterfall:hover .track {
+  animation-play-state: paused;
+}
+
+.waterfallItem {
+  display: block;
+  pointer-events: auto;
+  color: var(--kin-white);
+  font: 400 0.95rem/1.35 var(--kin-ui-sans);
+  text-align: right;
+  text-decoration: none;
+  text-transform: lowercase;
+}
+
+.waterfallItem:hover {
+  color: var(--kin-light-gray);
+}
+
+.waterfallKind {
+  display: block;
+  margin-bottom: 0.15rem;
+  color: var(--kin-light-gray);
+  font-size: var(--kin-caption-size);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+@keyframes community-fall {
+  from {
+    transform: translateY(-50%);
+  }
+
+  to {
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 700px) {
+  /* On phones the lists below are the way in; the falling column would
+     cover them. */
+  .waterfall {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .track {
+    animation: none;
+  }
+}

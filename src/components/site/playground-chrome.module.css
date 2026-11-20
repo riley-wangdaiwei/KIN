@@ -71,6 +71,12 @@
   pointer-events: auto;
 }
 
+/* The community link sits at the bottom-right, apart from the other footer
+   links. */
+.communityLink {
+  margin-left: auto;
+}
+
 .login:hover,
 .footer a:hover {
   color: #aaa;
