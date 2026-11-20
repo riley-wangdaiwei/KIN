@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import SiteArrow from "@/components/site/SiteArrow";
+import CommunityWaterfall, {
+  type CommunityWaterfallEntry,
+} from "@/components/canvas/CommunityWaterfall";
 import styles from "./page.module.css";
 
 type Publication = {
@@ -17,21 +19,15 @@ type CommunityCanvasItem = {
   createdAt: string;
 };
 
-type WaterfallItem = {
-  key: string;
-  kind: "canvas" | "question";
-  label: string;
-  href: string;
-};
-
-const ROW_HEIGHT = 40;
-
 export default function CommunityContent() {
   const [publications, setPublications] = useState<Publication[]>([]);
   const [communityCanvases, setCommunityCanvases] = useState<CommunityCanvasItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [viewportHeight, setViewportHeight] = useState(800);
+  const leftHalfRef = useRef<HTMLElement>(null);
+  const rightHalfRef = useRef<HTMLElement>(null);
+  const leftZoneRef = useRef<HTMLDivElement>(null);
+  const rightZoneRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let active = true;
@@ -67,115 +63,102 @@ export default function CommunityContent() {
     };
   }, []);
 
-  useEffect(() => {
-    const update = () => setViewportHeight(window.innerHeight);
-    update();
-    window.addEventListener("resize", update);
-    return () => window.removeEventListener("resize", update);
-  }, []);
-
-  const waterfallItems: WaterfallItem[] = useMemo(
-    () => [
-      ...publications.map((publication) => ({
+  const peopleEntries: CommunityWaterfallEntry[] = useMemo(
+    () =>
+      publications.map((publication) => ({
         key: `pub-${publication.token}`,
-        kind: "canvas" as const,
         label: publication.name,
         href: `/canvas-share/${publication.token}`,
       })),
-      ...communityCanvases.map((canvas) => ({
+    [publications],
+  );
+
+  const communityEntries: CommunityWaterfallEntry[] = useMemo(
+    () =>
+      communityCanvases.map((canvas) => ({
         key: `question-${canvas.id}`,
-        kind: "question" as const,
         label: canvas.question,
         href: `/community/questions/${canvas.id}`,
       })),
-    ],
-    [publications, communityCanvases],
+    [communityCanvases],
   );
-
-  // The track holds the items repeated enough times that half of it always
-  // covers the viewport; animating it from -50% to 0 falls downward and
-  // loops seamlessly because both halves are identical.
-  const { trackItems, durationSeconds } = useMemo(() => {
-    if (waterfallItems.length === 0) return { trackItems: [], durationSeconds: 0 };
-    const listHeight = waterfallItems.length * ROW_HEIGHT;
-    let copies = Math.max(4, Math.ceil(viewportHeight / listHeight) * 2 + 2);
-    if (copies % 2 !== 0) copies += 1;
-    const items = Array.from({ length: copies }).flatMap(() => waterfallItems);
-    const loopDistance = (copies / 2) * listHeight;
-    return { trackItems: items, durationSeconds: Math.max(24, loopDistance / 60) };
-  }, [waterfallItems, viewportHeight]);
 
   if (loading) return <p className={styles.status}>Loading the community…</p>;
   if (error) return <p className={styles.status} role="alert">{error}</p>;
 
   return (
     <>
-      {trackItems.length > 0 && (
-        <div aria-hidden="true" className={styles.waterfall}>
-          <div
-            className={styles.track}
-            style={{ animationDuration: `${durationSeconds}s` }}
-          >
-            {trackItems.map((item, index) => (
-              <Link
-                className={styles.waterfallItem}
-                href={item.href}
-                key={`${item.key}-${index}`}
-                tabIndex={-1}
-              >
-                <span className={styles.waterfallKind}>
-                  {item.kind === "canvas" ? "published canvas" : "community canvas"}
-                </span>
-                {item.label}
-              </Link>
-            ))}
+      <div className={styles.halves}>
+        <section aria-label="Community canvases" className={styles.half} ref={leftHalfRef}>
+          <div className={styles.streamZone} ref={leftZoneRef}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              alt=""
+              className={`${styles.kettle} ${styles.kettleJar}`}
+              data-canvas-obstacle
+              src="/jar-community-canvases.png"
+            />
+            {communityEntries.length > 0 ? (
+              <CommunityWaterfall
+                detourSide="left"
+                entries={communityEntries}
+                halfRef={leftHalfRef}
+                zoneRef={leftZoneRef}
+              />
+            ) : (
+              <p className={styles.zoneStatus}>No community questions yet.</p>
+            )}
           </div>
-        </div>
-      )}
+          <p className={styles.sideNote} data-canvas-obstacle>
+            To publish your own canvas, name it from{" "}
+            <Link href="/canvas">your canvas</Link>. Every week a new question
+            appears in your canvas waterfall — answer it there, and your answer
+            joins the community canvas for that question.
+          </p>
+        </section>
 
-      <h1 className={styles.title}>re.KIN community</h1>
-      <p className={styles.intro}>
-        Published canvases from the community, and the questions we&rsquo;re
-        answering together. Open one to see how someone else keeps what they
-        notice about the people they love.
-      </p>
+        <section aria-label="People's canvases" className={styles.half} ref={rightHalfRef}>
+          <div className={styles.streamZone} ref={rightZoneRef}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              alt=""
+              className={`${styles.kettle} ${styles.kettlePitcher}`}
+              data-canvas-obstacle
+              src="/pitcher-peoples-canvases.png"
+            />
+            {peopleEntries.length > 0 ? (
+              <CommunityWaterfall
+                detourSide="right"
+                entries={peopleEntries}
+                halfRef={rightHalfRef}
+                zoneRef={rightZoneRef}
+              />
+            ) : (
+              <p className={styles.zoneStatus}>No canvases published yet.</p>
+            )}
+          </div>
+          <p className={styles.sideNote} data-canvas-obstacle>
+            Published canvases from the community, and the questions we&rsquo;re
+            answering together. Open one to see how someone else keeps what they
+            notice about the people they love.
+          </p>
+        </section>
+      </div>
 
-      <h2 className={styles.sectionHeading}>Published canvases</h2>
-      {publications.length === 0 ? (
-        <p className={styles.status}>No canvases published yet.</p>
-      ) : (
-        <ul className={styles.list}>
-          {publications.map((publication) => (
-            <li key={publication.token}>
-              <Link href={`/canvas-share/${publication.token}`}>
-                {publication.name} <SiteArrow />
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      <h2 className={styles.sectionHeading}>Community canvases</h2>
-      {communityCanvases.length === 0 ? (
-        <p className={styles.status}>No community questions yet.</p>
-      ) : (
-        <ul className={styles.list}>
-          {communityCanvases.map((canvas) => (
-            <li key={canvas.id}>
-              <Link href={`/community/questions/${canvas.id}`}>
-                {canvas.question} <SiteArrow />
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      <p className={styles.note}>
-        To publish your own canvas, name it from{" "}
-        <Link href="/canvas">your canvas</Link>. Every week a new question
-        appears in your canvas waterfall — answer it there, and your answer
-        joins the community canvas for that question.
-      </p>
+      {/* The falling columns are a browsing surface; this list is the same
+          canvases for keyboard and screen-reader access. */}
+      <ul className={styles.visuallyHidden}>
+        {peopleEntries.map((entry) => (
+          <li key={entry.key}>
+            <Link href={entry.href}>{entry.label}</Link>
+          </li>
+        ))}
+        {communityEntries.map((entry) => (
+          <li key={entry.key}>
+            <Link href={entry.href}>{entry.label}</Link>
+          </li>
+        ))}
+      </ul>
     </>
   );
 }

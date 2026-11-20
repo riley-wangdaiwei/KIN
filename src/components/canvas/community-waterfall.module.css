@@ -1,0 +1,41 @@
+.stream {
+  pointer-events: none;
+}
+
+/* One falling canvas: a link, centred on the fall line, up to two lines.
+   Positioned fixed against the half (its containing block), like the
+   canvas stream's falling words. */
+.fallingItem {
+  position: fixed;
+  z-index: 2;
+  display: -webkit-box;
+  max-width: 11rem;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  pointer-events: auto;
+  color: var(--kin-white);
+  font: 400 0.95rem/1.35 var(--kin-ui-sans);
+  text-align: center;
+  text-decoration: none;
+  text-transform: lowercase;
+  transform: translate(-50%, -50%);
+}
+
+.fallingItem:hover {
+  color: var(--kin-light-gray);
+}
+
+@media (max-width: 1100px) {
+  .fallingItem {
+    max-width: 7rem;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 700px) {
+  .fallingItem {
+    max-width: min(6rem, 34vw);
+    font-size: 0.8rem;
+  }
+}

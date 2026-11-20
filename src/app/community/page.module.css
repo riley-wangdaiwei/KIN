@@ -1,75 +1,92 @@
 .page {
-  min-height: 100vh;
-  padding: clamp(7rem, 12vh, 9rem) var(--kin-page-gutter) 8rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
+  padding: clamp(6rem, 10vh, 8rem) var(--kin-page-gutter) 6rem;
   background: transparent;
   color: var(--kin-white);
 }
 
-.title {
-  margin: 0 0 0.75rem;
-  font: 400 clamp(1.8rem, 4vw, 3rem)/1.15 var(--kin-ui-sans);
-  letter-spacing: -0.02em;
-  text-transform: lowercase;
-}
-
-.intro {
-  max-width: 34rem;
-  margin: 0 0 2.5rem;
-  color: var(--kin-light-gray);
-  font-size: 0.95rem;
-  line-height: 1.5;
-}
-
-.sectionHeading {
-  margin: 0 0 0.9rem;
-  color: var(--kin-light-gray);
-  font: 400 var(--kin-caption-size)/1.4 var(--kin-ui-sans);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.list {
+.halves {
   display: grid;
-  gap: 0.85rem;
-  max-width: 34rem;
-  margin: 0 0 3rem;
-  padding: 0;
-  list-style: none;
+  flex: 1;
+  grid-template-columns: 1fr 1fr;
 }
 
-.list a {
-  color: var(--kin-white);
-  font-size: 1.05rem;
-  line-height: 1.35;
-  text-decoration: none;
-  text-transform: lowercase;
+/* One half per kettle. The transform makes the half the containing block
+   for the fixed-position falling items, so each waterfall scrolls with its
+   own half and is clipped to it. */
+.half {
+  position: relative;
+  min-height: 34rem;
+  overflow: hidden;
+  transform: translateZ(0);
 }
 
-.list a:hover {
-  color: var(--kin-light-gray);
+.streamZone {
+  position: absolute;
+  inset: 0;
 }
 
-.list a svg {
-  width: 0.8em;
-  height: 0.8em;
-  margin-left: 0.3rem;
-  vertical-align: baseline;
+.kettle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 1;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
 }
 
-.note {
-  max-width: 34rem;
+.kettleJar {
+  width: min(20vw, 17rem);
+}
+
+.kettlePitcher {
+  width: min(18vw, 15rem);
+}
+
+/* The explanatory text beside each kettle: a narrow column, tall by
+   wrapping. Each note sits on its kettle's inner side, and its waterfall
+   deflects outward, away from the note. */
+.sideNote {
+  position: absolute;
+  top: 50%;
+  z-index: 1;
+  width: 7rem;
   margin: 0;
   color: var(--kin-light-gray);
   font-size: 0.85rem;
   line-height: 1.5;
+  transform: translateY(-50%);
 }
 
-.note a {
+.half:first-child .sideNote {
+  left: calc(50% + 10rem);
+}
+
+.half:last-child .sideNote {
+  right: calc(50% + 9rem);
+}
+
+.sideNote a {
   color: var(--kin-white);
 }
 
-.note a:hover {
+.sideNote a:hover {
   color: var(--kin-light-gray);
+}
+
+.zoneStatus {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: max-content;
+  max-width: 90%;
+  margin: 0;
+  color: var(--kin-light-gray);
+  font-size: 0.9rem;
+  text-align: center;
+  transform: translate(-50%, -50%);
 }
 
 .status {
@@ -77,79 +94,94 @@
   font-size: 0.9rem;
 }
 
-/* The community waterfall: a steady column of published canvases and
-   community canvases falling down the right edge, like the canvas stream.
-   Hovering near it pauses the fall. It is a browsing surface; the lists
-   below are the same items for direct access. */
-.waterfall {
-  position: fixed;
-  top: 0;
-  right: var(--kin-page-gutter);
-  bottom: 0;
-  z-index: 30;
-  width: min(15rem, 30vw);
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.track {
+.visuallyHidden {
   position: absolute;
-  top: 0;
-  right: 0;
-  left: 0;
-  display: grid;
-  gap: 1.4rem;
-  animation: community-fall linear infinite;
-  will-change: transform;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
-.waterfall:hover .track {
-  animation-play-state: paused;
-}
-
-.waterfallItem {
-  display: block;
-  pointer-events: auto;
-  color: var(--kin-white);
-  font: 400 0.95rem/1.35 var(--kin-ui-sans);
-  text-align: right;
-  text-decoration: none;
-  text-transform: lowercase;
-}
-
-.waterfallItem:hover {
-  color: var(--kin-light-gray);
-}
-
-.waterfallKind {
-  display: block;
-  margin-bottom: 0.15rem;
-  color: var(--kin-light-gray);
-  font-size: var(--kin-caption-size);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-@keyframes community-fall {
-  from {
-    transform: translateY(-50%);
+@media (max-width: 1100px) {
+  .kettleJar {
+    width: min(28vw, 15rem);
   }
 
-  to {
-    transform: translateY(0);
+  .kettlePitcher {
+    width: min(24vw, 13rem);
+  }
+
+  /* The half is too narrow here for a note beside the kettle — a 6rem
+     column at center + 8.5rem would run past the half's edge and be cut
+     off by its overflow: hidden. Like on phones, the note sits below the
+     kettle, out of the fall path, so the stream never has to go around it. */
+  .streamZone {
+    top: 0;
+    right: 0;
+    bottom: auto;
+    left: 0;
+    height: 72%;
+  }
+
+  .sideNote {
+    top: auto;
+    bottom: 1.5rem;
+    left: 50%;
+    width: min(20rem, 86%);
+    transform: translateX(-50%);
+  }
+
+  .half:first-child .sideNote,
+  .half:last-child .sideNote {
+    left: 50%;
+    right: auto;
   }
 }
 
 @media (max-width: 700px) {
-  /* On phones the lists below are the way in; the falling column would
-     cover them. */
-  .waterfall {
-    display: none;
+  /* Stacked: one kettle and waterfall at a time. The note moves below the
+     kettle, out of the fall path, so the stream never has to go around it. */
+  .halves {
+    grid-template-columns: 1fr;
   }
-}
 
-@media (prefers-reduced-motion: reduce) {
-  .track {
-    animation: none;
+  .half {
+    min-height: 100svh;
+  }
+
+  .streamZone {
+    top: 0;
+    right: 0;
+    bottom: auto;
+    left: 0;
+    height: 72%;
+  }
+
+  /* Each kettle shifts slightly toward the side its waterfall deflects
+     away from, so a detouring item fits without touching the half's edge. */
+  .kettleJar {
+    left: 54%;
+    width: min(46vw, 13rem);
+  }
+
+  .kettlePitcher {
+    left: 46%;
+    width: min(42vw, 12rem);
+  }
+
+  .sideNote {
+    top: auto;
+    bottom: 1.5rem;
+    left: 50%;
+    width: min(20rem, 86%);
+    transform: translateX(-50%);
+  }
+
+  .half:first-child .sideNote,
+  .half:last-child .sideNote {
+    left: 50%;
+    right: auto;
   }
 }
