@@ -174,16 +174,18 @@ export default function PlaygroundExperience() {
           : false,
       );
 
-      // Package orbit: the jars fly out during the second half of chapter 2
-      // passing through the viewport, mirroring the old scroll-linked reveal.
+      // Package orbit: the jars emerge one by one during the second half of
+      // chapter 2 passing through the viewport, mirroring the old sticky
+      // timing. passThrough is 0 when the chapter's top enters the viewport
+      // and 1 when its bottom leaves it.
       const chapter2 = chapterRefs.current[1];
       if (chapter2) {
         const chapter2Rect = chapter2.getBoundingClientRect();
-        const mid = chapter2Rect.top + chapter2Rect.height / 2;
-        const through = clamp01(
-          (window.innerHeight - mid) / window.innerHeight,
+        const passThrough = clamp01(
+          (window.innerHeight - chapter2Rect.top) /
+            (window.innerHeight + chapter2Rect.height),
         );
-        setChapter2Reveal(clamp01((through - 0.5) * 2));
+        setChapter2Reveal(clamp01((passThrough - 0.5) * 2));
       }
     };
     const onScroll = () => {
@@ -202,9 +204,38 @@ export default function PlaygroundExperience() {
     };
   }, []);
 
+  useEffect(() => {
+    // Document-level settings for the homepage only: mandatory snap points
+    // so the page always settles on one chapter, and no visible scrollbar.
+    // Both are removed when this page unmounts so other routes are
+    // unaffected. Mandatory snapping fights reduced-motion users (the
+    // browser animates the snap), so it stays off when reduced motion is
+    // preferred.
+    const root = document.documentElement;
+    const previousSnapType = root.style.scrollSnapType;
+    const previousScrollbarWidth = root.style.scrollbarWidth;
+    const style = document.createElement("style");
+    style.setAttribute("data-kin-homepage", "");
+    style.textContent = "html::-webkit-scrollbar{display:none}";
+    document.head.appendChild(style);
+    if (!reducedMotion) {
+      root.style.scrollSnapType = "y mandatory";
+    }
+    root.style.scrollbarWidth = "none";
+    return () => {
+      root.style.scrollSnapType = previousSnapType;
+      root.style.scrollbarWidth = previousScrollbarWidth;
+      style.remove();
+    };
+  }, [reducedMotion]);
+
   const visiblePackageCount = reducedMotion
     ? packageRows.length
     : Math.ceil(chapter2Reveal * packageRows.length);
+
+  // The scroll hint is only for the opening: it fades out once the user
+  // starts scrolling (progress is 0 at the very top).
+  const showHint = progress < 0.005;
 
   return (
     <section className={styles.experience} ref={experienceRef}>
@@ -214,6 +245,12 @@ export default function PlaygroundExperience() {
       >
         <JarScroll progress={progress} reducedMotion={reducedMotion} />
       </div>
+
+      <p
+        className={`${styles.scrollHint} ${showHint ? "" : styles.scrollHintHidden}`}
+      >
+        scroll down to read on.
+      </p>
 
       <div className={styles.opening}>
         <div className={styles.openingTitles}>
@@ -311,6 +348,12 @@ export default function PlaygroundExperience() {
               })}
             </div>
           )}
+
+          {/* Second snap resting point for this chapter: its tail. Without
+              it, mandatory snapping would trap the lower content of a
+              chapter taller than the viewport. On a chapter that fits, this
+              lands on the same position as the chapter's start. */}
+          <div aria-hidden="true" className={styles.chapterTail} />
         </section>
       ))}
 

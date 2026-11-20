@@ -1,6 +1,8 @@
 .experience {
   position: relative;
-  overflow-x: hidden;
+  /* clip, not hidden: hidden would make this a scroll container and capture
+     the chapters as its own snap areas, breaking document-level snapping. */
+  overflow-x: clip;
   background: transparent;
   color: #f4f3ef;
   font-family: var(--kin-ui-sans);
@@ -40,6 +42,21 @@
 .vase canvas { display: block; width: 100%; height: 100%; }
 .vaseHidden { opacity: 0; visibility: hidden; }
 
+.scrollHint {
+  position: fixed;
+  z-index: 1;
+  top: calc(50% + min(19vw, 15rem) + 1rem);
+  left: 58%;
+  transform: translateX(-50%);
+  margin: 0;
+  color: var(--kin-light-gray);
+  font: 400 var(--kin-caption-size)/1.2 var(--kin-micro-mono);
+  white-space: nowrap;
+  pointer-events: none;
+  transition: opacity 450ms ease;
+}
+.scrollHintHidden { opacity: 0; visibility: hidden; }
+
 .opening {
   position: relative;
   z-index: 2;
@@ -47,6 +64,7 @@
   align-items: center;
   min-height: 100svh;
   padding: 0 max(5vw, 2rem);
+  scroll-snap-align: start;
 }
 .openingTitles {
   width: min(65vw, 62rem);
@@ -70,6 +88,20 @@
   justify-content: center;
   min-height: 100svh;
   padding: 4rem max(5vw, 2rem);
+  scroll-snap-align: start;
+}
+/* Second snap resting point for a chapter: its tail. Lets mandatory
+   snapping rest on a chapter taller than the viewport instead of trapping
+   its lower content; on a chapter that fits, this is the same position as
+   the chapter's start. */
+.chapterTail {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 0;
+  pointer-events: none;
+  scroll-snap-align: end;
 }
 .chapterPackage {
   justify-content: flex-start;
@@ -177,6 +209,9 @@
   justify-items: center;
   width: min(23vw, 19rem);
   transform: translate(0, var(--orbit-radius)) scale(0.2);
+  /* Stagger so the jars fly out one by one even when the reveal jumps in a
+     single scroll frame (fast flick). */
+  transition-delay: 140ms;
 }
 .orbitItem3 {
   top: calc(var(--orbit-center-y) + var(--orbit-radius) - var(--orbit-jar-size) / 2);
@@ -185,12 +220,14 @@
   justify-items: center;
   width: min(25vw, 21rem);
   transform: translate(0, calc(0px - var(--orbit-radius))) scale(0.2);
+  transition-delay: 280ms;
 }
 .orbitItem4 {
   top: calc(var(--orbit-center-y) - var(--orbit-jar-size) / 2);
   left: calc(50% + var(--orbit-radius) - var(--orbit-jar-size) / 2);
   width: min(28vw, 24rem);
   transform: translate(calc(0px - var(--orbit-radius)), 0) scale(0.2);
+  transition-delay: 420ms;
 }
 .orbitItemVisible {
   opacity: 1;
@@ -247,6 +284,10 @@
 }
 .orbitItem2 .orbitCopy,
 .orbitItem3 .orbitCopy { width: 100%; }
+/* Keep each label fading in with its own jar. */
+.orbitItem2 .orbitCopy { transition-delay: 400ms, 400ms; }
+.orbitItem3 .orbitCopy { transition-delay: 540ms, 540ms; }
+.orbitItem4 .orbitCopy { transition-delay: 680ms, 680ms; }
 .visible { opacity: 1; pointer-events: auto; visibility: visible; }
 .hidden { opacity: 0; pointer-events: none; visibility: hidden; }
 .sideNav {
@@ -269,6 +310,7 @@
   align-items: flex-end;
   min-height: 100svh;
   padding: 0 8% 18vh;
+  scroll-snap-align: start;
 }
 .ending {
   position: relative;
@@ -299,6 +341,7 @@
 
 @media (max-width: 700px) {
   .vase { top: 32%; left: 50%; width: 88vw; }
+  .scrollHint { top: calc(32% + 44vw + 0.9rem); left: 50%; }
   .opening { padding: 0 7vw; }
   .openingTitles { width: 86vw; }
   .chapter { padding: 4rem 7vw; }
@@ -352,6 +395,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .experience *, .experience *::before, .experience *::after { animation: none !important; scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
+  .experience *, .experience *::before, .experience *::after { animation: none !important; scroll-behavior: auto !important; transition-duration: 0.01ms !important; transition-delay: 0ms !important; }
   .story { transition: none; }
 }
