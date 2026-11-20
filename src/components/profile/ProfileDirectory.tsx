@@ -8,6 +8,8 @@ import styles from "./profile-content.module.css";
 // The canvas directory: a plain vertical list of canvas names on the left,
 // and a wide rectangular page-preview thumbnail on the right (her sketches)
 // — the hovered canvas rendered small, like a screenshot of its page.
+// Hovering (or focusing) a name switches the preview; clicking it opens
+// the canvas board at /canvas.
 // Kept as its own component so it can be exercised with test data without
 // a Supabase session.
 export default function ProfileDirectory({
@@ -35,24 +37,23 @@ export default function ProfileDirectory({
       <ul className={styles.directory}>
         {directory.map((entry) => (
           <li key={entry.id}>
-            <button
+            <Link
               aria-current={activeEntry?.id === entry.id}
               className={
                 activeEntry?.id === entry.id
                   ? `${styles.directoryItem} ${styles.directoryItemActive}`.trim()
                   : styles.directoryItem
               }
-              onClick={() => onSelect(entry.id)}
+              href="/canvas"
               onFocus={() => onSelect(entry.id)}
               onMouseEnter={() => onSelect(entry.id)}
-              type="button"
             >
               {entry.label}
               <span className={styles.directoryCount}>
                 {entry.entryCount} {entry.entryCount === 1 ? "note" : "notes"}
                 {entry.gift ? " · gift" : ""}
               </span>
-            </button>
+            </Link>
           </li>
         ))}
       </ul>
