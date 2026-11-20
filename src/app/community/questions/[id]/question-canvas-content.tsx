@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import AlphabetName from "@/components/canvas/AlphabetName";
 import styles from "./page.module.css";
 
 type Answer = {
@@ -63,7 +64,7 @@ export default function QuestionCanvasContent({ id }: { id: string }) {
         back to the community
       </Link>
       <p className={styles.eyebrow}>Community canvas</p>
-      <h1 className={styles.question}>{question}</h1>
+      <AlphabetName as="h1" className={styles.question} name={question} />
       {answers.length === 0 ? (
         <p className={styles.status}>No answers yet — be the first, from your canvas.</p>
       ) : (
