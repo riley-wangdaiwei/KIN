@@ -823,24 +823,30 @@ export default function CanvasWorkspace() {
 
       {userId && !loading && (
         <div className={styles.waterfallLayer}>
-          {streamItems.map((item) => (
-            <button
-              className={`${styles.fallingWord} ${item.kind === "image" ? styles.fallingImage : ""} ${item.kind === "question" ? styles.fallingQuestion : ""}`.trim()}
-              data-stream-id={item.id}
-              key={item.id}
-              onPointerDown={(event) => startDraggingItem(item, event)}
-              style={{ left: item.x, top: item.y, pointerEvents: draggingStreamId === item.id ? "none" : "auto" }}
-              aria-label={item.kind === "word" ? `Add ${item.label}` : item.kind === "question" ? `Answer this week's question: ${item.label}` : `Add ${item.stickerKey} image`}
-              type="button"
-            >
-              {item.kind === "image" ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img alt="" src={item.imageSrc} />
-              ) : (
-                item.label
-              )}
-            </button>
-          ))}
+          {streamItems.map((item) => {
+            // Keep the waterfall clear of the fixed header and the fixed site
+            // footer: items are still tracked by the engine, just not drawn
+            // while they pass behind the chrome.
+            if (item.y < 76 || item.y > window.innerHeight - 56) return null;
+            return (
+              <button
+                className={`${styles.fallingWord} ${item.kind === "image" ? styles.fallingImage : ""} ${item.kind === "question" ? styles.fallingQuestion : ""}`.trim()}
+                data-stream-id={item.id}
+                key={item.id}
+                onPointerDown={(event) => startDraggingItem(item, event)}
+                style={{ left: item.x, top: item.y, pointerEvents: draggingStreamId === item.id ? "none" : "auto" }}
+                aria-label={item.kind === "word" ? `Add ${item.label}` : item.kind === "question" ? `Answer this week's question: ${item.label}` : `Add ${item.stickerKey} image`}
+                type="button"
+              >
+                {item.kind === "image" ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img alt="" src={item.imageSrc} />
+                ) : (
+                  item.label
+                )}
+              </button>
+            );
+          })}
         </div>
       )}
 

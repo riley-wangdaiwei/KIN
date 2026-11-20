@@ -45,17 +45,20 @@
   object-fit: contain;
 }
 
-/* The weekly question rides the waterfall as a wrapped line, not a single
-   word, so it stays readable in the right-hand column. */
+/* The weekly question rides the waterfall on a single row like every other
+   item, so it can't spill over its neighbours. The full question stays in
+   the answer prompt when you drag it in. */
 .fallingQuestion {
-  height: auto;
-  max-width: min(15rem, 62vw);
-  font-size: clamp(0.85rem, 1.1vw, 1rem);
-  line-height: 1.35;
-  text-align: right;
+  height: 28px;
+  max-width: min(12rem, 58vw);
+  overflow: hidden;
+  font-size: clamp(0.78rem, 1.05vw, 0.92rem);
+  line-height: 28px;
+  text-align: left;
   text-transform: none;
   letter-spacing: 0;
-  white-space: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .dropPrompt {
@@ -335,10 +338,13 @@
   white-space: nowrap;
 }
 
+/* Lifted above the fixed site footer so "Publish your canvas" never sits on
+   the "re.KIN community" link: 4rem clears the footer even when its links
+   wrap to three rows on narrow screens. */
 .sendFooter {
   position: fixed;
   right: var(--kin-page-gutter);
-  bottom: 1.25rem;
+  bottom: calc(1.15rem + 4rem);
   z-index: 10;
   display: grid;
   justify-items: end;
