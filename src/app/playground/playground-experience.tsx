@@ -139,6 +139,7 @@ function clamp01(value: number) {
 export default function PlaygroundExperience() {
   const experienceRef = useRef<HTMLElement>(null);
   const chapterRefs = useRef<(HTMLElement | null)[]>([]);
+  const orbitRef = useRef<HTMLDivElement>(null);
   const endingRef = useRef<HTMLDivElement>(null);
   const [progress, setProgress] = useState(0);
   const [activeChapter, setActiveChapter] = useState(-1);
@@ -196,18 +197,17 @@ export default function PlaygroundExperience() {
           : false,
       );
 
-      // Package orbit: the jars emerge one by one as chapter 2 slides in and
-      // settles on screen, so all four are out while chapter 2 is the
-      // current page — not only as it leaves. passThrough is 0 when the
-      // chapter's top enters the viewport and ~0.5 when it snaps into place.
-      const chapter2 = chapterRefs.current[1];
-      if (chapter2) {
-        const chapter2Rect = chapter2.getBoundingClientRect();
-        const passThrough = clamp01(
-          (window.innerHeight - chapter2Rect.top) /
-            (window.innerHeight + chapter2Rect.height),
-        );
-        setChapter2Reveal(clamp01(passThrough * 2));
+      // Package orbit: the jars emerge one by one as the orbit screen
+      // slides into place below the chapter text, so all four are out once
+      // the chapter's tail snaps the orbit screen into the viewport. The
+      // reveal starts when the orbit screen's top crosses 45% of the
+      // viewport and completes when it reaches the top — 0 while the text
+      // screen is the resting point, so no copy shows beside the text.
+      const orbit = orbitRef.current;
+      if (orbit) {
+        const orbitTop = orbit.getBoundingClientRect().top;
+        const span = window.innerHeight * 0.45;
+        setChapter2Reveal(clamp01((span - orbitTop) / span));
       }
     };
     const onScroll = () => {
@@ -344,10 +344,12 @@ export default function PlaygroundExperience() {
           </div>
 
           {chapterIndex === 1 && packageStep?.circles && (
-            <div
-              className={styles.packageOrbit}
-              aria-label="What comes with the gift"
-            >
+            <>
+              <div
+                className={styles.packageOrbit}
+                ref={orbitRef}
+                aria-label="What comes with the gift"
+              >
               {packageRows.map((row, index) => {
                 const isVisible = index < visiblePackageCount;
                 return (
@@ -370,7 +372,12 @@ export default function PlaygroundExperience() {
                   </article>
                 );
               })}
-            </div>
+              </div>
+              {/* In-flow spacer: the orbit is absolute, so this is what makes
+                  the chapter tall enough to hold both the text screen and
+                  the orbit screen below it. */}
+              <div aria-hidden="true" className={styles.orbitSpacer} />
+            </>
           )}
 
           {/* Second snap resting point for this chapter: its tail. Without

@@ -183,13 +183,31 @@
 .packageItem dd span { display: block; }
 .packageItem dd span + span { margin-top: 0.2rem; }
 .packageOrbit {
+  /* The orbit lives in its own screen below the chapter text: the chapter
+     is one text screen plus this 100svh orbit screen, so the four copies
+     never share space with the body text. Bottom-anchored, so when the
+     chapter's tail snaps into place the orbit screen fills the viewport
+     and the orbit center lands on the fixed vase (58% across, viewport
+     center). The spacer div below gives the chapter its height. */
   position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
   z-index: 3;
-  inset: 0;
-  --orbit-radius: min(12.5vw, 20vh);
-  --orbit-center-y: 60%;
+  height: 100svh;
+  --orbit-center-x: 58%;
+  --orbit-center-y: 50%;
+  /* Radius sized so the top copy clears the vase's top tip while the
+     right copy still fits inside the viewport at 1280px. */
+  --orbit-radius: min(19vw, 26.5vh);
   --orbit-jar-size: clamp(3.6rem, 5.6vw, 5.2rem);
   pointer-events: none;
+}
+/* In-flow spacer: the orbit is absolute, so this is what makes the chapter
+   tall enough to hold both the text screen and the orbit screen. */
+.orbitSpacer {
+  flex: none;
+  height: 100svh;
 }
 .orbitItem {
   position: absolute;
@@ -204,7 +222,7 @@
 }
 .orbitItem2 {
   top: calc(var(--orbit-center-y) - var(--orbit-radius) - var(--orbit-jar-size) / 2);
-  left: calc(50% - min(11.5vw, 9.5rem));
+  left: calc(var(--orbit-center-x) - min(11.5vw, 9.5rem));
   grid-template-columns: minmax(0, 1fr);
   justify-items: center;
   width: min(23vw, 19rem);
@@ -215,7 +233,7 @@
 }
 .orbitItem3 {
   top: calc(var(--orbit-center-y) + var(--orbit-radius) - var(--orbit-jar-size) / 2);
-  left: calc(50% - min(12.5vw, 10.5rem));
+  left: calc(var(--orbit-center-x) - min(12.5vw, 10.5rem));
   grid-template-columns: minmax(0, 1fr);
   justify-items: center;
   width: min(25vw, 21rem);
@@ -224,8 +242,8 @@
 }
 .orbitItem4 {
   top: calc(var(--orbit-center-y) - var(--orbit-jar-size) / 2);
-  left: calc(50% + var(--orbit-radius) - var(--orbit-jar-size) / 2);
-  width: min(28vw, 24rem);
+  left: calc(var(--orbit-center-x) + var(--orbit-radius) - var(--orbit-jar-size) / 2);
+  width: min(25vw, 21rem);
   transform: translate(calc(0px - var(--orbit-radius)), 0) scale(0.2);
   transition-delay: 420ms;
 }
@@ -236,7 +254,7 @@
 .orbitItem1 {
   top: calc(var(--orbit-center-y) - var(--orbit-jar-size) / 2);
   left: auto;
-  right: calc(50% + var(--orbit-radius) - var(--orbit-jar-size) / 2);
+  right: calc(100% - var(--orbit-center-x) + var(--orbit-radius) - var(--orbit-jar-size) / 2);
   grid-template-columns: minmax(0, 1fr) var(--orbit-jar-size);
   width: min(34vw, 29rem);
 }
@@ -360,29 +378,32 @@
   }
   .packageOrbit {
     --orbit-radius: min(21vw, 14vh);
-    --orbit-center-y: 60%;
+    --orbit-center-x: 50%;
+    /* Low enough that the top copy clears the bottom of the (very tall,
+       top-anchored) mobile vase instead of sitting on it. */
+    --orbit-center-y: 68%;
     --orbit-jar-size: 2.72rem;
   }
   .orbitItem1 {
-    right: calc(50% + var(--orbit-radius) - var(--orbit-jar-size) / 2);
+    right: calc(100% - var(--orbit-center-x) + var(--orbit-radius) - var(--orbit-jar-size) / 2);
     width: 32vw;
     grid-template-columns: minmax(0, 1fr) var(--orbit-jar-size);
   }
   .orbitItem2 {
     top: calc(var(--orbit-center-y) - var(--orbit-radius) - var(--orbit-jar-size) / 2);
-    left: calc(50% - 18vw);
+    left: calc(var(--orbit-center-x) - 18vw);
     grid-template-columns: minmax(0, 1fr);
     width: 36vw;
   }
   .orbitItem3 {
     top: calc(var(--orbit-center-y) + var(--orbit-radius) - var(--orbit-jar-size) / 2);
-    left: calc(50% - 18vw);
+    left: calc(var(--orbit-center-x) - 18vw);
     grid-template-columns: minmax(0, 1fr);
     width: 36vw;
   }
   .orbitItem4 {
     top: calc(var(--orbit-center-y) - var(--orbit-radius) - var(--orbit-jar-size) / 2);
-    left: calc(50% + var(--orbit-radius) - var(--orbit-jar-size) / 2);
+    left: calc(var(--orbit-center-x) + var(--orbit-radius) - var(--orbit-jar-size) / 2);
     width: 32vw;
   }
   .orbitCopy h3 { font-size: 0.72rem; }
