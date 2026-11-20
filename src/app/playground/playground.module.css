@@ -1,20 +1,9 @@
 .experience {
   position: relative;
-  height: 640vh;
+  overflow-x: hidden;
   background: transparent;
   color: #f4f3ef;
   font-family: var(--kin-ui-sans);
-}
-
-.sticky {
-  position: sticky;
-  top: 0;
-  width: 100%;
-  height: 100svh;
-  min-height: 34rem;
-  overflow: hidden;
-  background: transparent;
-  isolation: isolate;
 }
 
 .sideNav a {
@@ -38,27 +27,59 @@
 .sideNav a:focus-visible, .ending a:focus-visible { outline: 1px solid currentColor; outline-offset: 5px; }
 
 .vase {
-  position: absolute;
+  position: fixed;
   z-index: 1;
   top: 50%;
   left: 58%;
   width: min(38vw, 30rem);
   aspect-ratio: 1 / 1;
   transform: translate(-50%, -50%);
-  transition: width 700ms ease, top 700ms ease, left 700ms ease, opacity 450ms ease;
+  transition: opacity 450ms ease;
+  pointer-events: none;
 }
 .vase canvas { display: block; width: 100%; height: 100%; }
-.vaseChapter2 { left: 50%; width: min(34vw, 27rem); }
-.vaseEnding { top: 75%; left: 78%; width: min(22vw, 18rem); }
+.vaseHidden { opacity: 0; visibility: hidden; }
+
+.opening {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  min-height: 100svh;
+  padding: 0 max(5vw, 2rem);
+}
+.openingTitles {
+  width: min(65vw, 62rem);
+}
+.openingTitles h1 {
+  display: grid;
+  gap: 0.06em;
+  margin: 0;
+}
+.openingHeadlineImage {
+  display: block;
+  width: min(246%, 90vw);
+  height: auto;
+}
+
+.chapter {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  min-height: 100svh;
+  padding: 4rem max(5vw, 2rem);
+}
+.chapterPackage {
+  justify-content: flex-start;
+  padding-top: 5vh;
+}
 
 .story {
-  position: absolute;
+  position: relative;
   z-index: 2;
-  top: 50%;
-  left: max(5vw, 2rem);
   width: min(65vw, 62rem);
-  transform: translateY(-50%);
-  transition: opacity 450ms ease;
 }
 .story h2 {
   margin: 0;
@@ -68,19 +89,9 @@
   width: 100%;
   height: auto;
 }
-.openingHeadlineImage {
-  display: block;
-  width: min(246%, 90vw);
-  height: auto;
-}
 .story h2 .headlineChapter1 { width: min(203%, 90vw); }
 .story h2 .headlineChapter2 { width: min(169%, 90vw); }
 .story h2 .headlineChapter3 { width: min(201%, 90vw); }
-.storyChapter2 {
-  top: 5%;
-  width: min(65vw, 62rem);
-  transform: none;
-}
 .chapterSubtitle {
   max-width: 44ch;
   margin: 0.6rem 0 0;
@@ -88,20 +99,6 @@
   font-family: var(--kin-reading-serif);
   font-size: clamp(0.78rem, 1vw, 0.9rem);
   line-height: 1.25;
-}
-.openingTitles h1 {
-  display: grid;
-  gap: 0.06em;
-  margin: 0;
-}
-.openingTitles {
-  position: absolute;
-  z-index: 2;
-  top: 50%;
-  left: max(5vw, 2rem);
-  width: min(65vw, 62rem);
-  transform: translateY(-50%);
-  transition: opacity 450ms ease;
 }
 .storyContent {
   width: min(100%, 53rem);
@@ -253,7 +250,7 @@
 .visible { opacity: 1; pointer-events: auto; visibility: visible; }
 .hidden { opacity: 0; pointer-events: none; visibility: hidden; }
 .sideNav {
-  position: absolute;
+  position: fixed;
   z-index: 4;
   top: 54%;
   right: 2rem;
@@ -265,12 +262,17 @@
   font-weight: 500;
 }
 .sideNav > div { justify-self: end; font-size: 1.05rem; }
-.ending {
-  position: absolute;
+.endingSection {
+  position: relative;
   z-index: 3;
-  bottom: 18%;
-  left: 8%;
-  transition: opacity 450ms ease;
+  display: flex;
+  align-items: flex-end;
+  min-height: 100svh;
+  padding: 0 8% 18vh;
+}
+.ending {
+  position: relative;
+  z-index: 3;
 }
 .ending a {
   display: flex;
@@ -296,14 +298,13 @@
 @keyframes appear { from { opacity: 0; transform: translateY(0.5rem); } to { opacity: 1; transform: translateY(0); } }
 
 @media (max-width: 700px) {
-  .sticky { min-height: 38rem; }
   .vase { top: 32%; left: 50%; width: 88vw; }
-  .vaseChapter2 { top: 56%; left: 50%; width: 42vw; }
-  .vaseEnding { top: 73%; left: 70%; width: 66vw; }
-  .story { top: 54%; left: 7vw; width: 86vw; transform: translateY(-38%); }
-  .storyChapter2 { top: 5%; left: 7vw; width: 86vw; transform: none; }
+  .opening { padding: 0 7vw; }
+  .openingTitles { width: 86vw; }
+  .chapter { padding: 4rem 7vw; }
+  .chapterPackage { padding-top: 5vh; }
+  .story { width: 86vw; }
   .chapterSubtitle { max-width: 40ch; font-size: 0.72rem; }
-  .openingTitles { top: 54%; left: 7vw; width: 86vw; transform: translateY(-38%); }
   .storyStep > p { font-size: 0.92rem; }
   .storyStep > .introduction { font-size: 1.1rem; }
   .packageItem { grid-template-columns: 6.5rem minmax(0, 1fr); gap: 0.4rem 0.65rem; }
@@ -337,7 +338,7 @@
     width: 36vw;
   }
   .orbitItem4 {
-    top: calc(var(--orbit-center-y) - var(--orbit-jar-size) / 2);
+    top: calc(var(--orbit-center-y) - var(--orbit-radius) - var(--orbit-jar-size) / 2);
     left: calc(50% + var(--orbit-radius) - var(--orbit-jar-size) / 2);
     width: 32vw;
   }
@@ -345,7 +346,8 @@
   .orbitCopy p { font-size: 0.62rem; line-height: 1.1; }
   .sideNav { top: auto; right: 0.8rem; bottom: 5.2rem; gap: 0.55rem; transform: none; }
   .sideNav a { font-size: 0.95rem; }
-  .ending { bottom: 17%; left: 7%; max-width: 70vw; }
+  .endingSection { padding: 0 7% 17vh; }
+  .ending { max-width: 70vw; }
   .ending a { gap: 0.6rem; font-size: 1.5rem; }
 }
 

@@ -106,9 +106,23 @@ const packageImages = [
   "/jars/jar_processnote.png",
 ];
 
+// The chapter-2 package step drives the orbit of jars around the fixed vase.
+const packageStep = chapters[1].steps[1];
+const packageRows = packageStep.rows ?? [];
+
+function clamp01(value: number) {
+  return Math.min(1, Math.max(0, value));
+}
+
 export default function PlaygroundExperience() {
   const experienceRef = useRef<HTMLElement>(null);
+  const chapterRefs = useRef<(HTMLElement | null)[]>([]);
+  const endingRef = useRef<HTMLDivElement>(null);
   const [progress, setProgress] = useState(0);
+  const [activeChapter, setActiveChapter] = useState(-1);
+  const [showEnding, setShowEnding] = useState(false);
+  const [vaseVisible, setVaseVisible] = useState(true);
+  const [chapter2Reveal, setChapter2Reveal] = useState(0);
   const [reducedMotion, setReducedMotion] = useState(false);
   const [returningVisitor, setReturningVisitor] = useState(false);
 
@@ -131,10 +145,46 @@ export default function PlaygroundExperience() {
       ticking = false;
       const node = experienceRef.current;
       if (!node) return;
+
+      // Jar progress: 0 while the section is still entering, 1 once it has
+      // been scrolled all the way through.
       const rect = node.getBoundingClientRect();
       const distance = Math.max(1, node.offsetHeight - window.innerHeight);
-      const next = Math.min(1, Math.max(0, -rect.top / distance));
-      setProgress(next);
+      setProgress(clamp01(-rect.top / distance));
+
+      // The fixed vase only shows while the experience section is on screen.
+      setVaseVisible(rect.bottom > 0 && rect.top < window.innerHeight);
+
+      // Scroll-spy: the chapter (or ending) the viewport center is inside.
+      const center = window.innerHeight / 2;
+      let nextChapter = -1;
+      chapterRefs.current.forEach((section, index) => {
+        if (!section) return;
+        const sectionRect = section.getBoundingClientRect();
+        if (sectionRect.top <= center && center <= sectionRect.bottom) {
+          nextChapter = index;
+        }
+      });
+      setActiveChapter(nextChapter);
+
+      const endingRect = endingRef.current?.getBoundingClientRect();
+      setShowEnding(
+        endingRect
+          ? endingRect.top <= center && center <= endingRect.bottom
+          : false,
+      );
+
+      // Package orbit: the jars fly out during the second half of chapter 2
+      // passing through the viewport, mirroring the old scroll-linked reveal.
+      const chapter2 = chapterRefs.current[1];
+      if (chapter2) {
+        const chapter2Rect = chapter2.getBoundingClientRect();
+        const mid = chapter2Rect.top + chapter2Rect.height / 2;
+        const through = clamp01(
+          (window.innerHeight - mid) / window.innerHeight,
+        );
+        setChapter2Reveal(clamp01((through - 0.5) * 2));
+      }
     };
     const onScroll = () => {
       if (!ticking) {
@@ -152,170 +202,140 @@ export default function PlaygroundExperience() {
     };
   }, []);
 
-  const isOpening = progress < 0.1;
-  const activeChapter =
-    progress < 0.1
-      ? -1
-      : progress < 0.35
-        ? 0
-        : progress < 0.6
-          ? 1
-          : progress < 0.85
-            ? 2
-            : -1;
-  const showEnding = progress >= 0.85;
-  const sceneText = activeChapter >= 0 ? chapters[activeChapter] : null;
-  const chapterProgress =
-    sceneText === null
-      ? 0
-      : (progress - (0.1 + activeChapter * 0.25)) / 0.25;
-  const stepIndex = reducedMotion
-    ? sceneText?.steps.length ?? 0
-    : Math.min(1, Math.floor(Math.max(0, chapterProgress) * 2));
-  const visibleSteps = sceneText
-    ? reducedMotion
-      ? sceneText.steps
-      : [sceneText.steps[stepIndex]]
-    : [];
-  const packageStep = sceneText?.steps[1];
-  const packageProgress = Math.min(1, Math.max(0, (chapterProgress - 0.5) * 2));
   const visiblePackageCount = reducedMotion
-    ? packageStep?.rows?.length ?? 0
-    : Math.ceil(packageProgress * (packageStep?.rows?.length ?? 0));
+    ? packageRows.length
+    : Math.ceil(chapter2Reveal * packageRows.length);
 
   return (
     <section className={styles.experience} ref={experienceRef}>
-      <div className={styles.sticky}>
-        <div
-          className={`${styles.vase} ${isOpening || activeChapter === 0 ? styles.vaseIntro : ""} ${activeChapter === 1 ? styles.vaseChapter2 : ""} ${showEnding ? styles.vaseEnding : ""}`}
-          aria-hidden="true"
-        >
-          <JarScroll progress={progress} reducedMotion={reducedMotion} />
+      <div
+        className={`${styles.vase} ${vaseVisible ? "" : styles.vaseHidden}`}
+        aria-hidden="true"
+      >
+        <JarScroll progress={progress} reducedMotion={reducedMotion} />
+      </div>
+
+      <div className={styles.opening}>
+        <div className={styles.openingTitles}>
+          <h1>
+            <Image
+              className={styles.openingHeadlineImage}
+              src={openingHeadline.src}
+              alt={openingHeadline.alt}
+              width={openingHeadline.width}
+              height={openingHeadline.height}
+              priority
+            />
+          </h1>
         </div>
+      </div>
 
-        {isOpening ? (
-          <div className={`${styles.openingTitles} ${styles.visible}`}>
-            <h1>
-              <Image
-                className={styles.openingHeadlineImage}
-                src={openingHeadline.src}
-                alt={openingHeadline.alt}
-                width={openingHeadline.width}
-                height={openingHeadline.height}
-                priority
-              />
-            </h1>
-          </div>
-        ) : (
-          <div
-            className={`${styles.story} ${activeChapter === 1 ? styles.storyChapter2 : ""} ${sceneText ? styles.visible : styles.hidden}`}
-            aria-live="polite"
-            aria-atomic="true"
-          >
-            {sceneText && (
-              <>
-                <h2>
-                  <Image
-                    className={`${styles.headlineImage} ${styles[`headlineChapter${activeChapter + 1}`]}`}
-                    src={sentenceImages[activeChapter].src}
-                    alt={sceneText.title}
-                    width={sentenceImages[activeChapter].width}
-                    height={sentenceImages[activeChapter].height}
-                  />
-                </h2>
-                {sceneText.subtitle && (
-                  <p className={styles.chapterSubtitle}>{sceneText.subtitle}</p>
-                )}
-                <div className={styles.storyContent}>
-                  {visibleSteps.map((step, index) => (
-                    <div
-                      className={styles.storyStep}
-                      key={`${activeChapter}-${stepIndex}-${index}`}
-                    >
-                      {step.introduction && (
-                        <p className={styles.introduction}>{step.introduction}</p>
-                      )}
-                      {step.rows && !step.circles && (
-                        <dl className={styles.packageContents}>
-                          {step.rows.map((row) => (
-                            <div className={styles.packageItem} key={row.label}>
-                              <dt>{row.label}</dt>
-                              <dd>
-                                {Array.isArray(row.description)
-                                  ? row.description.map((line) => (
-                                      <span key={line}>{line}</span>
-                                    ))
-                                  : row.description}
-                              </dd>
-                            </div>
-                          ))}
-                        </dl>
-                      )}
-                      {step.body?.map((paragraph) => (
-                        <p key={paragraph}>{paragraph}</p>
-                      ))}
-                      {step.conclusion && <p>{step.conclusion}</p>}
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
-        )}
-
-        {activeChapter === 1 && packageStep?.circles && (
-          <div
-            className={styles.packageOrbit}
-            aria-label="What comes with the gift"
-          >
-            {packageStep.rows?.map((row, index) => {
-              const isVisible = index < visiblePackageCount;
-              return (
-                <article
-                  className={`${styles.orbitItem} ${styles[`orbitItem${index + 1}`]} ${isVisible ? styles.orbitItemVisible : ""}`}
-                  key={row.label}
-                  aria-hidden={!isVisible}
-                >
-                  <Image
-                    className={styles.orbitJar}
-                    src={packageImages[index]}
-                    alt=""
-                    width={128}
-                    height={128}
-                  />
-                  <div className={styles.orbitCopy}>
-                    <h3>{row.label}</h3>
-                    <p>{row.description}</p>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-        )}
-
-        <nav
-          className={`${styles.sideNav} ${activeChapter >= 1 || showEnding ? styles.visible : styles.hidden}`}
-          aria-label="Explore re.KIN"
+      {chapters.map((chapter, chapterIndex) => (
+        <section
+          className={`${styles.chapter} ${chapterIndex === 1 ? styles.chapterPackage : ""}`}
+          key={chapter.title}
+          ref={(element) => {
+            chapterRefs.current[chapterIndex] = element;
+          }}
         >
+          <div className={styles.story}>
+            <h2>
+              <Image
+                className={`${styles.headlineImage} ${styles[`headlineChapter${chapterIndex + 1}`]}`}
+                src={sentenceImages[chapterIndex].src}
+                alt={chapter.title}
+                width={sentenceImages[chapterIndex].width}
+                height={sentenceImages[chapterIndex].height}
+              />
+            </h2>
+            {chapter.subtitle && (
+              <p className={styles.chapterSubtitle}>{chapter.subtitle}</p>
+            )}
+            <div className={styles.storyContent}>
+              {chapter.steps.map((step, stepIndex) => (
+                <div className={styles.storyStep} key={stepIndex}>
+                  {step.introduction && (
+                    <p className={styles.introduction}>{step.introduction}</p>
+                  )}
+                  {step.rows && !step.circles && (
+                    <dl className={styles.packageContents}>
+                      {step.rows.map((row) => (
+                        <div className={styles.packageItem} key={row.label}>
+                          <dt>{row.label}</dt>
+                          <dd>
+                            {Array.isArray(row.description)
+                              ? row.description.map((line) => (
+                                  <span key={line}>{line}</span>
+                                ))
+                              : row.description}
+                          </dd>
+                        </div>
+                      ))}
+                    </dl>
+                  )}
+                  {step.body?.map((paragraph) => (
+                    <p key={paragraph}>{paragraph}</p>
+                  ))}
+                  {step.conclusion && <p>{step.conclusion}</p>}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {chapterIndex === 1 && packageStep.circles && (
+            <div
+              className={styles.packageOrbit}
+              aria-label="What comes with the gift"
+            >
+              {packageRows.map((row, index) => {
+                const isVisible = index < visiblePackageCount;
+                return (
+                  <article
+                    className={`${styles.orbitItem} ${styles[`orbitItem${index + 1}`]} ${isVisible ? styles.orbitItemVisible : ""}`}
+                    key={row.label}
+                    aria-hidden={!isVisible}
+                  >
+                    <Image
+                      className={styles.orbitJar}
+                      src={packageImages[index]}
+                      alt=""
+                      width={128}
+                      height={128}
+                    />
+                    <div className={styles.orbitCopy}>
+                      <h3>{row.label}</h3>
+                      <p>{row.description}</p>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          )}
+        </section>
+      ))}
+
+      <nav
+        className={`${styles.sideNav} ${activeChapter >= 1 || showEnding ? styles.visible : styles.hidden}`}
+        aria-label="Explore re.KIN"
+      >
+        <HoverRingMenu
+          href="/artists"
+          items={artistPartnerNames}
+          label="artists and partners"
+          menuSide="left"
+        />
+        {(returningVisitor || activeChapter >= 2 || showEnding) && (
           <HoverRingMenu
-            href="/artists"
-            items={artistPartnerNames}
-            label="artists and partners"
+            href="/canvas"
+            items={identityExamples}
+            label="A Gifting Identity"
             menuSide="left"
           />
-          {(returningVisitor || activeChapter >= 2 || showEnding) && (
-            <HoverRingMenu
-              href="/canvas"
-              items={identityExamples}
-              label="A Gifting Identity"
-              menuSide="left"
-            />
-          )}
-        </nav>
+        )}
+      </nav>
 
-        <div
-          className={`${styles.ending} ${showEnding ? styles.visible : styles.hidden}`}
-        >
+      <div className={styles.endingSection} ref={endingRef}>
+        <div className={styles.ending}>
           <Link href="/my-gifting-identity">
             <Image
               src="/rekin-tell-us-white.png"
