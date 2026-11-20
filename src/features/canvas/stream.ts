@@ -18,6 +18,34 @@ const stickerImageSources: Record<string, string> = {
   foto: "/stickers/foto.png",
 };
 
+// One row of the stream: the cycle expanded so the weekly question rides
+// as one word per row — dragging any one word answers the whole question
+// (questionLabel keeps the full question for the row's accessible name).
+export type StreamRowTemplate = {
+  kind: "word" | "image" | "question";
+  label?: string;
+  imageSrc?: string;
+  stickerKey?: string;
+  questionId?: string;
+  questionLabel?: string;
+};
+
+export function buildStreamRows(question: CommunityQuestion | null = null): StreamRowTemplate[] {
+  return buildStreamCycle(question).flatMap((item) =>
+    item.kind === "question"
+      ? (item.label ?? "")
+          .split(/\s+/)
+          .filter(Boolean)
+          .map((word) => ({
+            kind: "question" as const,
+            label: word,
+            questionId: item.questionId,
+            questionLabel: item.label,
+          }))
+      : [item],
+  );
+}
+
 // The stream cycle: the same words, provided sticker images and (once per
 // cycle) the weekly community question that the stream has always run.
 export function buildStreamCycle(question: CommunityQuestion | null = null): StreamCycleItem[] {

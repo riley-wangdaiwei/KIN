@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode, type Ref } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 
 // React wrapper for the vendored TextFlow engine (public/textflow.js).
 // Renders a <section data-flow> and creates one TextFlow instance for it
@@ -9,21 +9,9 @@ import { useEffect, useRef, type CSSProperties, type PointerEvent as ReactPointe
 // [data-flow-source] text and the [data-flow-obstacle] elements — are
 // plain React markup; TextFlow only appends its word layer to the section.
 
-export type TextFlowPlacement = {
-  k: number;
-  x: number;
-  y: number;
-  row: number;
-  w: number;
-};
-
-export type TextFlowInstance = {
+type TextFlowInstance = {
   layout: () => void;
   destroy: () => void;
-  fall: () => void;
-  // Where TextFlow put each word, index-aligned with nodes.
-  placements: TextFlowPlacement[];
-  nodes: HTMLElement[];
 };
 
 type TextFlowConstructor = new (root: HTMLElement) => TextFlowInstance;
@@ -62,33 +50,19 @@ type TextFlowSectionProps = {
   ariaLabel?: string;
   children: ReactNode;
   className?: string;
-  // Turn off TextFlow's one-shot fall-in (callers that drive the motion
-  // themselves, like the looping canvas stream). Default true.
-  fall?: boolean;
-  // Called with the instance when it is created, and with null when it is
-  // destroyed, so callers can drive layout/placements themselves.
-  onInstance?: (instance: TextFlowInstance | null) => void;
-  onPointerDown?: (event: ReactPointerEvent<HTMLElement>) => void;
-  ref?: Ref<HTMLElement>;
   // Re-create the TextFlow instance when the source content changes.
   refreshKey?: string;
   separator?: string;
   shape?: "fill" | "waterfall";
-  style?: CSSProperties;
 };
 
 export default function TextFlowSection({
   ariaLabel,
   children,
   className,
-  fall = true,
-  onInstance,
-  onPointerDown,
-  ref,
   refreshKey,
   separator,
   shape = "fill",
-  style,
 }: TextFlowSectionProps) {
   const sectionRef = useRef<HTMLElement | null>(null);
 
@@ -107,10 +81,7 @@ export default function TextFlowSection({
         instance =
           section._textFlow ??
           (window.TextFlow ? new window.TextFlow(section) : null);
-        if (instance) {
-          section._textFlow = instance;
-          onInstance?.(instance);
-        }
+        if (instance) section._textFlow = instance;
       })
       .catch(() => {
         // Without the engine the section still shows its source text and
@@ -119,28 +90,20 @@ export default function TextFlowSection({
     return () => {
       cancelled = true;
       if (instance) {
-        onInstance?.(null);
         instance.destroy();
         if (section) delete section._textFlow;
       }
     };
-  }, [onInstance, refreshKey]);
+  }, [refreshKey]);
 
   return (
     <section
       aria-label={ariaLabel}
       className={className}
       data-flow
-      data-flow-fall={fall ? undefined : "false"}
       data-flow-separator={separator}
       data-flow-shape={shape}
-      onPointerDown={onPointerDown}
-      ref={(element) => {
-        sectionRef.current = element;
-        if (typeof ref === "function") ref(element);
-        else if (ref) ref.current = element;
-      }}
-      style={style}
+      ref={sectionRef}
     >
       {children}
     </section>

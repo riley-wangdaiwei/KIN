@@ -3,12 +3,12 @@
 import {
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
   type PointerEvent as ReactPointerEvent,
 } from "react";
-import TextFlowSection, { type TextFlowInstance } from "@/components/site/TextFlowSection";
-import { buildStreamCycle } from "@/features/canvas/stream";
+import { buildStreamRows, type StreamRowTemplate } from "@/features/canvas/stream";
 import type { CommunityQuestion } from "@/lib/storage/canvas-adapter";
 import styles from "./canvas-workspace.module.css";
 
@@ -41,30 +41,70 @@ type CanvasStreamProps = {
   onDropItem: (item: StreamDropItem, target: StreamDropTarget) => void;
 };
 
-// The loop: each word falls into place, holds, then falls again. Timings
-// mirror TextFlow's own fall (drop ~140px, staggered by row) stretched over
-// a 6s cycle, so about a quarter of the words are falling at any moment.
-const LOOP_DURATION_MS = 6000;
-const LOOP_DELAY_SPREAD_MS = 1800;
-const FALL_DROP_PX = 140;
-const PAUSE_RADIUS_PX = 140;
-const RESYNC_INTERVAL_MS = 2000;
+// The original stream, restored: a narrow column on the right edge, items
+// scrolling steadily down and recycling at the top — no dense fill, the
+// board stays clean and words only live in the stream.
+const STREAM_ROW_HEIGHT = 28;
+const STREAM_SPEED = 1.25;
+// The fall is shaped like the community page's waterfall (TextFlow's
+// numbers: narrow at the top, wider toward the bottom) and anchored to the
+// right: the stream region is the right 38% of the viewport and the fall is
+// centered at 72% of the region, so it hugs the right edge at the top and
+// spreads leftward as items fall.
+const REGION_SHARE = 0.38;
+const SHAPE_CENTER = 0.72;
+const SHAPE_TOP = 0.1;
+const SHAPE_BOTTOM = 0.6;
+const SHAPE_CURVE = 2.6;
+const HEADER_PX = 76;
+const FOOTER_PX = 56;
 
-type LoopAnim = {
-  node: HTMLElement;
-  anim: Animation;
-  px: number;
-  py: number;
+type StreamItem = StreamRowTemplate & {
+  id: number;
+  x: number;
+  y: number;
+  speed: number;
+  // Lateral position inside the fall (0 = left edge, 1 = right edge), fixed
+  // for the item's whole fall — as the fall widens, the item drifts outward.
+  frac: number;
+  detourUntil?: number;
+  detourX?: number;
 };
 
-function isReducedMotion(): boolean {
-  return typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+function clamp01(value: number): number {
+  return Math.min(1, Math.max(0, value));
 }
 
-function mirrorKeyFor(element: HTMLElement): string {
-  if (element.dataset.personId) return `person-${element.dataset.personId}`;
-  if (element.dataset.canvasEntryId) return `entry-${element.dataset.canvasEntryId}`;
-  return "footer";
+function isReducedMotion(): boolean {
+  return (
+    typeof window !== "undefined" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  );
+}
+
+// Left/right edge of the fall at viewport height y, in viewport coords.
+function streamBounds(y: number): [number, number] {
+  const innerWidth = window.innerWidth;
+  const innerHeight = window.innerHeight;
+  const regionLeft = innerWidth * (1 - REGION_SHARE);
+  const regionWidth = innerWidth * REGION_SHARE;
+  const t = clamp01((y - HEADER_PX) / Math.max(1, innerHeight - HEADER_PX - FOOTER_PX));
+  const share = SHAPE_TOP + (SHAPE_BOTTOM - SHAPE_TOP) * Math.pow(t, SHAPE_CURVE);
+  const half = (share * regionWidth) / 2;
+  const center = regionLeft + SHAPE_CENTER * regionWidth;
+  return [center - half, center + half];
+}
+
+function shapeX(y: number, frac: number): number {
+  const [left, right] = streamBounds(y);
+  return left + frac * (right - left);
+}
+
+// Words near the fall's edges are fainter, like the community fall.
+function fadeFor(x: number, y: number): number {
+  const [left, right] = streamBounds(y);
+  const edge = Math.min(x - left, right - x) / Math.max(1, (right - left) / 2);
+  return 0.35 + 0.65 * Math.min(1, edge * 2.2);
 }
 
 function dropTargetFromPoint(clientX: number, clientY: number): {
@@ -74,459 +114,317 @@ function dropTargetFromPoint(clientX: number, clientY: number): {
 } {
   const target = document.elementFromPoint(clientX, clientY);
   const personId = target?.closest<HTMLElement>("[data-person-id]")?.dataset.personId ?? null;
-  const relatedEntryId = target?.closest<HTMLElement>("[data-entry-id]")?.dataset.entryId ?? null;
-  const isCanvasTarget = Boolean(target?.closest<HTMLElement>("[data-person-id], [data-canvas-area]"));
+  const relatedEntryId =
+    target?.closest<HTMLElement>("[data-entry-id]")?.dataset.entryId ?? null;
+  const isCanvasTarget = Boolean(
+    target?.closest<HTMLElement>("[data-person-id], [data-canvas-area]"),
+  );
   return { personId, relatedEntryId, isCanvasTarget };
 }
 
-function startLoopAnim(
-  node: HTMLElement,
-  placement: { x: number; y: number },
-  section: HTMLElement,
-  delayOverride?: number,
-): LoopAnim {
-  const H = section.clientHeight || 1;
-  const W = section.clientWidth || 1;
-  const drop = FALL_DROP_PX * (0.6 + Math.random() * 0.8);
-  const tilt = (Math.random() - 0.5) * 14;
-  const { x, y } = placement;
-  const delay =
-    delayOverride ?? (y / H) * LOOP_DELAY_SPREAD_MS + (x / W) * 160 + Math.random() * 220;
-  const anim = node.animate(
-    [
-      {
-        transform: `translate(${x}px, ${y - drop}px) rotate(${tilt.toFixed(2)}deg)`,
-        opacity: 0,
-        easing: "cubic-bezier(.5,0,.9,.5)",
-      },
-      {
-        transform: `translate(${x}px, ${y + 3}px) rotate(${(tilt * 0.15).toFixed(2)}deg)`,
-        opacity: 1,
-        offset: 0.18,
-        easing: "cubic-bezier(.2,.6,.4,1)",
-      },
-      {
-        transform: `translate(${x}px, ${y - 1.5}px) rotate(${(-tilt * 0.05).toFixed(2)}deg)`,
-        offset: 0.23,
-        easing: "ease-in-out",
-      },
-      { transform: `translate(${x}px, ${y}px) rotate(0deg)`, offset: 0.25 },
-      { transform: `translate(${x}px, ${y}px) rotate(0deg)`, offset: 1 },
-    ],
-    { duration: LOOP_DURATION_MS, delay, iterations: Infinity, fill: "backwards" },
-  );
-  return { node, anim, px: x, py: y };
-}
-
 export default function CanvasStream({ question, onDragState, onDropItem }: CanvasStreamProps) {
-  const sectionRef = useRef<HTMLElement | null>(null);
-  const [instance, setInstance] = useState<TextFlowInstance | null>(null);
-  const instanceRef = useRef<TextFlowInstance | null>(null);
-  const [mirrorKeys, setMirrorKeys] = useState<string[] | null>(null);
-  const mirrorKeysRef = useRef<string[]>([]);
-  const mirrorRects = useRef(
-    new Map<string, { left: number; top: number; width: number; height: number }>(),
-  );
-  const loopAnims = useRef<LoopAnim[]>([]);
-  const draggingRef = useRef<{ item: StreamDropItem; node: HTMLElement; width: number } | null>(null);
-  const hoverRef = useRef<{ personId: string | null; isCanvas: boolean } | null>(null);
-  const nextItemId = useRef(1);
-  const layoutTimer = useRef<number | null>(null);
-  const pauseQueued = useRef(false);
-  const syncQueued = useRef(false);
+  const templates = useMemo(() => buildStreamRows(question), [question]);
+  const templatesRef = useRef(templates);
+  useEffect(() => {
+    templatesRef.current = templates;
+  }, [templates]);
+  const [streamItems, setStreamItems] = useState<StreamItem[]>([]);
+  const streamRef = useRef<StreamItem[]>([]);
+  const draggingWordRef = useRef<StreamItem | null>(null);
+  const [draggingStreamId, setDraggingStreamId] = useState<number | null>(null);
+  const nextStreamId = useRef(1);
+  const nextSequenceIndex = useRef(0);
+  const pointerNearStream = useRef(false);
+  const seededForRef = useRef<string | null | undefined>(undefined);
+  const reducedMotion = isReducedMotion();
 
-  const cycle = buildStreamCycle(question);
-  const refreshKey = `${mirrorKeys?.join("|") ?? ""}#${question?.id ?? "none"}`;
+  useEffect(() => {
+    streamRef.current = streamItems;
+  }, [streamItems]);
 
-  // Re-create loop animations for words whose placement changed (or that are
-  // new); leave untouched words falling on their own schedule. With reduced
-  // motion there is no loop — words just sit where TextFlow put them.
-  const resyncLoop = useCallback(() => {
-    const inst = instanceRef.current;
-    const section = sectionRef.current;
-    if (!inst || !section) return;
-    const layer = section.querySelector(".tf-layer");
-    if (isReducedMotion()) {
-      loopAnims.current.forEach((entry) => entry.anim.cancel());
-      loopAnims.current = [];
-      layer?.classList.add("tf-live");
-      return;
-    }
-    const placements = inst.placements;
-    const nodes = inst.nodes;
-    const byNode = new Map(loopAnims.current.map((entry) => [entry.node, entry]));
-    const next: LoopAnim[] = [];
-    for (let i = 0; i < nodes.length; i++) {
-      const node = nodes[i];
-      const placement = placements[i];
-      if (!placement || node.style.display === "none") continue;
-      // Never re-animate the word being dragged: its transform is driven
-      // by the pointer until the drop, when it is restarted explicitly.
-      if (draggingRef.current?.node === node) continue;
-      const existing = byNode.get(node);
-      if (existing && existing.px === placement.x && existing.py === placement.y) {
-        next.push(existing);
-        byNode.delete(node);
-        continue;
-      }
-      existing?.anim.cancel();
-      next.push(startLoopAnim(node, placement, section));
-      byNode.delete(node);
-    }
-    byNode.forEach((entry) => entry.anim.cancel());
-    loopAnims.current = next;
-    layer?.classList.add("tf-live");
-  }, []);
-
-  const scheduleLayout = useCallback(() => {
-    if (layoutTimer.current !== null) return;
-    layoutTimer.current = window.setTimeout(() => {
-      layoutTimer.current = null;
-      const inst = instanceRef.current;
-      if (!inst) return;
-      inst.layout();
-      resyncLoop();
-    }, 150);
-  }, [resyncLoop]);
-
-  // Board elements live outside this section, so TextFlow cannot see them.
-  // Mirror divs inside the section track their viewport rects, and TextFlow
-  // wraps the fill around the mirrors instead.
-  const syncMirrors = useCallback(() => {
-    const targets = [
-      ...document.querySelectorAll<HTMLElement>("[data-board-element], [data-canvas-obstacle]"),
-    ];
-    const keys = targets.map(mirrorKeyFor);
-    if (keys.join("|") !== mirrorKeysRef.current.join("|")) {
-      mirrorKeysRef.current = keys;
-      setMirrorKeys(keys);
-      // The mirrors render on the next commit; positions sync then.
-      return;
-    }
-    const section = sectionRef.current;
-    if (!section) return;
-    const sectionRect = section.getBoundingClientRect();
-    // Prune rects of mirrors that no longer exist.
-    const keySet = new Set(keys);
-    for (const key of [...mirrorRects.current.keys()]) {
-      if (!keySet.has(key)) mirrorRects.current.delete(key);
-    }
-    let moved = false;
-    for (let i = 0; i < targets.length; i++) {
-      const mirror = section.querySelector<HTMLElement>(`[data-mirror-key="${keys[i]}"]`);
-      if (!mirror) continue;
-      const rect = targets[i].getBoundingClientRect();
-      const box = {
-        left: Math.round(rect.left - sectionRect.left),
-        top: Math.round(rect.top - sectionRect.top),
-        width: Math.round(rect.width),
-        height: Math.round(rect.height),
+  const seed = useCallback(() => {
+    if (typeof window === "undefined") return;
+    const sequence = templatesRef.current;
+    if (sequence.length === 0) return;
+    const count = Math.ceil(window.innerHeight / STREAM_ROW_HEIGHT) + 1;
+    const startIndex = Math.floor(Math.random() * sequence.length);
+    const verticalOffset = Math.random() * STREAM_ROW_HEIGHT;
+    const items = Array.from({ length: count }).map((_, index) => {
+      const template = sequence[(startIndex + index) % sequence.length];
+      const y = index * STREAM_ROW_HEIGHT - STREAM_ROW_HEIGHT + verticalOffset;
+      const frac = Math.random();
+      return {
+        ...template,
+        id: index + 1,
+        x: shapeX(y, frac),
+        y,
+        speed: STREAM_SPEED,
+        frac,
       };
-      const prev = mirrorRects.current.get(keys[i]);
-      if (
-        !prev ||
-        prev.left !== box.left ||
-        prev.top !== box.top ||
-        prev.width !== box.width ||
-        prev.height !== box.height
-      ) {
-        mirror.style.left = `${box.left}px`;
-        mirror.style.top = `${box.top}px`;
-        mirror.style.width = `${box.width}px`;
-        mirror.style.height = `${box.height}px`;
-        mirrorRects.current.set(keys[i], box);
-        moved = true;
-      }
-    }
-    if (moved) scheduleLayout();
-  }, [scheduleLayout]);
+    });
+    nextStreamId.current = count + 1;
+    nextSequenceIndex.current = startIndex + count;
+    streamRef.current = items;
+    setStreamItems(items);
+  }, []);
 
-  // Read the board targets after every render — the set changes when board
-  // content is added or removed, and positions change on scroll and drag.
+  // Seed once at mount, and again if the weekly question arrives later.
   useEffect(() => {
-    syncMirrors();
-  });
+    const questionId = question?.id ?? null;
+    if (streamRef.current.length === 0 || seededForRef.current !== questionId) {
+      seededForRef.current = questionId;
+      seed();
+    }
+  }, [question, seed]);
 
-  // Start the loop once TextFlow's first layout lands, and re-sync it on a
-  // slow interval so a layout TextFlow runs on its own (resize) is picked up.
   useEffect(() => {
-    instanceRef.current = instance;
-    if (!instance) {
-      loopAnims.current.forEach((entry) => entry.anim.cancel());
-      loopAnims.current = [];
-      return;
-    }
-    if (isReducedMotion()) {
-      sectionRef.current?.querySelector(".tf-layer")?.classList.add("tf-live");
-      return;
-    }
-    let cancelled = false;
-    const check = window.setInterval(() => {
-      if (cancelled) return;
-      if (instance.placements.length > 0) {
-        window.clearInterval(check);
-        syncMirrors();
-        instance.layout();
-        resyncLoop();
-      }
-    }, 50);
-    const resyncTimer = window.setInterval(() => {
-      if (!cancelled) resyncLoop();
-    }, RESYNC_INTERVAL_MS);
-    return () => {
-      cancelled = true;
-      window.clearInterval(check);
-      window.clearInterval(resyncTimer);
-      loopAnims.current.forEach((entry) => entry.anim.cancel());
-      loopAnims.current = [];
+    const updatePointerProximity = (event: PointerEvent) => {
+      pointerNearStream.current =
+        event.clientX >= window.innerWidth * (1 - REGION_SHARE) - 60;
     };
-  }, [instance, resyncLoop, syncMirrors]);
-
-  const pauseNearPointer = useCallback((clientX: number, clientY: number) => {
-    const section = sectionRef.current;
-    if (!section || draggingRef.current) return;
-    const rect = section.getBoundingClientRect();
-    const x = clientX - rect.left;
-    const y = clientY - rect.top;
-    for (const entry of loopAnims.current) {
-      const near =
-        Math.abs(entry.px - x) < PAUSE_RADIUS_PX && entry.py > y - 220 && entry.py < y + 40;
-      if (near) entry.anim.pause();
-      else entry.anim.play();
-    }
+    const clearPointerProximity = () => {
+      pointerNearStream.current = false;
+    };
+    window.addEventListener("pointermove", updatePointerProximity);
+    window.addEventListener("pointerleave", clearPointerProximity);
+    return () => {
+      window.removeEventListener("pointermove", updatePointerProximity);
+      window.removeEventListener("pointerleave", clearPointerProximity);
+    };
   }, []);
 
-  const pauseAllLoop = useCallback(() => {
-    loopAnims.current.forEach((entry) => entry.anim.pause());
-  }, []);
+  useEffect(() => {
+    if (reducedMotion) return;
 
-  const resumeAllLoop = useCallback(() => {
-    loopAnims.current.forEach((entry) => entry.anim.play());
-  }, []);
-
-  const restartNode = useCallback((node: HTMLElement, delay: number) => {
-    const inst = instanceRef.current;
-    const section = sectionRef.current;
-    if (!inst || !section) return;
-    const index = inst.nodes.indexOf(node);
-    const placement = inst.placements[index];
-    if (!placement) return;
-    if (isReducedMotion()) {
-      // No loop: put the word back where TextFlow placed it.
-      node.style.transform = `translate(${placement.x}px, ${placement.y}px)`;
-      return;
-    }
-    loopAnims.current = loopAnims.current.filter((entry) => entry.node !== node);
-    loopAnims.current.push(startLoopAnim(node, placement, section, delay));
-  }, []);
-
-  const handleDragMove = useCallback(
-    (event: PointerEvent) => {
-      const drag = draggingRef.current;
-      if (!drag) return;
-      const section = sectionRef.current;
-      if (!section) return;
-      const rect = section.getBoundingClientRect();
-      const px = event.clientX - rect.left;
-      const py = event.clientY - rect.top;
-      drag.node.style.transform = `translate(${px - drag.width / 2}px, ${py - 14}px)`;
-      const { personId, isCanvasTarget } = dropTargetFromPoint(event.clientX, event.clientY);
-      const hover = { personId, isCanvas: isCanvasTarget };
-      if (
-        hover.personId !== hoverRef.current?.personId ||
-        hover.isCanvas !== hoverRef.current?.isCanvas
-      ) {
-        hoverRef.current = hover;
-        onDragState({ dragging: true, personId, isCanvas: isCanvasTarget });
+    let frame = 0;
+    const tick = () => {
+      if (draggingWordRef.current || pointerNearStream.current) {
+        frame = requestAnimationFrame(tick);
+        return;
       }
+      const sequence = templatesRef.current;
+      const hitAreas = [
+        ...document.querySelectorAll<HTMLElement>(
+          `[data-board-element], [data-canvas-obstacle]`,
+        ),
+      ].map((element) => element.getBoundingClientRect());
+      const items = streamRef.current.map((item) => {
+        if (draggingWordRef.current?.id === item.id) return item;
+        const nextY = item.y + item.speed;
+        const element = document.querySelector<HTMLElement>(`[data-stream-id="${item.id}"]`);
+        const rect = element?.getBoundingClientRect();
+        const width = rect?.width ?? 90;
+        const height = rect?.height ?? STREAM_ROW_HEIGHT;
+        const hit = hitAreas.find(
+          (area) =>
+            item.x + width / 2 > area.left &&
+            item.x - width / 2 < area.right &&
+            nextY + height / 2 > area.top &&
+            nextY - height / 2 < area.bottom,
+        );
+        let detourUntil = item.detourUntil;
+        let detourX = item.detourX;
+        if (hit && detourUntil === undefined) {
+          detourUntil = hit.bottom + height / 2 + 4;
+          detourX = Math.max(0, hit.left - width / 2 - 8);
+        }
+        if (detourUntil !== undefined && nextY > detourUntil) {
+          detourUntil = undefined;
+          detourX = undefined;
+        }
+        const targetX = detourX ?? shapeX(nextY, item.frac);
+        const nextX = item.x + Math.max(-20, Math.min(20, targetX - item.x));
+        if (nextY > window.innerHeight + height) {
+          const template = sequence[nextSequenceIndex.current % sequence.length];
+          nextSequenceIndex.current += 1;
+          const y =
+            Math.min(...streamRef.current.map((candidate) => candidate.y)) -
+            STREAM_ROW_HEIGHT;
+          const frac = Math.random();
+          return {
+            ...template,
+            id: nextStreamId.current++,
+            x: shapeX(y, frac),
+            y,
+            speed: STREAM_SPEED,
+            frac,
+          };
+        }
+        return { ...item, x: nextX, y: nextY, detourUntil, detourX };
+      });
+
+      streamRef.current = items;
+      setStreamItems(items);
+      frame = requestAnimationFrame(tick);
+    };
+
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [reducedMotion]);
+
+  // Keep the column full when the viewport grows taller.
+  useEffect(() => {
+    const topUp = () => {
+      const current = streamRef.current;
+      if (current.length === 0) return;
+      const needed = Math.ceil(window.innerHeight / STREAM_ROW_HEIGHT) + 1;
+      if (current.length >= needed) return;
+      const sequence = templatesRef.current;
+      const minY = Math.min(...current.map((candidate) => candidate.y));
+      const extra = Array.from({ length: needed - current.length }).map((_, index) => {
+        const template = sequence[nextSequenceIndex.current % sequence.length];
+        nextSequenceIndex.current += 1;
+        const y = minY - STREAM_ROW_HEIGHT * (index + 1);
+        const frac = Math.random();
+        return {
+          ...template,
+          id: nextStreamId.current++,
+          x: shapeX(y, frac),
+          y,
+          speed: STREAM_SPEED,
+          frac,
+        };
+      });
+      const items = [...extra, ...current];
+      streamRef.current = items;
+      setStreamItems(items);
+    };
+    window.addEventListener("resize", topUp);
+    return () => window.removeEventListener("resize", topUp);
+  }, []);
+
+  const handlePointerMove = useCallback(
+    (event: PointerEvent) => {
+      const active = draggingWordRef.current;
+      if (!active) return;
+      const { personId, isCanvasTarget } = dropTargetFromPoint(event.clientX, event.clientY);
+      onDragState({ dragging: true, personId, isCanvas: isCanvasTarget });
+      setStreamItems((current) =>
+        current.map((item) =>
+          item.id === active.id ? { ...item, x: event.clientX, y: event.clientY } : item,
+        ),
+      );
     },
     [onDragState],
   );
 
-  const handleDragUp = useCallback(
+  const handlePointerUp = useCallback(
     (event: PointerEvent) => {
-      const drag = draggingRef.current;
-      if (!drag) return;
-      // Read the drop target BEFORE lifting the dragging class: while the
-      // class is on, every word ignores the pointer and elementFromPoint
-      // sees the board; without it, it would hit the dragged word itself.
+      const active = draggingWordRef.current;
+      if (!active) return;
       const { personId, relatedEntryId, isCanvasTarget } = dropTargetFromPoint(
         event.clientX,
         event.clientY,
       );
-      draggingRef.current = null;
-      hoverRef.current = null;
-      sectionRef.current?.classList.remove(styles.dragging);
-      resumeAllLoop();
-      restartNode(drag.node, 0);
+      draggingWordRef.current = null;
+      setDraggingStreamId(null);
+      setStreamItems((current) =>
+        current.map((item) =>
+          item.id === active.id
+            ? {
+                ...item,
+                x: shapeX(active.y, item.frac),
+                y: active.y,
+                detourX: undefined,
+                detourUntil: undefined,
+              }
+            : item,
+        ),
+      );
+      window.removeEventListener("pointermove", handlePointerMove);
       onDragState({ dragging: false, personId: null, isCanvas: false });
-      onDropItem(drag.item, {
-        clientX: event.clientX,
-        clientY: event.clientY,
-        personId,
-        relatedEntryId,
-        isCanvasTarget,
-      });
+      if (!isCanvasTarget) return;
+      onDropItem(
+        {
+          id: active.id,
+          kind: active.kind,
+          label: active.label,
+          stickerKey: active.stickerKey,
+          questionId: active.questionId,
+        },
+        { clientX: event.clientX, clientY: event.clientY, personId, relatedEntryId, isCanvasTarget },
+      );
     },
-    [onDragState, onDropItem, resumeAllLoop, restartNode],
+    [handlePointerMove, onDragState, onDropItem],
   );
 
   const cancelDrag = useCallback(() => {
-    const drag = draggingRef.current;
-    if (!drag) return;
-    draggingRef.current = null;
-    hoverRef.current = null;
-    sectionRef.current?.classList.remove(styles.dragging);
-    resumeAllLoop();
-    restartNode(drag.node, 0);
+    const active = draggingWordRef.current;
+    if (!active) return;
+    draggingWordRef.current = null;
+    setDraggingStreamId(null);
+    setStreamItems((current) =>
+      current.map((item) =>
+        item.id === active.id
+          ? {
+              ...item,
+              x: shapeX(active.y, item.frac),
+              y: active.y,
+              detourX: undefined,
+              detourUntil: undefined,
+            }
+          : item,
+      ),
+    );
+    window.removeEventListener("pointermove", handlePointerMove);
     onDragState({ dragging: false, personId: null, isCanvas: false });
-  }, [onDragState, resumeAllLoop, restartNode]);
+  }, [handlePointerMove, onDragState]);
 
-  // One window listener set for the pointer: while a word is dragged it
-  // drives the node and the drop target; otherwise it pauses the words
-  // near the pointer so they hold still long enough to grab.
-  useEffect(() => {
-    const onPointerMove = (event: PointerEvent) => {
-      if (draggingRef.current) {
-        handleDragMove(event);
-        return;
-      }
-      if (pauseQueued.current) return;
-      pauseQueued.current = true;
-      requestAnimationFrame(() => {
-        pauseQueued.current = false;
-        if (!draggingRef.current) pauseNearPointer(event.clientX, event.clientY);
-      });
-    };
-    const onPointerUp = (event: PointerEvent) => {
-      if (draggingRef.current) handleDragUp(event);
-    };
-    const onPointerCancel = () => {
-      if (draggingRef.current) cancelDrag();
-    };
-    const onPointerLeave = () => {
-      if (!draggingRef.current) resumeAllLoop();
-    };
-    const onScroll = () => {
-      if (syncQueued.current) return;
-      syncQueued.current = true;
-      requestAnimationFrame(() => {
-        syncQueued.current = false;
-        syncMirrors();
-      });
-    };
-    const onResize = () => syncMirrors();
-    window.addEventListener("pointermove", onPointerMove);
-    window.addEventListener("pointerup", onPointerUp);
-    window.addEventListener("pointercancel", onPointerCancel);
-    document.documentElement.addEventListener("pointerleave", onPointerLeave);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onResize);
-    return () => {
-      window.removeEventListener("pointermove", onPointerMove);
-      window.removeEventListener("pointerup", onPointerUp);
-      window.removeEventListener("pointercancel", onPointerCancel);
-      document.documentElement.removeEventListener("pointerleave", onPointerLeave);
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onResize);
-    };
-  }, [cancelDrag, handleDragMove, handleDragUp, pauseNearPointer, resumeAllLoop, syncMirrors]);
-
-  const handleWordPointerDown = (event: ReactPointerEvent<HTMLElement>) => {
-    if (event.pointerType === "mouse" && event.button !== 0) return;
-    const node = (event.target as HTMLElement).closest(".tf-w") as HTMLElement | null;
-    if (!node) return;
-    const kind = node.dataset.kind as StreamDropItem["kind"] | undefined;
-    if (!kind) return;
-    event.preventDefault();
-    const item: StreamDropItem = {
-      id: nextItemId.current++,
-      kind,
-      label: node.dataset.label,
-      stickerKey: node.dataset.stickerKey,
-      questionId: node.dataset.questionId,
-    };
-    const entry = loopAnims.current.find((candidate) => candidate.node === node);
-    if (entry) {
-      entry.anim.cancel();
-      loopAnims.current = loopAnims.current.filter((candidate) => candidate.node !== node);
-    }
-    const width = node.getBoundingClientRect().width;
-    draggingRef.current = { item, node, width };
-    sectionRef.current?.classList.add(styles.dragging);
-    pauseAllLoop();
-    onDragState({ dragging: true, personId: null, isCanvas: false });
-  };
-
-  if (mirrorKeys === null) {
-    // Board targets are read after mount; the section mounts once they are
-    // known, so TextFlow sees the full mirror set on its first layout.
-    return null;
-  }
+  const startDraggingItem = useCallback(
+    (item: StreamItem, event: ReactPointerEvent<HTMLButtonElement>) => {
+      if (event.pointerType === "mouse" && event.button !== 0) return;
+      event.preventDefault();
+      draggingWordRef.current = item;
+      setDraggingStreamId(item.id);
+      onDragState({ dragging: true, personId: null, isCanvas: false });
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.addEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerUp);
+      window.addEventListener("pointerup", handlePointerUp, { once: true });
+      window.removeEventListener("pointercancel", cancelDrag);
+      window.addEventListener("pointercancel", cancelDrag, { once: true });
+    },
+    [cancelDrag, handlePointerMove, handlePointerUp, onDragState],
+  );
 
   return (
-    <TextFlowSection
-      ariaLabel="Add to your canvas"
-      className={styles.canvasFlow}
-      fall={false}
-      onInstance={setInstance}
-      onPointerDown={handleWordPointerDown}
-      ref={sectionRef}
-      refreshKey={refreshKey}
-      shape="fill"
-      style={{
-        position: "fixed",
-        top: 76,
-        right: 0,
-        bottom: 56,
-        left: 0,
-        zIndex: 30,
-        pointerEvents: "none",
-      }}
-    >
-      <div aria-hidden="true" data-flow-source>
-        {cycle.map((item, index) =>
-          item.kind === "image" ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              alt=""
-              className={styles.streamSticker}
-              data-flow-token
-              data-kind="image"
-              data-sticker-key={item.stickerKey}
-              key={index}
-              src={item.imageSrc}
-            />
-          ) : item.kind === "question" ? (
-            <span key={index}>
-              {item.label?.split(/\s+/).map((word, wordIndex) => (
-                <span
-                  className={styles.questionWord}
-                  data-flow-token
-                  data-kind="question"
-                  data-question-id={item.questionId}
-                  key={wordIndex}
-                >
-                  {word}
-                </span>
-              ))}
-            </span>
-          ) : (
-            <span data-flow-token data-kind="word" data-label={item.label} key={index}>
-              {item.label}
-            </span>
-          ),
-        )}
-      </div>
-      {mirrorKeys.map((key) => (
-        <div
-          aria-hidden="true"
-          className={styles.streamMirror}
-          data-flow-obstacle
-          data-mirror-key={key}
-          key={key}
-        />
-      ))}
-    </TextFlowSection>
+    <div className={styles.waterfallLayer}>
+      {streamItems.map((item) => {
+        // Keep the stream clear of the fixed header and the fixed site
+        // footer: items are still tracked by the engine, just not drawn
+        // while they pass behind the chrome.
+        if (item.y < HEADER_PX || item.y > window.innerHeight - FOOTER_PX) return null;
+        const opacity = item.kind === "image" ? 1 : fadeFor(item.x, item.y);
+        return (
+          <button
+            className={`${styles.fallingWord} ${item.kind === "image" ? styles.fallingImage : ""} ${item.kind === "question" ? styles.fallingQuestion : ""}`.trim()}
+            data-stream-id={item.id}
+            key={item.id}
+            onPointerDown={(event) => startDraggingItem(item, event)}
+            style={{
+              left: item.x,
+              top: item.y,
+              opacity,
+              pointerEvents: draggingStreamId === item.id ? "none" : "auto",
+            }}
+            aria-label={
+              item.kind === "word"
+                ? `Add ${item.label}`
+                : item.kind === "question"
+                  ? `Answer this week's question: ${item.questionLabel ?? item.label}`
+                  : `Add ${item.stickerKey} image`
+            }
+            type="button"
+          >
+            {item.kind === "image" ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img alt="" src={item.imageSrc} />
+            ) : (
+              item.label
+            )}
+          </button>
+        );
+      })}
+    </div>
   );
 }
