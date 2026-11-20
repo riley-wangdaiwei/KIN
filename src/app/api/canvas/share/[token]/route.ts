@@ -69,6 +69,8 @@ export async function GET(
   const supabase = createClient(url, serviceRoleKey, {
     auth: { autoRefreshToken: false, persistSession: false },
   });
+  // A token is either a re.KIN share (canvas_shares) or a published canvas
+  // (canvas_publications). A publication always shares the whole canvas.
   const { data: share, error: shareError } = await supabase
     .from("canvas_shares")
     .select("user_id,person_id")
@@ -77,11 +79,23 @@ export async function GET(
   if (shareError) {
     return NextResponse.json({ error: "Could not load this share link." }, { status: 500 });
   }
-  if (!share) {
+  let shareRow: ShareRow | null = share as ShareRow | null;
+  if (!shareRow) {
+    const { data: publication, error: publicationError } = await supabase
+      .from("canvas_publications")
+      .select("user_id")
+      .eq("token", token)
+      .maybeSingle();
+    if (publicationError) {
+      return NextResponse.json({ error: "Could not load this share link." }, { status: 500 });
+    }
+    if (publication) {
+      shareRow = { user_id: publication.user_id as string, person_id: null };
+    }
+  }
+  if (!shareRow) {
     return NextResponse.json({ error: "This share link is no longer available." }, { status: 404 });
   }
-
-  const shareRow = share as ShareRow;
   const peopleQuery = supabase
     .from("canvas_people")
     .select("id,name,name_size,pos_x,pos_y,created_at")
