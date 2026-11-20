@@ -315,7 +315,7 @@ export default function PlaygroundChrome({
             </button>
             <div className={styles.pot}>
               <Image
-                src="/pot.jpg"
+                src="/amphora.png"
                 alt=""
                 fill
                 sizes="(max-width: 700px) 94vw, 56rem"
