@@ -7,15 +7,26 @@ interface ResendResponse {
 }
 
 const labels: Record<string, string> = {
-  recipient: "Who is it for?",
-  occasion: "What is the occasion?",
-  "something-special": "What is something special about them?",
-  budget: "What budget feels right?",
-  timeline: "When do you need the gift?",
-  email: "Your contact email",
+  person: "Who's your person?",
+  occasion: "What are we celebrating?",
+  sunday: "Their perfect Sunday looks like…",
+  kind: "They're the kind of person who…",
+  weather: "If they were a weather, they'd be…",
+  gesture: "How big a gesture?",
+  timing: "How's the clock looking?",
+  email: "Where should we send your result?",
 };
 
-const expected = ["recipient", "occasion", "something-special", "budget", "timeline", "email"];
+const expected = [
+  "person",
+  "occasion",
+  "sunday",
+  "kind",
+  "weather",
+  "gesture",
+  "timing",
+  "email",
+];
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -98,7 +109,7 @@ export async function POST(request: Request) {
 
   if (!apiKey || !inbox) {
     return NextResponse.json(
-      { error: "The gifting identity email is not configured. Please try again later." },
+      { error: "The gift quiz email is not configured. Please try again later." },
       { status: 503 },
     );
   }
@@ -124,30 +135,57 @@ export async function POST(request: Request) {
       { status: 400 },
     );
   }
+  if (typeof body.result !== "string" || body.result.trim().length === 0) {
+    return NextResponse.json({ error: "The result was not valid." }, { status: 400 });
+  }
+  const result = body.result.trim();
+  const energy =
+    typeof body.energy === "string" && body.energy.trim().length > 0
+      ? body.energy.trim()
+      : null;
+  const userEmail = (answers.email as string).trim();
 
+  // The artist reads the answers before the meeting.
   const lines = expected.map(
     (key) => `${labels[key]}\n${(answers[key] as string).trim()}`,
   );
-  const sent = await sendEmail({
+  const teamSent = await sendEmail({
     apiKey,
     from,
     to: inbox,
-    subject: "New re.KIN gifting identity",
-    text: `New re.KIN gifting identity\n\n${lines.join("\n\n")}`,
-    html: `<h1>New re.KIN gifting identity</h1>${expected
+    subject: "New re.KIN gift quiz result",
+    text: `New re.KIN gift quiz result\n\n${lines.join("\n\n")}\n\nResult\n${result}${
+      energy ? `\n${energy}` : ""
+    }`,
+    html: `<h1>New re.KIN gift quiz result</h1>${expected
       .map(
         (key) =>
           `<p><strong>${escapeHtml(labels[key])}</strong><br />${escapeHtml((answers[key] as string).trim())}</p>`,
       )
-      .join("")}`,
+      .join("")}<p><strong>Result</strong><br />${escapeHtml(result)}${
+      energy ? `<br />${escapeHtml(energy)}` : ""
+    }</p>`,
     idempotencyKey: crypto.randomUUID(),
   });
-  if (!sent.ok) {
+  if (!teamSent.ok) {
     return NextResponse.json(
-      { error: `We could not send your answers: ${sent.message}` },
+      { error: `We could not send your answers: ${teamSent.message}` },
       { status: 502 },
     );
   }
 
-  return NextResponse.json({ ok: true });
+  // The result goes to the user too, at the address they entered.
+  const userSent = await sendEmail({
+    apiKey,
+    from,
+    to: userEmail,
+    subject: "Your re.KIN gift result",
+    text: `Your re.KIN gift result\n\n${result}${energy ? `\n\n${energy}` : ""}\n\nIf you ever want to go further, book a free curation meeting with our artist: https://www.r3kin.info/my-gifting-identity`,
+    html: `<h1>Your re.KIN gift result</h1><p>${escapeHtml(result)}</p>${
+      energy ? `<p>${escapeHtml(energy)}</p>` : ""
+    }<p>If you ever want to go further, <a href="https://www.r3kin.info/my-gifting-identity">book a free curation meeting</a> with our artist.</p>`,
+    idempotencyKey: crypto.randomUUID(),
+  });
+
+  return NextResponse.json({ ok: true, resultEmailed: userSent.ok });
 }

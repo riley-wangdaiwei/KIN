@@ -14,65 +14,17 @@
   line-height: 1.25;
 }
 
-.metadata {
-  color: var(--kin-light-gray);
-  font-family: var(--kin-micro-mono);
-  font-size: var(--kin-caption-size);
-  line-height: 1.2;
-}
-
-.questionnaire {
+.quiz {
   max-width: 54rem;
   scroll-margin-top: 2rem;
 }
 
-.questionnaire h1 {
-  max-width: none;
+.quiz h1 {
+  max-width: 20ch;
   margin: 1rem 0 0;
   font-family: var(--kin-display-serif);
   font-size: clamp(2.7rem, 7vw, 6rem);
   font-weight: 400;
   letter-spacing: -0.045em;
   line-height: 0.88;
-}
-
-.questionnaire h1 img {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
-.canvasLink {
-  max-width: 54rem;
-  margin: clamp(3rem, 8vw, 6rem) 0 0;
-  color: var(--kin-light-gray);
-  font-family: var(--kin-reading-serif);
-  font-size: clamp(1rem, 1.4vw, 1.2rem);
-  line-height: 1.25;
-}
-
-.canvasLink a {
-  color: var(--kin-white);
-}
-
-.meetingButton {
-  display: inline-block;
-  margin: clamp(2.5rem, 6vw, 4rem) 0 0;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--kin-white);
-  font-family: var(--kin-reading-serif);
-  font-size: clamp(1rem, 1.4vw, 1.2rem);
-  line-height: 1.25;
-  cursor: pointer;
-}
-
-.canvasNote {
-  max-width: 54rem;
-  margin: 0.75rem 0 0;
-  color: var(--kin-light-gray);
-  font-family: var(--kin-reading-serif);
-  font-size: clamp(1rem, 1.4vw, 1.2rem);
-  line-height: 1.25;
 }

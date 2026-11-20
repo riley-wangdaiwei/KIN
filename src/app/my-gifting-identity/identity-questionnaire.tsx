@@ -1,92 +1,110 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { getCanvasUser, subscribeToCanvasAuth } from "@/lib/storage/canvas-adapter";
-import styles from "./identity-questionnaire.module.css";
+import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import BookingTrigger from "@/components/site/BookingTrigger";
 import SiteArrow from "@/components/site/SiteArrow";
+import { computeResult, quizQuestions, resultTexts } from "@/features/quiz/quiz";
+import styles from "./identity-questionnaire.module.css";
 
-type Question = {
-  name: string;
-  question: string;
-  options: string[];
-};
-
-const questions: Question[] = [
-  { name: "recipient", question: "Who is it for?", options: ["A friend", "A partner", "A family member", "Someone else"] },
-  { name: "occasion", question: "What is the occasion?", options: ["A birthday", "A milestone", "Just because", "Another occasion"] },
-  { name: "something-special", question: "What is something special about them?", options: ["The little things they notice", "Their unusual interests", "A memory we share", "Something hard to put into words"] },
-  { name: "budget", question: "What budget feels right?", options: ["Under $50", "$50–100", "$100–250", "$250+"] },
-  { name: "timeline", question: "When do you need the gift?", options: ["As soon as possible", "Within a month", "In 1–3 months", "I’m flexible"] },
-];
+const totalSteps = quizQuestions.length + 1; // 7 questions + the email step
+const emailPattern = /^\S+@\S+\.\S+$/;
 
 export default function IdentityQuestionnaire() {
+  const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [otherOpen, setOtherOpen] = useState<Record<string, boolean>>({});
   const [otherText, setOtherText] = useState<Record<string, string>>({});
-  const [loginEmail, setLoginEmail] = useState<string | null>(null);
-  const [emailChoice, setEmailChoice] = useState<"login" | "other" | null>(null);
-  const [emailInput, setEmailInput] = useState("");
-  const [sending, setSending] = useState(false);
-  const [sendState, setSendState] = useState<"idle" | "sent" | "error">("idle");
+  const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [phase, setPhase] = useState<"quiz" | "result">("quiz");
+  const [resultId, setResultId] = useState<keyof typeof resultTexts | null>(null);
+  const [energy, setEnergy] = useState<string | null>(null);
+  const [sendState, setSendState] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [sendError, setSendError] = useState("");
+  const [resultEmailed, setResultEmailed] = useState<boolean | null>(null);
+  const advanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    let active = true;
-    const unsubscribe = subscribeToCanvasAuth((user) => {
-      if (active) setLoginEmail(user?.email ?? null);
-    });
-    void getCanvasUser()
-      .then((user) => {
-        if (active) setLoginEmail(user?.email ?? null);
-      })
-      .catch(() => {});
     return () => {
-      active = false;
-      unsubscribe?.();
+      if (advanceTimer.current) clearTimeout(advanceTimer.current);
     };
   }, []);
 
-  const emailAnswer = loginEmail
-    ? emailChoice === "login"
-      ? loginEmail
-      : emailChoice === "other"
-        ? emailInput.trim()
-        : ""
-    : emailInput.trim();
-  const complete =
-    questions.every(({ name }) => Boolean(answers[name]?.trim())) &&
-    Boolean(emailAnswer);
-
-  function selectOption(name: string, option: string) {
-    setOtherOpen((current) => ({ ...current, [name]: false }));
-    setAnswers((current) => ({ ...current, [name]: option }));
+  function advanceAfterSelect() {
+    if (advanceTimer.current) clearTimeout(advanceTimer.current);
+    const reducedMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    advanceTimer.current = setTimeout(
+      () => setStep((current) => Math.min(current + 1, totalSteps - 1)),
+      reducedMotion ? 0 : 350,
+    );
   }
 
-  function selectOther(name: string) {
-    setOtherOpen((current) => ({ ...current, [name]: true }));
-    setAnswers((current) => ({ ...current, [name]: otherText[name] ?? "" }));
+  function selectOption(questionId: string, option: string) {
+    setOtherOpen((current) => ({ ...current, [questionId]: false }));
+    setAnswers((current) => ({ ...current, [questionId]: option }));
+    advanceAfterSelect();
   }
 
-  function changeOther(name: string, value: string) {
-    setOtherText((current) => ({ ...current, [name]: value }));
-    setAnswers((current) => ({ ...current, [name]: value }));
+  function selectOther(questionId: string) {
+    setOtherOpen((current) => ({ ...current, [questionId]: true }));
+    setAnswers((current) => ({ ...current, [questionId]: otherText[questionId] ?? "" }));
   }
 
-  async function sendAnswers() {
-    if (!complete || sending) return;
-    setSending(true);
-    setSendError("");
+  function changeOther(questionId: string, value: string) {
+    setOtherText((current) => ({ ...current, [questionId]: value }));
+    setAnswers((current) => ({ ...current, [questionId]: value }));
+  }
+
+  function continueFromOther(questionId: string) {
+    if (!otherText[questionId]?.trim()) return;
+    advanceAfterSelect();
+  }
+
+  function goBack() {
+    if (advanceTimer.current) clearTimeout(advanceTimer.current);
+    setStep((current) => Math.max(current - 1, 0));
+  }
+
+  function startOver() {
+    if (advanceTimer.current) clearTimeout(advanceTimer.current);
+    setAnswers({});
+    setOtherOpen({});
+    setOtherText({});
+    setEmail("");
+    setEmailError("");
+    setResultId(null);
+    setEnergy(null);
     setSendState("idle");
+    setSendError("");
+    setResultEmailed(null);
+    setStep(0);
+    setPhase("quiz");
+  }
+
+  async function submitQuiz(computed: { result: keyof typeof resultTexts; energy: string | null }) {
+    setSendState("sending");
+    setSendError("");
     try {
       const response = await fetch("/api/gifting-identity", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ answers: { ...answers, email: emailAnswer } }),
+        body: JSON.stringify({
+          answers: { ...answers, email: email.trim() },
+          result: resultTexts[computed.result],
+          energy: computed.energy,
+        }),
       });
+      const data = (await response.json().catch(() => null)) as {
+        resultEmailed?: boolean;
+        error?: string;
+      } | null;
       if (!response.ok) {
-        const result = (await response.json().catch(() => null)) as { error?: string } | null;
-        throw new Error(result?.error ?? "We could not send your answers. Please try again.");
+        throw new Error(data?.error ?? "We could not send your answers. Please try again.");
       }
+      setResultEmailed(data?.resultEmailed ?? false);
       setSendState("sent");
     } catch (error) {
       setSendError(
@@ -95,102 +113,190 @@ export default function IdentityQuestionnaire() {
           : "We could not send your answers. Please try again.",
       );
       setSendState("error");
-    } finally {
-      setSending(false);
     }
   }
 
+  function seeResult() {
+    if (!emailPattern.test(email.trim())) {
+      setEmailError("That email doesn't look right — mind checking it?");
+      return;
+    }
+    setEmailError("");
+    const computed = computeResult(answers);
+    setResultId(computed.result);
+    setEnergy(computed.energy);
+    setPhase("result");
+    void submitQuiz(computed);
+  }
+
+  if (phase === "result" && resultId) {
+    return (
+      <div className={styles.result}>
+        <div className={styles.resultCard}>
+          <p className={styles.resultEyebrow}>your person&rsquo;s gift</p>
+          <p className={styles.resultText}>{resultTexts[resultId]}</p>
+          {energy && <p className={styles.resultEnergy}>{energy}</p>}
+          <p className={styles.resultMark}>re.KIN</p>
+        </div>
+        {sendState === "error" && sendError && (
+          <p className={styles.error} role="alert">
+            {sendError}{" "}
+            <button
+              className={styles.retry}
+              onClick={() => void submitQuiz({ result: resultId, energy })}
+              type="button"
+            >
+              Try sending again
+            </button>
+          </p>
+        )}
+        {sendState === "sent" && resultEmailed === false && (
+          <p className={styles.hint}>
+            We couldn&rsquo;t email your result — this card is yours to keep.
+          </p>
+        )}
+        <p className={styles.cta}>
+          If you ever want to go further,{" "}
+          <BookingTrigger className={`${styles.ctaButton} kin-glass-hover`}>
+            Book a free curation meeting
+          </BookingTrigger>{" "}
+          with our artist to see how this could develop.
+        </p>
+        <p className={styles.ctaNote}>
+          Our artist will have read your answers before you meet.
+        </p>
+        <p className={styles.canvasLink}>
+          Not ready yet? Start a <Link href="/canvas">canvas</Link> for them.
+        </p>
+        <p className={styles.canvasNote}>
+          Save the little things you notice over time. When you&rsquo;re
+          ready, share it with us and we&rsquo;ll shape it into a gift.
+        </p>
+        <button className={styles.retake} onClick={startOver} type="button">
+          take it again
+        </button>
+      </div>
+    );
+  }
+
+  const question = quizQuestions[step];
+  const isEmailStep = step === quizQuestions.length;
+
   return (
-    <div className={styles.form}>
-      {questions.map(({ name, question, options }, index) => (
-        <fieldset className={styles.question} key={name}>
-          <legend><span className={styles.number}>{String(index + 1).padStart(2, "0")}</span>{question}</legend>
+    <div className={styles.quiz}>
+      <div
+        aria-label={`Question ${step + 1} of ${totalSteps}`}
+        aria-valuemax={totalSteps}
+        aria-valuemin={1}
+        aria-valuenow={step + 1}
+        className={styles.progress}
+        role="progressbar"
+      >
+        <span style={{ width: `${((step + 1) / totalSteps) * 100}%` }} />
+      </div>
+      <p className={styles.counter}>
+        {String(step + 1).padStart(2, "0")} / {String(totalSteps).padStart(2, "0")}
+      </p>
+      {step > 0 && (
+        <button className={styles.back} onClick={goBack} type="button">
+          <span className={styles.backArrow} aria-hidden="true">
+            <SiteArrow />
+          </span>
+          back
+        </button>
+      )}
+      {isEmailStep ? (
+        <fieldset className={styles.question}>
+          <legend>
+            <span className={styles.number}>08</span>Where should we send your result?
+          </legend>
+          <input
+            aria-label="Your email"
+            className={styles.emailInput}
+            maxLength={254}
+            onChange={(event) => {
+              setEmail(event.target.value);
+              setEmailError("");
+            }}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") seeResult();
+            }}
+            placeholder="Your email"
+            type="email"
+            value={email}
+          />
+          <button
+            className={styles.submit}
+            disabled={sendState === "sending"}
+            onClick={seeResult}
+            type="button"
+          >
+            See my result <SiteArrow />
+          </button>
+          {emailError && (
+            <p className={styles.error} role="alert">
+              {emailError}
+            </p>
+          )}
+        </fieldset>
+      ) : (
+        <fieldset className={styles.question} key={question.id}>
+          <legend>
+            <span className={styles.number}>{String(step + 1).padStart(2, "0")}</span>
+            {question.title}
+          </legend>
           <div className={styles.options}>
-            {options.map((option) => (
+            {question.options.map((option) => (
               <button
-                aria-pressed={answers[name] === option && !otherOpen[name]}
-                className={`${styles.option} ${answers[name] === option && !otherOpen[name] ? styles.selected : ""}`}
+                aria-pressed={answers[question.id] === option && !otherOpen[question.id]}
+                className={`${styles.option} ${
+                  answers[question.id] === option && !otherOpen[question.id]
+                    ? styles.selected
+                    : ""
+                }`}
                 key={option}
-                onClick={() => selectOption(name, option)}
+                onClick={() => selectOption(question.id, option)}
                 type="button"
               >
                 {option}
               </button>
             ))}
-            <button
-              aria-pressed={Boolean(otherOpen[name])}
-              className={`${styles.option} ${otherOpen[name] ? styles.selected : ""}`}
-              onClick={() => selectOther(name)}
-              type="button"
-            >
-              Other
-            </button>
+            {question.hasOther && (
+              <button
+                aria-pressed={Boolean(otherOpen[question.id])}
+                className={`${styles.option} ${otherOpen[question.id] ? styles.selected : ""}`}
+                onClick={() => selectOther(question.id)}
+                type="button"
+              >
+                Other
+              </button>
+            )}
           </div>
-          {otherOpen[name] && (
-            <input
-              aria-label={`${question} — other`}
-              className={styles.otherInput}
-              maxLength={200}
-              onChange={(event) => changeOther(name, event.target.value)}
-              placeholder="Tell us in your own words"
-              value={otherText[name] ?? ""}
-            />
+          {otherOpen[question.id] && (
+            <div className={styles.otherRow}>
+              <input
+                aria-label={`${question.title} — other`}
+                autoFocus
+                className={styles.otherInput}
+                maxLength={200}
+                onChange={(event) => changeOther(question.id, event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") continueFromOther(question.id);
+                }}
+                placeholder="Tell us in your own words"
+                value={otherText[question.id] ?? ""}
+              />
+              <button
+                className={styles.continue}
+                disabled={!otherText[question.id]?.trim()}
+                onClick={() => continueFromOther(question.id)}
+                type="button"
+              >
+                continue <SiteArrow />
+              </button>
+            </div>
           )}
         </fieldset>
-      ))}
-      <fieldset className={styles.question}>
-        <legend><span className={styles.number}>06</span>Your contact email</legend>
-        {loginEmail && (
-          <div className={styles.options}>
-            <button
-              aria-pressed={emailChoice === "login"}
-              className={`${styles.option} ${emailChoice === "login" ? styles.selected : ""}`}
-              onClick={() => setEmailChoice("login")}
-              type="button"
-            >
-              Same as my login email
-            </button>
-            <button
-              aria-pressed={emailChoice === "other"}
-              className={`${styles.option} ${emailChoice === "other" ? styles.selected : ""}`}
-              onClick={() => setEmailChoice("other")}
-              type="button"
-            >
-              Use a different email
-            </button>
-          </div>
-        )}
-        {(emailChoice === "other" || !loginEmail) && (
-          <input
-            aria-label="Your contact email"
-            className={styles.otherInput}
-            maxLength={254}
-            onChange={(event) => setEmailInput(event.target.value)}
-            placeholder="Your email"
-            type="email"
-            value={emailInput}
-          />
-        )}
-        {loginEmail && emailChoice === "login" && (
-          <p className={styles.emailNote}>{loginEmail}</p>
-        )}
-      </fieldset>
-      {complete && (
-        <div className={styles.share} aria-live="polite">
-          <h2>share your idea</h2>
-          {sendState === "sent" ? (
-            <p className={styles.sent}>Sent — we&rsquo;ll be in touch soon.</p>
-          ) : (
-            <>
-              <button className={styles.submit} disabled={sending} onClick={() => void sendAnswers()} type="button">
-                {sending ? "Sending…" : <>Send us an email <SiteArrow /></>}
-              </button>
-              {sendState === "error" && sendError && (
-                <p className={styles.error} role="alert">{sendError}</p>
-              )}
-            </>
-          )}
-        </div>
       )}
     </div>
   );
