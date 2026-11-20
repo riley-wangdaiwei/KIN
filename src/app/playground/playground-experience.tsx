@@ -174,10 +174,10 @@ export default function PlaygroundExperience() {
           : false,
       );
 
-      // Package orbit: the jars emerge one by one during the second half of
-      // chapter 2 passing through the viewport, mirroring the old sticky
-      // timing. passThrough is 0 when the chapter's top enters the viewport
-      // and 1 when its bottom leaves it.
+      // Package orbit: the jars emerge one by one as chapter 2 slides in and
+      // settles on screen, so all four are out while chapter 2 is the
+      // current page — not only as it leaves. passThrough is 0 when the
+      // chapter's top enters the viewport and ~0.5 when it snaps into place.
       const chapter2 = chapterRefs.current[1];
       if (chapter2) {
         const chapter2Rect = chapter2.getBoundingClientRect();
@@ -185,7 +185,7 @@ export default function PlaygroundExperience() {
           (window.innerHeight - chapter2Rect.top) /
             (window.innerHeight + chapter2Rect.height),
         );
-        setChapter2Reveal(clamp01((passThrough - 0.5) * 2));
+        setChapter2Reveal(clamp01(passThrough * 2));
       }
     };
     const onScroll = () => {
