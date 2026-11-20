@@ -25,7 +25,6 @@ export default function PlaygroundChrome({
 }) {
   const loginButtonRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLElement>(null);
-  const bookingButtonRef = useRef<HTMLButtonElement>(null);
   const bookingDialogRef = useRef<HTMLElement>(null);
   const bookingOverlayRef = useRef<HTMLDivElement>(null);
   const bookingReturnFocusRef = useRef<HTMLElement | null>(null);
@@ -171,7 +170,7 @@ export default function PlaygroundChrome({
   useEffect(() => {
     if (!bookingOpen) {
       if (bookingWasOpen.current) {
-        (bookingReturnFocusRef.current ?? bookingButtonRef.current)?.focus();
+        bookingReturnFocusRef.current?.focus();
       }
       bookingReturnFocusRef.current = null;
       bookingWasOpen.current = false;
@@ -222,14 +221,12 @@ export default function PlaygroundChrome({
             sizes="140px"
           />
         </Link>
-        <button
+        <Link
           className={`${styles.meeting} kin-glass-hover`}
-          onClick={() => setBookingOpen(true)}
-          ref={bookingButtonRef}
-          type="button"
+          href="/my-gifting-identity"
         >
-          book a free curation meeting
-        </button>
+          Start your gift with a one minute quiz
+        </Link>
         <button
           className={styles.login}
           data-canvas-obstacle

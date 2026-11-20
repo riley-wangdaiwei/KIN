@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import PlaygroundChrome from "@/components/site/PlaygroundChrome";
+import BookingTrigger from "@/components/site/BookingTrigger";
 import IdentityQuestionnaire from "./identity-questionnaire";
 import styles from "./page.module.css";
 
@@ -29,12 +30,20 @@ export default function MyGiftingIdentityPage() {
             />
           </h1>
           <p className={styles.intro}>
-            Share a few details to begin a curation conversation.
+            Share a few details to begin a curation conversation. (this will
+            take you max 5min!)
           </p>
           <IdentityQuestionnaire />
         </section>
+        <BookingTrigger className={`${styles.meetingButton} kin-glass-hover`}>
+          Book a free curation meeting
+        </BookingTrigger>
         <p className={styles.canvasLink}>
-          Or keep a <Link href="/canvas">canvas</Link> for them.
+          Not ready yet? Start a <Link href="/canvas">canvas</Link> for them.
+        </p>
+        <p className={styles.canvasNote}>
+          Save the little things you notice over time. When you&rsquo;re
+          ready, share it with us and we&rsquo;ll shape it into a gift.
         </p>
       </main>
     </>
