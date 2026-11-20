@@ -18,9 +18,41 @@ type StoryStep = {
   circles?: boolean;
 };
 
-const chapters: { title: string; subtitle?: string; steps: StoryStep[] }[] = [
+// Hand-drawn chapter headlines. Sentence 1 ("less generic gifting") is
+// retired with the old first chapter; sentences 2 and 3 head chapters 2
+// and 3, referenced from the chapters array below.
+const sentenceImages = [
+  { src: "/rekin-sentence1-white.png", width: 2589, height: 345 },
+  { src: "/rekin-sentence2-white.png", width: 3764, height: 607 },
+  { src: "/rekin-sentence3-white.png", width: 4067, height: 607 },
+];
+
+const chapters: {
+  title: string;
+  subtitle?: string;
+  headlineImage?: { src: string; width: number; height: number };
+  steps: StoryStep[];
+}[] = [
   {
-    title: "less generic gifting",
+    // The re.KIN story, in Riles's own words, verbatim. No headline image:
+    // the opening paragraph leads in the editorial italic instead.
+    title: "our story",
+    steps: [
+      {
+        introduction:
+          "Riley and Eika love making gifts. Riley built her mom's childhood house out of cardboard. Eika made short films for her friends. Riley turned their chat history into a poster. Eika asked a perfume artist to make a scent.",
+        body: [
+          "Then we saw the problem. Most people never get to work with a real artist. Gift ideas come at the last minute. Shopping is just algorithms.",
+          "So we built this. Keep a canvas for the people you love. Share ideas with other gifters. Make something with a real artist, at a fair price.",
+          "We document every step, because the process is part of the gift. In a world of AI, giving should stay human.",
+        ],
+      },
+    ],
+  },
+  {
+    title: "more oddly specific art about your favorite people",
+    subtitle: "A private gift web page, with a QR code to share it any way you like.",
+    headlineImage: sentenceImages[1],
     steps: [
       {
         body: [
@@ -32,12 +64,6 @@ const chapters: { title: string; subtitle?: string; steps: StoryStep[] }[] = [
           "Share the stories only you know. Together you shape them into a direction, and you decide what the gift becomes.",
         ],
       },
-    ],
-  },
-  {
-    title: "more oddly specific art about your favorite people",
-    subtitle: "A private gift web page, with a QR code to share it any way you like.",
-    steps: [
       {
         body: [
           "Keep a canvas for each person. Her new favorite band. The way he folds receipts. Your own taste, too. When it's time to give, it's all there.",
@@ -69,6 +95,7 @@ const chapters: { title: string; subtitle?: string; steps: StoryStep[] }[] = [
   },
   {
     title: "a more personal identity for the way you give",
+    headlineImage: sentenceImages[2],
     steps: [
       {
         body: [
@@ -78,7 +105,6 @@ const chapters: { title: string; subtitle?: string; steps: StoryStep[] }[] = [
       {
         body: [
           "Think of it as collaborating with artists to shape your own identity: not just a personal style, but artists you keep coming back to.",
-          "We help you refine it, and you can share it whenever you like.",
           "Keep collaborating and earn tokens — a way to stay engaged with the artists you love.",
         ],
       },
@@ -93,12 +119,6 @@ const openingHeadline = {
   alt: "Most gifts are bought. Ours are made. From your story.",
 };
 
-const sentenceImages = [
-  { src: "/rekin-sentence1-white.png", width: 2589, height: 345 },
-  { src: "/rekin-sentence2-white.png", width: 3764, height: 607 },
-  { src: "/rekin-sentence3-white.png", width: 4067, height: 607 },
-];
-
 const packageImages = [
   "/jars/jar_herogift.png",
   "/jars/jar_fillings.png",
@@ -107,8 +127,10 @@ const packageImages = [
 ];
 
 // The chapter-2 package step drives the orbit of jars around the fixed vase.
-const packageStep = chapters[1].steps[1];
-const packageRows = packageStep.rows ?? [];
+// Found by shape, not index: the "less generic gifting" steps moved into
+// chapter 2 ahead of it, so its position in the steps array changed.
+const packageStep = chapters[1].steps.find((step) => step.circles);
+const packageRows = packageStep?.rows ?? [];
 
 function clamp01(value: number) {
   return Math.min(1, Math.max(0, value));
@@ -276,15 +298,17 @@ export default function PlaygroundExperience() {
           }}
         >
           <div className={styles.story}>
-            <h2>
-              <Image
-                className={`${styles.headlineImage} ${styles[`headlineChapter${chapterIndex + 1}`]}`}
-                src={sentenceImages[chapterIndex].src}
-                alt={chapter.title}
-                width={sentenceImages[chapterIndex].width}
-                height={sentenceImages[chapterIndex].height}
-              />
-            </h2>
+            {chapter.headlineImage && (
+              <h2>
+                <Image
+                  className={`${styles.headlineImage} ${styles[`headlineChapter${chapterIndex + 1}`]}`}
+                  src={chapter.headlineImage.src}
+                  alt={chapter.title}
+                  width={chapter.headlineImage.width}
+                  height={chapter.headlineImage.height}
+                />
+              </h2>
+            )}
             {chapter.subtitle && (
               <p className={styles.chapterSubtitle}>{chapter.subtitle}</p>
             )}
@@ -319,7 +343,7 @@ export default function PlaygroundExperience() {
             </div>
           </div>
 
-          {chapterIndex === 1 && packageStep.circles && (
+          {chapterIndex === 1 && packageStep?.circles && (
             <div
               className={styles.packageOrbit}
               aria-label="What comes with the gift"
