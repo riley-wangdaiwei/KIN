@@ -151,7 +151,13 @@ async function sendEmail({
 
 export async function POST(request: Request) {
   const apiKey = process.env.RESEND_API_KEY;
-  const inbox = process.env.KIN_INBOX_EMAIL?.trim();
+  // Artist inquiries go to the team inbox. KIN_INBOX_EMAIL is a dedicated
+  // override when set; otherwise they share the orders inbox (teams@),
+  // which is what the other inquiry routes already use — so the form no
+  // longer 503s when the dedicated variable is missing.
+  const inbox =
+    process.env.KIN_INBOX_EMAIL?.trim() ||
+    process.env.KIN_ORDERS_EMAIL?.trim();
   const from =
     process.env.KIN_FROM_EMAIL?.trim() || "re.KIN <hello@r3kin.info>";
 
