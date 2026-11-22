@@ -52,7 +52,6 @@ export const quizQuestions: QuizQuestion[] = [
     id: "gesture",
     title: "How big a gesture?",
     options: [
-      "A sweet little something (under $50)",
       "A thoughtful surprise ($50–100)",
       "A real wow ($100–250)",
       "Go all out ($250+)",
