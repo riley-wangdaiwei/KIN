@@ -119,3 +119,64 @@
 .portfolioNote {
   margin-top: 0.65rem;
 }
+
+/* Featured artist: one artist, featured large — no grid. */
+.feature {
+  display: grid;
+  justify-items: start;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.featureLabel {
+  margin: 0;
+  color: var(--kin-light-gray);
+  font-family: var(--kin-micro-mono);
+  font-size: var(--kin-caption-size);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.featureImage {
+  position: relative;
+  display: block;
+  width: min(100%, 56rem);
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+}
+
+.featureImage img {
+  object-fit: cover;
+}
+
+.featureCopy {
+  max-width: 58ch;
+  margin: 0;
+  color: var(--kin-light-gray);
+  font-family: var(--kin-reading-serif);
+  font-size: var(--kin-copy-size);
+  line-height: 1.45;
+}
+
+.textLink {
+  color: var(--kin-white);
+  text-decoration: none;
+}
+
+.textLink:hover {
+  text-decoration: underline;
+}
+
+.more {
+  display: grid;
+  justify-items: start;
+  gap: 0.5rem;
+  margin-top: 3rem;
+}
+
+.more p {
+  margin: 0;
+  color: var(--kin-light-gray);
+  font-family: var(--kin-ui-sans);
+  font-size: 0.85rem;
+}
