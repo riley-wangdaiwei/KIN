@@ -100,7 +100,6 @@ export default function ProfileDirectory({
                 {entry.label}
                 <span className={styles.directoryCount}>
                   {entry.entryCount} {entry.entryCount === 1 ? "note" : "notes"}
-                  {entry.gift ? " · gift" : ""}
                 </span>
               </Link>
             </li>
@@ -157,19 +156,6 @@ export default function ProfileDirectory({
               people={activeEntry.people}
               unsorted={activeEntry.unsorted}
             />
-            {activeEntry.gift && (
-              <Link className={styles.gift} href={activeEntry.gift.href}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  alt={activeEntry.gift.title}
-                  className={styles.giftImage}
-                  src={activeEntry.gift.image}
-                />
-                <span className={styles.giftCaption}>
-                  {activeEntry.gift.title} — made with {activeEntry.gift.artist}
-                </span>
-              </Link>
-            )}
           </div>
         )}
       </div>

@@ -16,12 +16,6 @@ import type { CanvasPublication } from "@/lib/storage/canvas-adapter";
 //     canvas with an empty preview for now.
 // People on the board are NEVER auto-added as directory entries — the
 // user adds canvases herself.
-export interface ProfileGift {
-  title: string;
-  image: string;
-  artist: string;
-  href: string;
-}
 
 // One named canvas from profile_canvases: a row the user added, with the
 // board person it links to (null when it links to nobody).
@@ -38,19 +32,7 @@ export interface ProfileDirectoryEntry {
   people: CanvasPerson[];
   unsorted: GiftingCanvas["unsorted"];
   entryCount: number;
-  gift?: ProfileGift;
 }
-
-// PLACEHOLDER — no gift exists in the data yet (the first loop has not
-// produced one), so the gift slot is wired to a sample gift on the board
-// entry only, so the design is visible. Remove PLACEHOLDER_GIFT from the
-// board entry and attach real gifts when a canvas gains a linked gift.
-export const PLACEHOLDER_GIFT: ProfileGift = {
-  title: "Conversation Recap",
-  image: "/gift_conversation.jpg",
-  artist: "Rhema",
-  href: "/gifts/conversation-recap",
-};
 
 export function buildProfileDirectory(
   canvas: GiftingCanvas,
@@ -67,8 +49,6 @@ export function buildProfileDirectory(
       entryCount:
         canvas.people.reduce((sum, person) => sum + person.entries.length, 0) +
         canvas.unsorted.length,
-      // PLACEHOLDER gift — see PLACEHOLDER_GIFT above.
-      gift: PLACEHOLDER_GIFT,
     },
   ];
   for (const row of profileCanvases) {
@@ -138,12 +118,13 @@ export const SEED_GIFTING_STYLES: string[] = [
 // exists yet, so this is a stand-in name until real data lands.
 export const PLACEHOLDER_ARTISTS: string[] = ["Rhema"];
 
-// PLACEHOLDER — fake numbers for features that do not exist yet (tokens,
-// subscription level, follows). Replace with real data when those
-// features land; do not treat these as the user's real counts.
+// PLACEHOLDER — zeroed counts for features that do not exist yet
+// (tokens, follows). Subscription level stays "Trial" until it is real.
+// Replace with real data when those features land; do not treat these
+// as the user's real counts.
 export const PLACEHOLDER_PROFILE_STATS = {
-  tokens: 42,
+  tokens: 0,
   subscription: "Trial",
-  following: 3,
-  followers: 5,
+  following: 0,
+  followers: 0,
 };

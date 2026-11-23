@@ -387,30 +387,6 @@
   width: min(26rem, 100%);
 }
 
-.gift {
-  display: block;
-  margin-top: 1rem;
-  color: var(--kin-white);
-  text-decoration: none;
-}
-
-.gift:hover .giftCaption {
-  color: var(--kin-light-gray);
-}
-
-.giftImage {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
-.giftCaption {
-  display: block;
-  margin-top: 0.45rem;
-  color: var(--kin-light-gray);
-  font: 400 var(--kin-caption-size)/1.4 var(--kin-micro-mono);
-}
-
 @media (max-width: 720px) {
   .metaBlock {
     align-items: flex-start;
