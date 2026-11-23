@@ -1,0 +1,41 @@
+.stage {
+  position: relative;
+  width: min(100%, 32rem);
+  aspect-ratio: 1;
+  margin-inline: auto;
+}
+
+.jar {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.word {
+  position: absolute;
+  left: 0;
+  top: 0;
+  border: 0;
+  padding: 0.1rem 0.25rem;
+  background: transparent;
+  color: rgb(255 255 255 / 55%);
+  cursor: pointer;
+  font-family: var(--kin-ui-sans);
+  font-size: 0.95rem;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.word:hover {
+  color: var(--kin-white);
+}
+
+.wordActive {
+  color: var(--kin-white);
+}
+
+.word:focus-visible {
+  outline: 1px solid currentColor;
+  outline-offset: 3px;
+}
