@@ -7,107 +7,109 @@
   color: var(--kin-white);
 }
 
-.halves {
+/* The cover layout: two equal halves — the left rail holds the two
+   kettles stacked (jar on top, pitcher below), each with a vertical
+   column of names beside it; the right stage is a big screen showing
+   the preview of the active name. The left stack sits CENTERED in the
+   left half (Riles 2026-11-23: don't squeeze everything to the left) —
+   each row centers its kettle + column group in the rail, and the
+   preview fills the right half, so there is no empty third on the
+   right. The kettles never disappear — the preview lives on the big
+   screen, not at a kettle. */
+.layout {
   display: grid;
   flex: 1;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(20rem, 1fr) minmax(20rem, 1fr);
+  gap: clamp(1.5rem, 3vw, 3rem);
+  min-height: 0;
 }
 
-/* One half per kettle. Each half holds a kettle, a wheel of words
-   circling it, a small "?" with the note behind it, and — while a wheel
-   word is hovered — a large preview of that canvas at the kettle's spot.
-   --kettle-size lives on the half, so the kettle, the "?" and the
-   preview all size from the same number. */
-.half {
+.rail {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* One row per kettle: the kettle on the left, its column of names
+   beside it. The row is the column's viewport (the names roll inside
+   it), so it needs a definite height — flex: 1 splits the rail evenly.
+   The kettle + column group is centered in the row (the column caps
+   its own width), so the left stack sits centered in the left half. */
+.row {
   position: relative;
-  min-height: 34rem;
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(1rem, 2vw, 2rem);
+  min-height: 0;
   overflow: hidden;
 }
 
-.half:first-child {
-  --kettle-size: min(20vw, 17rem);
+/* The kettle's box: a fixed width (the image fills it), so the "?"
+   beside it can anchor to its right edge. */
+.kettleWrap {
+  position: relative;
+  flex-shrink: 0;
+  width: var(--kettle-size);
 }
 
-.half:last-child {
-  --kettle-size: min(18vw, 15rem);
+.row:first-child {
+  --kettle-size: min(13vw, 12rem);
 }
 
-/* The kettle must sit where its rect says it sits — no transform
-   centering. Margin auto centers it instead, with its size in
-   --kettle-size. It sits a little toward the bottom-right: top/left
-   offsets shift its center down ~1.5rem and right ~1rem (the margin-auto
-   center moves half the offset). The right shift stays small on purpose
-   — the left kettle's right edge must clear the "?" beside it (1rem of
-   clearance left). */
+.row:last-child {
+  --kettle-size: min(12vw, 11rem);
+}
+
 .kettle {
-  position: absolute;
-  top: 3rem;
-  right: 0;
-  bottom: 0;
-  left: 2rem;
-  z-index: 1;
-  width: var(--kettle-size);
+  display: block;
+  width: 100%;
   height: auto;
-  margin: auto;
   pointer-events: none;
 }
 
-/* While a wheel word is hovered, the kettle hides and the preview takes
-   its place (same spot, same size). Visibility — not display — so the
-   wheel keeps measuring the same center and the kettle returns exactly
-   where it was. */
-.kettleHidden {
-  visibility: hidden;
+/* The big screen on the right: the active name's canvas, large. The
+   preview sits bare on the page (no frame), like the old kettle
+   preview — only much bigger. It never takes the pointer; the column
+   names keep their clicks. */
+.stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  min-width: 0;
+  min-height: 0;
 }
 
-/* Hover preview: a large page-preview thumbnail of the hovered canvas,
-   at that side's kettle spot and roughly the kettle's size (the jar is
-   ~17rem wide, the pitcher ~15rem), keeping its 16:9 ratio. Same
-   margin-auto centering as the kettle, so it lands exactly where the
-   kettle was. It never takes the pointer — the wheel words keep their
-   clicks. The "?" beside the kettle stays visible above it. */
-.kettlePreview {
-  position: absolute;
-  top: 3rem;
-  right: 0;
-  bottom: 0;
-  left: 2rem;
-  z-index: 2;
-  width: var(--kettle-size);
-  height: fit-content;
-  margin: auto;
+.stagePreview {
+  width: min(100%, 58rem);
   pointer-events: none;
 }
 
-.kettlePreviewStatus {
+.stageCaption {
   margin: 0;
-  padding: 0.75rem 1rem;
-  /* No frame around the preview — the loading box sits bare like it. */
-  border: 0;
-  background: rgb(255 255 255 / 6%);
-  color: var(--kin-light-gray);
-  font-size: 0.9rem;
-}
-
-.kettlePreviewCaption {
-  margin: 0.45rem 0 0;
   color: var(--kin-light-gray);
   font: 400 var(--kin-caption-size)/1.4 var(--kin-micro-mono);
   text-align: center;
 }
 
-.zoneStatus {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  z-index: 1;
-  width: max-content;
-  max-width: 90%;
+.stageStatus {
   margin: 0;
   color: var(--kin-light-gray);
   font-size: 0.9rem;
   text-align: center;
-  transform: translate(-50%, -50%);
+}
+
+.zoneStatus {
+  flex: 1;
+  align-self: center;
+  margin: 0;
+  color: var(--kin-light-gray);
+  font-size: 0.9rem;
+  text-align: center;
 }
 
 .status {
@@ -125,43 +127,23 @@
   white-space: nowrap;
 }
 
-@media (max-width: 1100px) {
-  .half:first-child {
-    --kettle-size: min(28vw, 15rem);
-  }
-
-  .half:last-child {
-    --kettle-size: min(24vw, 13rem);
-  }
-}
-
 @media (max-width: 700px) {
-  /* Stacked: one kettle and wheel at a time. */
-  .halves {
+  /* Stacked: the rail's two rows, then the big screen below. The rows
+     need a fixed height here (the rail's height is content-driven once
+     stacked), so the columns have a viewport to roll in. */
+  .layout {
     grid-template-columns: 1fr;
   }
 
-  .half {
-    min-height: 100svh;
+  .row {
+    min-height: 16rem;
   }
 
-  .half:first-child {
-    --kettle-size: min(46vw, 13rem);
+  .row:first-child {
+    --kettle-size: min(34vw, 9rem);
   }
 
-  .half:last-child {
-    --kettle-size: min(42vw, 12rem);
-  }
-
-  /* Each kettle shifts slightly toward its outer side, as before — and
-     the preview at its spot shifts with it (same classes). */
-  .kettleJar {
-    right: 0;
-    left: 8%;
-  }
-
-  .kettlePitcher {
-    right: 8%;
-    left: 0;
+  .row:last-child {
+    --kettle-size: min(30vw, 8rem);
   }
 }

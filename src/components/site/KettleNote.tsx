@@ -23,11 +23,16 @@ export default function KettleNote({
   side,
   label,
   children,
+  variant = "half",
 }: {
   kettle: "jar" | "pitcher";
   side: "left" | "right";
   label: string;
   children: ReactNode;
+  // "half" centers the "?" on its half (the wheel layout); "wrap"
+  // anchors it to the right edge of a small wrap around the kettle
+  // (the cover layout, where the kettle is a flex item, not centered).
+  variant?: "half" | "wrap";
 }) {
   const [open, setOpen] = useState(false);
   const [position, setPosition] = useState({ top: 0, left: 0 });
@@ -160,7 +165,7 @@ export default function KettleNote({
       <button
         aria-expanded={open}
         aria-label={label}
-        className={`${styles.noteTrigger} ${kettle === "jar" ? styles.noteTriggerJar : styles.noteTriggerPitcher}`}
+        className={`${styles.noteTrigger} ${variant === "wrap" ? styles.noteTriggerWrap : kettle === "jar" ? styles.noteTriggerJar : styles.noteTriggerPitcher}`.trim()}
         onClick={() => setOpen((wasOpen) => !wasOpen)}
         onFocus={openCard}
         ref={buttonRef}

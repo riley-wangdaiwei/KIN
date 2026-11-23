@@ -1,0 +1,48 @@
+/* The cover-style wheel: names in a vertical column beside the kettle,
+   rolling vertically. The name at the column's vertical center lights
+   bright white; the names above and below it dim toward the edges
+   (opacity comes from the component's inline style). The column takes
+   the full height of its row and hides the names rolling in and out at
+   its top and bottom edges. The names are links to their canvases. */
+.column {
+  position: relative;
+  /* Capped (not flex: 1): the column takes up to 22rem and shrinks to
+     fit, so the kettle + column group has a definite width and the row
+     can center it in the left half. Only the community page uses this
+     component. */
+  flex: 0 1 22rem;
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+  user-select: none;
+}
+
+/* Slightly smaller than the waterfall's words (which run
+   clamp(1.15rem, 1.6vw, 1.7rem) on 28px rows): same sans, same tight
+   lowercase setting. The slot is 38px tall (the line-height), so the
+   text sits centered in its slot. Long labels truncate to one row. */
+.columnName {
+  position: absolute;
+  left: 0;
+  display: block;
+  width: 100%;
+  height: 38px;
+  overflow: hidden;
+  color: rgb(255 255 255 / 55%);
+  cursor: pointer;
+  font: 400 1.1rem/38px var(--kin-ui-sans);
+  letter-spacing: -0.04em;
+  text-decoration: none;
+  text-overflow: ellipsis;
+  text-transform: lowercase;
+  white-space: nowrap;
+}
+
+.columnNameActive {
+  color: var(--kin-white);
+}
+
+.columnName:hover,
+.columnName:focus-visible {
+  color: var(--kin-white);
+}

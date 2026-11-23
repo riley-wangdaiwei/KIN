@@ -49,6 +49,19 @@
   transform: translateX(calc(-1 * (var(--kettle-size) / 2 + 1rem)));
 }
 
+/* When the "?" sits in a small wrap around a kettle (the cover layout),
+   it anchors to the wrap's right edge — toward the name column — instead
+   of centering on a half. It comes after the jar/pitcher rules so it
+   wins on equal specificity. */
+.noteTriggerWrap {
+  top: 50%;
+  right: -0.9rem;
+  bottom: auto;
+  left: auto;
+  margin: 0;
+  transform: translateY(-50%);
+}
+
 /* The note as a normal horizontal paragraph — around 19rem wide, never
    the old 7rem narrow column. A light-paper card, like the quiz result:
    dark text on paper, so it reads on the purple. No border — the paper

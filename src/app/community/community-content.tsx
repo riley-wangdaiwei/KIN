@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import WordWheel, { type WordWheelItem } from "@/components/site/WordWheel";
+import CoverColumn, { type CoverColumnItem } from "@/components/site/CoverColumn";
 import KettleNote from "@/components/site/KettleNote";
 import CanvasPreview from "@/components/canvas/CanvasPreview";
 import type {
@@ -21,8 +21,8 @@ type Publication = {
 type CommunityCanvasItem = {
   id: string;
   question: string;
-  // Short title for the waterfall (e.g. "special gifts"); null when the
-  // question has none — the waterfall falls back to the full question.
+  // Short title for the column (e.g. "special gifts"); null when the
+  // question has none — the column falls back to the full question.
   shortTitle: string | null;
   createdAt: string;
 };
@@ -38,7 +38,7 @@ type PreviewData = {
   unsorted: CanvasEntry[];
 };
 
-// The hovered waterfall item's fetch target, read from its link — the same
+// The preview target for a column item, read from its link — the same
 // href a click would follow. Question canvases load their answers
 // (/api/community/questions/[id]); published canvases load the shared
 // canvas (/api/canvas/share/[token]).
@@ -63,134 +63,129 @@ export default function CommunityContent() {
   const [communityCanvases, setCommunityCanvases] = useState<CommunityCanvasItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const leftHalfRef = useRef<HTMLElement>(null);
-  const rightHalfRef = useRef<HTMLElement>(null);
-  const leftKettleRef = useRef<HTMLImageElement>(null);
-  const rightKettleRef = useRef<HTMLImageElement>(null);
-  // Hover preview: fetched on hover, cached per canvas, never preloaded.
-  // It appears AT the hovered side's kettle spot, replacing the kettle
-  // while it shows — previewSide says which half it belongs to.
-  const [preview, setPreview] = useState<PreviewData | null>(null);
-  const [previewSide, setPreviewSide] = useState<"left" | "right" | null>(null);
-  const [previewLoading, setPreviewLoading] = useState(false);
-  const previewCacheRef = useRef(new Map<string, PreviewData>());
-  const previewKeyRef = useRef<string | null>(null);
-  const previewClearTimerRef = useRef<number | null>(null);
+  // The big preview on the right: fetched on demand, cached per canvas,
+  // never preloaded. The kettles never disappear for it — it lives on
+  // the big screen, not at a kettle. The cache is state (not a ref) so
+  // the render can read it; the effect below only starts fetches and
+  // never sets state synchronously (the fetch callbacks do).
+  const [previewCache, setPreviewCache] = useState<Map<string, PreviewData>>(
+    () => new Map(),
+  );
+  const [failedKeys, setFailedKeys] = useState<ReadonlySet<string>>(
+    () => new Set(),
+  );
+  // Fetches in flight, so the effect never starts the same one twice
+  // when it re-runs (a fetch completing re-renders, which re-runs it).
+  const inflightRef = useRef(new Set<string>());
+  // Which item the big preview shows: the hovered name if any, else the
+  // center name of the engaged column (the last column the pointer
+  // entered; the top one until then). The columns report their center
+  // when it changes, so the preview follows the roll.
+  const [hoveredItem, setHoveredItem] = useState<CoverColumnItem | null>(null);
+  const [topCenter, setTopCenter] = useState<CoverColumnItem | null>(null);
+  const [bottomCenter, setBottomCenter] = useState<CoverColumnItem | null>(null);
+  const [activeColumn, setActiveColumn] = useState<"top" | "bottom">("top");
 
-  const clearPreview = useCallback(() => {
-    previewKeyRef.current = null;
-    setPreview(null);
-    setPreviewLoading(false);
-    setPreviewSide(null);
-  }, []);
+  const activeItem = useMemo(
+    () =>
+      hoveredItem ??
+      (activeColumn === "bottom" ? bottomCenter : topCenter),
+    [hoveredItem, activeColumn, bottomCenter, topCenter],
+  );
 
-  const handleHoverItem = useCallback(
-    (item: { label?: string; href?: string } | null, side: "left" | "right") => {
-      if (previewClearTimerRef.current !== null) {
-        window.clearTimeout(previewClearTimerRef.current);
-        previewClearTimerRef.current = null;
-      }
-      const target = item ? previewTargetFromHref(item.href, item.label) : null;
-      if (!target) {
-        // A short delay so moving between two words does not flicker the
-        // preview away and back.
-        previewClearTimerRef.current = window.setTimeout(clearPreview, 120);
-        return;
-      }
-      setPreviewSide(side);
-      const key =
-        target.kind === "question"
-          ? `question:${target.id}`
-          : `publication:${target.token}`;
-      previewKeyRef.current = key;
-      const cached = previewCacheRef.current.get(key);
-      if (cached) {
-        setPreview(cached);
-        setPreviewLoading(false);
-        return;
-      }
-      setPreview(null);
-      setPreviewLoading(true);
-      const url =
-        target.kind === "question"
-          ? `/api/community/questions/${encodeURIComponent(target.id)}`
-          : `/api/canvas/share/${encodeURIComponent(target.token)}`;
-      void fetch(url, { cache: "no-store" })
-        .then(async (response) => {
-          const result = (await response.json()) as
-            | SharedCanvas
-            | {
-                answers?: { id: string; content: string; createdAt: string }[];
-                error?: string;
-              };
-          if (!response.ok) {
-            throw new Error(
-              "error" in result && result.error
-                ? result.error
-                : "This canvas could not be opened.",
-            );
-          }
-          let data: PreviewData;
-          if (target.kind === "question") {
-            // A question canvas is its answers — text only, no names.
-            // Rendered as unsorted text entries, so the preview shows the
-            // answers stacked like the canvas page lists them.
-            const answers =
-              "answers" in result && Array.isArray(result.answers)
-                ? result.answers
-                : [];
-            data = {
-              key,
-              label: target.label,
-              people: [],
-              unsorted: answers.map((answer) => ({
-                id: answer.id,
-                personId: null,
-                relatedEntryId: null,
-                kind: "text" as const,
-                content: answer.content,
-                storagePath: null,
-                imageUrl: null,
-                imageSize: null,
-                fontSize: null,
-                posX: null,
-                posY: null,
-                createdAt: answer.createdAt,
-              })),
+  // The big preview follows the active item: the effect starts the
+  // fetch for it when it is missing (cached and failed targets are
+  // skipped; a fetch in flight is never started twice). State changes
+  // only in the fetch's async callbacks.
+  useEffect(() => {
+    if (!activeItem) return;
+    const target = previewTargetFromHref(activeItem.href, activeItem.label);
+    if (!target) return;
+    const key =
+      target.kind === "question"
+        ? `question:${target.id}`
+        : `publication:${target.token}`;
+    if (
+      previewCache.has(key) ||
+      failedKeys.has(key) ||
+      inflightRef.current.has(key)
+    ) {
+      return;
+    }
+    inflightRef.current.add(key);
+    const url =
+      target.kind === "question"
+        ? `/api/community/questions/${encodeURIComponent(target.id)}`
+        : `/api/canvas/share/${encodeURIComponent(target.token)}`;
+    void fetch(url, { cache: "no-store" })
+      .then(async (response) => {
+        const result = (await response.json()) as
+          | SharedCanvas
+          | {
+              answers?: { id: string; content: string; createdAt: string }[];
+              error?: string;
             };
-          } else {
-            const shared = result as SharedCanvas;
-            data = {
-              key,
-              label: target.label,
-              people: shared.people ?? [],
-              unsorted: shared.unsorted ?? [],
-            };
-          }
-          previewCacheRef.current.set(key, data);
-          if (previewKeyRef.current === key) {
-            setPreview(data);
-            setPreviewLoading(false);
-          }
-        })
-        .catch(() => {
-          if (previewKeyRef.current === key) {
-            setPreview(null);
-            setPreviewLoading(false);
-          }
+        if (!response.ok) {
+          throw new Error(
+            "error" in result && result.error
+              ? result.error
+              : "This canvas could not be opened.",
+          );
+        }
+        let data: PreviewData;
+        if (target.kind === "question") {
+          // A question canvas is its answers — text only, no names.
+          // Rendered as unsorted text entries, so the preview shows the
+          // answers stacked like the canvas page lists them.
+          const answers =
+            "answers" in result && Array.isArray(result.answers)
+              ? result.answers
+              : [];
+          data = {
+            key,
+            label: target.label,
+            people: [],
+            unsorted: answers.map((answer) => ({
+              id: answer.id,
+              personId: null,
+              relatedEntryId: null,
+              kind: "text" as const,
+              content: answer.content,
+              storagePath: null,
+              imageUrl: null,
+              imageSize: null,
+              fontSize: null,
+              posX: null,
+              posY: null,
+              createdAt: answer.createdAt,
+            })),
+          };
+        } else {
+          const shared = result as SharedCanvas;
+          data = {
+            key,
+            label: target.label,
+            people: shared.people ?? [],
+            unsorted: shared.unsorted ?? [],
+          };
+        }
+        setPreviewCache((prev) => {
+          const next = new Map(prev);
+          next.set(key, data);
+          return next;
         });
-    },
-    [clearPreview],
-  );
-
-  useEffect(
-    () => () => {
-      if (previewClearTimerRef.current !== null) {
-        window.clearTimeout(previewClearTimerRef.current);
-      }
-    },
-    [],
-  );
+      })
+      .catch(() => {
+        setFailedKeys((prev) => {
+          const next = new Set(prev);
+          next.add(key);
+          return next;
+        });
+      })
+      .finally(() => {
+        inflightRef.current.delete(key);
+      });
+  }, [activeItem, previewCache, failedKeys]);
 
   useEffect(() => {
     let active = true;
@@ -226,13 +221,13 @@ export default function CommunityContent() {
     };
   }, []);
 
-  // Each half runs a wheel of words circling its kettle — the left one
-  // the community question titles, the right one the people's canvas
-  // names. The left wheel shows each question's short title when it has
-  // one ("special gifts"), falling back to the full question. The words
-  // are links to their canvases (click, not drag); hovering one pauses
-  // the ring and shows its preview at that side's kettle.
-  const questionItems: WordWheelItem[] = useMemo(
+  // Each row runs a vertical column of names beside its kettle — the top
+  // one the community question titles, the bottom one the people's
+  // canvas names. The top column shows each question's short title when
+  // it has one ("special gifts"), falling back to the full question. The
+  // names are links to their canvases (click, not drag); hovering one
+  // pauses its column and shows its preview on the big screen.
+  const questionItems: CoverColumnItem[] = useMemo(
     () =>
       communityCanvases.map((canvas) => ({
         label: canvas.shortTitle ?? canvas.question,
@@ -240,7 +235,7 @@ export default function CommunityContent() {
       })),
     [communityCanvases],
   );
-  const peopleItems: WordWheelItem[] = useMemo(
+  const peopleItems: CoverColumnItem[] = useMemo(
     () =>
       publications.map((publication) => ({
         label: publication.name,
@@ -248,115 +243,124 @@ export default function CommunityContent() {
       })),
     [publications],
   );
+  // What the big screen shows, derived during render: the cached data
+  // for the active item (if loaded), else the in-flight preview state
+  // when it already matches. No extra state — the effect above only
+  // starts fetches, and a fetch completion re-renders via setPreview.
+  const activeTarget = useMemo(
+    () =>
+      activeItem
+        ? previewTargetFromHref(activeItem.href, activeItem.label)
+        : null,
+    [activeItem],
+  );
+  const activeKey = activeTarget
+    ? activeTarget.kind === "question"
+      ? `question:${activeTarget.id}`
+      : `publication:${activeTarget.token}`
+    : null;
+  const shownPreview = activeKey ? (previewCache.get(activeKey) ?? null) : null;
+  const activeFailed = activeKey !== null && failedKeys.has(activeKey);
 
   if (loading) return <p className={styles.status}>Loading the community…</p>;
   if (error) return <p className={styles.status} role="alert">{error}</p>;
 
   return (
     <>
-      <div className={styles.halves}>
-        <section aria-label="Community canvases" className={styles.half} ref={leftHalfRef}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            alt=""
-            className={`${styles.kettle} ${styles.kettleJar} ${previewSide === "left" && (preview || previewLoading) ? styles.kettleHidden : ""}`.trim()}
-            ref={leftKettleRef}
-            src="/jar-community-canvases.png"
-          />
-          {communityCanvases.length === 0 ? (
-            <p className={styles.zoneStatus}>No community questions yet.</p>
-          ) : (
-            <WordWheel
-              items={questionItems}
-              kettleRef={leftKettleRef}
-              onHoverItem={(item) => handleHoverItem(item, "left")}
-              refreshKey={communityCanvases.map((canvas) => canvas.id).join("|")}
-              regionRef={leftHalfRef}
-              // Visible-content fractions of the jar PNG, measured from
-              // its alpha channel (the img box has transparent margins).
-              visibleFrac={{ x0: 0.036, x1: 0.965, y0: 0.134, y1: 0.9 }}
-            />
-          )}
-          <KettleNote kettle="jar" label="About the community canvases" side="left">
-            To publish your own canvas, name it from{" "}
-            <Link href="/canvas">your canvas</Link>. Every week a new question
-            appears in your canvas waterfall — answer it there, and your answer
-            joins the community canvas for that question.{" "}
-            <Link href="/profile">Create your own canvas</Link>.
-          </KettleNote>
-          {previewSide === "left" && (preview || previewLoading) && (
-            <div
-              aria-hidden="true"
-              className={`${styles.kettlePreview} ${styles.kettleJar}`}
-              data-testid="community-hover-preview"
-            >
-              {previewLoading && !preview ? (
-                <p className={styles.kettlePreviewStatus}>Loading preview…</p>
-              ) : preview ? (
-                <>
-                  <CanvasPreview
-                    label={preview.label}
-                    people={preview.people}
-                    unsorted={preview.unsorted}
-                  />
-                  <p className={styles.kettlePreviewCaption}>{preview.label}</p>
-                </>
-              ) : null}
+      <div className={styles.layout}>
+        <div className={styles.rail}>
+          <section aria-label="Community canvases" className={styles.row}>
+            <div className={styles.kettleWrap}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                alt=""
+                className={styles.kettle}
+                src="/jar-community-canvases.png"
+              />
+              <KettleNote
+                kettle="jar"
+                label="About the community canvases"
+                side="left"
+                variant="wrap"
+              >
+                To publish your own canvas, name it from{" "}
+                <Link href="/canvas">your canvas</Link>. Every week a new question
+                appears in your canvas waterfall — answer it there, and your answer
+                joins the community canvas for that question.{" "}
+                <Link href="/profile">Create your own canvas</Link>.
+              </KettleNote>
             </div>
-          )}
-        </section>
+            {communityCanvases.length === 0 ? (
+              <p className={styles.zoneStatus}>No community questions yet.</p>
+            ) : (
+              <CoverColumn
+                items={questionItems}
+                onCenterItem={setTopCenter}
+                onEngage={() => setActiveColumn("top")}
+                onHoverItem={setHoveredItem}
+              />
+            )}
+          </section>
 
-        <section aria-label="People's canvases" className={styles.half} ref={rightHalfRef}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            alt=""
-            className={`${styles.kettle} ${styles.kettlePitcher} ${previewSide === "right" && (preview || previewLoading) ? styles.kettleHidden : ""}`.trim()}
-            ref={rightKettleRef}
-            src="/pitcher-peoples-canvases.png"
-          />
-          {publications.length === 0 ? (
-            <p className={styles.zoneStatus}>No canvases published yet.</p>
-          ) : (
-            <WordWheel
-              items={peopleItems}
-              kettleRef={rightKettleRef}
-              onHoverItem={(item) => handleHoverItem(item, "right")}
-              refreshKey={publications.map((publication) => publication.token).join("|")}
-              regionRef={rightHalfRef}
-              // Visible-content fractions of the pitcher PNG, measured
-              // from its alpha channel.
-              visibleFrac={{ x0: 0.196, x1: 0.747, y0: 0.083, y1: 0.927 }}
-            />
-          )}
-          <KettleNote kettle="pitcher" label="About the people's canvases" side="right">
-            Published canvases from the community, and the questions we&rsquo;re
-            answering together. Open one to see how someone else keeps what they
-            notice about the people they love.
-          </KettleNote>
-          {previewSide === "right" && (preview || previewLoading) && (
-            <div
-              aria-hidden="true"
-              className={`${styles.kettlePreview} ${styles.kettlePitcher}`}
-              data-testid="community-hover-preview"
-            >
-              {previewLoading && !preview ? (
-                <p className={styles.kettlePreviewStatus}>Loading preview…</p>
-              ) : preview ? (
-                <>
-                  <CanvasPreview
-                    label={preview.label}
-                    people={preview.people}
-                    unsorted={preview.unsorted}
-                  />
-                  <p className={styles.kettlePreviewCaption}>{preview.label}</p>
-                </>
-              ) : null}
+          <section aria-label="People's canvases" className={styles.row}>
+            <div className={styles.kettleWrap}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                alt=""
+                className={styles.kettle}
+                src="/pitcher-peoples-canvases.png"
+              />
+              <KettleNote
+                kettle="pitcher"
+                label="About the people's canvases"
+                side="left"
+                variant="wrap"
+              >
+                Published canvases from the community, and the questions we&rsquo;re
+                answering together. Open one to see how someone else keeps what they
+                notice about the people they love.
+              </KettleNote>
             </div>
+            {publications.length === 0 ? (
+              <p className={styles.zoneStatus}>No canvases published yet.</p>
+            ) : (
+              <CoverColumn
+                items={peopleItems}
+                onCenterItem={setBottomCenter}
+                onEngage={() => setActiveColumn("bottom")}
+                onHoverItem={setHoveredItem}
+              />
+            )}
+          </section>
+        </div>
+
+        <section aria-label="Preview" className={styles.stage}>
+          {!activeItem ? (
+            <p className={styles.stageStatus}>Nothing to preview yet.</p>
+          ) : activeFailed ? (
+            <p className={styles.stageStatus}>This canvas could not be opened.</p>
+          ) : shownPreview ? (
+            <>
+              <div
+                aria-hidden="true"
+                className={styles.stagePreview}
+                data-testid="community-big-preview"
+              >
+                <CanvasPreview
+                  label={shownPreview.label}
+                  people={shownPreview.people}
+                  unsorted={shownPreview.unsorted}
+                />
+              </div>
+              <p className={styles.stageCaption}>{shownPreview.label}</p>
+            </>
+          ) : (
+            <p className={styles.stageStatus}>Loading preview…</p>
           )}
         </section>
       </div>
 
-      {/* The circling text is a browsing surface; this list is the same
+      {/* The columns are a browsing surface; this list is the same
           canvases for keyboard and screen-reader access. */}
       <ul className={styles.visuallyHidden}>
         {publications.map((publication) => (
