@@ -1,17 +1,18 @@
 // Artists and partners shown on /artists. One entry per person — the wheel
 // reads this list, so adding an artist or partner is one entry here.
 //
-// What the repo stores today: exactly ONE artist name — "Rhema"
-// (src/features/profile/profile.ts PLACEHOLDER_ARTISTS + the gift artist;
-// "Rhema meal" in src/app/gifts/page.tsx). The gifts data spells the
+// The list is Rhema Tan plus the homepage's artist/partner hover-list
+// names, imported from src/data/hover-lists.ts (do not retype them here).
+// Those hover-list names include placeholder/demo names (e.g. Virginia
+// Woolf) — she can confirm or correct them. The gifts data spells the
 // collection "Rhemma Meals" with a double m — left alone; the artist
-// herself is Rhema. No partner names are stored anywhere in the repo
-// (the partner page names no one), so the wheel starts with Rhema Tan
-// and grows as names are added here.
+// herself is Rhema.
 //
-// Rhema Tan is the new entry: her photos live at public/rhema_1/2/3.png
-// (uploaded separately). Artists without photos get a neutral placeholder
-// on the right side instead.
+// Rhema Tan is the only entry with photos (public/rhema_1/2/3.png).
+// Artists without photos show only their caption on the right side —
+// no photo area, no placeholder.
+import { artistPartnerNames } from "@/data/hover-lists";
+
 export type ArtistPhotos = {
   large: string;
   small: [string, string];
@@ -25,6 +26,14 @@ export type ArtistEntry = {
   photos?: ArtistPhotos;
 };
 
+function slugify(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/&/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
 export const ARTISTS: ArtistEntry[] = [
   {
     id: "rhema-tan",
@@ -33,4 +42,5 @@ export const ARTISTS: ArtistEntry[] = [
     line: "你好 i like 辣酸豆角包",
     photos: { large: "/rhema_2.png", small: ["/rhema_1.png", "/rhema_3.png"] },
   },
+  ...artistPartnerNames.map((name) => ({ id: slugify(name), name })),
 ];

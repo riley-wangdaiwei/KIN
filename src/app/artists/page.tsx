@@ -11,10 +11,11 @@ export const metadata: Metadata = {
   description: "Make thoughtful, artist-made gifts with re.KIN.",
 };
 
-// Artists as a wheel: a small jar turning on the left with the artists'
-// and partners' names circling it, the active artist's photos on the
-// right. The list lives in src/features/artists/artists.ts — today it is
-// only Rhema Tan, because she is the only artist name the site stores.
+// Artists as a cover-style wheel: a small jar turning beside a
+// vertical column of artists' and partners' names — the name at the
+// column's center is front-most and shows its photos on the right.
+// The list lives in src/features/artists/artists.ts: Rhema Tan plus
+// the homepage's artist/partner hover-list names.
 export default function ArtistsPage() {
   return (
     <EditorialPage

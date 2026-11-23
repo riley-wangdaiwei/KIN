@@ -1,6 +1,10 @@
+/* The /artists split: the cover-style wheel (small jar + name column)
+   on the left, the active artist's photos on the right. The photos
+   take the wider share — substantially larger than the wheel side, but
+   still inside the page column with margins, never full-bleed. */
 .split {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 5fr 7fr;
   gap: 2.5rem;
   align-items: center;
   margin-top: 0.5rem;

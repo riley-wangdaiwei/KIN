@@ -1,15 +1,43 @@
+/* A cover-style wheel: a small jar on the left, the artists' and
+   partners' names in a vertical column beside it. The name at the
+   column's center is bright white and largest; names above and below
+   fade and shrink toward the edges, where a mask lets them disappear.
+   The column takes no pointer events of its own — only the words do —
+   and the stage is the scroll/drag surface, so it keeps vertical page
+   scrolling (pan-y) on touch. */
 .stage {
-  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
   width: min(100%, 32rem);
-  aspect-ratio: 1;
   margin-inline: auto;
+  touch-action: pan-y;
+  user-select: none;
 }
 
 .jar {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
+  flex: none;
+}
+
+.column {
+  position: relative;
+  flex: 1;
+  height: 16rem;
+  overflow: hidden;
+  mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    #000 18%,
+    #000 82%,
+    transparent
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    #000 18%,
+    #000 82%,
+    transparent
+  );
 }
 
 .word {
@@ -17,22 +45,24 @@
   left: 0;
   top: 0;
   border: 0;
-  padding: 0.1rem 0.25rem;
+  padding: 0;
   background: transparent;
-  color: rgb(255 255 255 / 55%);
+  color: var(--kin-white);
   cursor: pointer;
   font-family: var(--kin-ui-sans);
   font-size: 0.95rem;
   line-height: 1.2;
+  text-align: left;
   white-space: nowrap;
+  opacity: var(--word-opacity, 0.55);
 }
 
 .word:hover {
-  color: var(--kin-white);
+  opacity: 1;
 }
 
 .wordActive {
-  color: var(--kin-white);
+  opacity: 1;
 }
 
 .word:focus-visible {

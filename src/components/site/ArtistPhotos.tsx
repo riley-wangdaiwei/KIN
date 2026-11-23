@@ -6,9 +6,8 @@ import styles from "./artist-photos.module.css";
 
 // Right half of /artists: the active artist's photos — one large on top,
 // two small below, all aligned to the same outer edges — and the caption
-// line underneath: Name · Region · one-liner. Artists without photos get
-// the same layout as neutral outlined boxes ("Photos coming soon."), so
-// the panel never shows a broken image and never jumps around.
+// line underneath: Name · Region · one-liner. Artists without photos
+// show only their caption — no photo area at all, no placeholder.
 export default function ArtistPhotos({ entry }: { entry: ArtistEntry }) {
   const captionParts = [entry.region, entry.line].filter(Boolean);
   return (
@@ -20,7 +19,7 @@ export default function ArtistPhotos({ entry }: { entry: ArtistEntry }) {
               src={entry.photos.large}
               alt={`${entry.name} — photo`}
               fill
-              sizes="(max-width: 56rem) 100vw, 34rem"
+              sizes="(max-width: 56rem) 100vw, 40rem"
             />
           </div>
           <div className={styles.smallRow}>
@@ -29,7 +28,7 @@ export default function ArtistPhotos({ entry }: { entry: ArtistEntry }) {
                 src={entry.photos.small[0]}
                 alt={`${entry.name} — photo`}
                 fill
-                sizes="(max-width: 56rem) 50vw, 17rem"
+                sizes="(max-width: 56rem) 50vw, 20rem"
               />
             </div>
             <div className={styles.small}>
@@ -37,22 +36,12 @@ export default function ArtistPhotos({ entry }: { entry: ArtistEntry }) {
                 src={entry.photos.small[1]}
                 alt={`${entry.name} — photo`}
                 fill
-                sizes="(max-width: 56rem) 50vw, 17rem"
+                sizes="(max-width: 56rem) 50vw, 20rem"
               />
             </div>
           </div>
         </>
-      ) : (
-        <>
-          <div className={styles.placeholderLarge}>
-            <p>Photos coming soon.</p>
-          </div>
-          <div className={styles.smallRow}>
-            <div className={styles.placeholderSmall} />
-            <div className={styles.placeholderSmall} />
-          </div>
-        </>
-      )}
+      ) : null}
       <p className={styles.caption}>
         <span className={styles.captionName}>{entry.name}</span>
         {captionParts.length > 0 ? ` · ${captionParts.join(" · ")}` : ""}
