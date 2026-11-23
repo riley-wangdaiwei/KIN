@@ -1,9 +1,29 @@
-/* A ring of words circling a kettle: the community page's replacement
-   for the flowing waterfall. The layer covers its half and takes no
-   pointer events — only the words do. It sits above the kettle
-   (z-index 1) and the preview at the kettle spot (z-index 2), and below
-   the "?" (z-index 4). */
+/* A tilted 3D carousel of words circling a kettle: the community
+   page's replacement for the flowing waterfall. The ring is an ellipse
+   — words on the near (bottom) arc are larger and brighter and pass in
+   front of the kettle, words on the far (top) arc are smaller and
+   dimmer and pass behind it. The occlusion is real stacking: the back
+   layer sits below the kettle (z-index 0 < the kettle's 1) and the
+   front layer above it (z-index 3 > the preview's 2), so a far word
+   disappears behind the kettle's own pixels and re-emerges on the
+   other side. The "?" stays on top (z-index 4). The wrapper itself
+   takes no z-index, so the two layers compete in the half's stacking
+   context. The layers cover their half and take no pointer events —
+   only the words do. */
 .wheelLayer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.wheelLayerBack {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.wheelLayerFront {
   position: absolute;
   inset: 0;
   z-index: 3;
@@ -11,29 +31,37 @@
 }
 
 /* Slightly smaller than the waterfall's words (which run
-   clamp(1.15rem, 1.6vw, 1.7rem) on 28px rows): 20px, same sans, same
-   tight lowercase setting. Long labels truncate to one row. */
+   clamp(1.15rem, 1.6vw, 1.7rem) on 28px rows): same sans, same tight
+   lowercase setting. The smaller size is part of the density — more
+   words fit around the ring without swallowing each other. Long labels
+   truncate to one row at the old 10rem, so a name like "Mara's
+   birthday" still reads in full. Words are dim by default (like the
+   artists page's wheel); the active word — the one at the rightmost
+   point — lights bright white. Depth (scale + opacity) comes from the
+   component's inline style. */
 .wheelWord {
   position: absolute;
-  z-index: 3;
   display: block;
   max-width: min(10rem, 40vw);
   overflow: hidden;
   padding: 0;
-  color: var(--kin-white);
+  color: rgb(255 255 255 / 55%);
   cursor: pointer;
-  font: 400 1.25rem/1.4 var(--kin-ui-sans);
+  font: 400 1.1rem/1.4 var(--kin-ui-sans);
   letter-spacing: -0.04em;
   pointer-events: auto;
   text-decoration: none;
   text-overflow: ellipsis;
   text-transform: lowercase;
-  transform: translate(-50%, -50%);
   user-select: none;
   white-space: nowrap;
 }
 
+.wheelWordActive {
+  color: var(--kin-white);
+}
+
 .wheelWord:hover,
 .wheelWord:focus-visible {
-  color: var(--kin-light-gray);
+  color: var(--kin-white);
 }

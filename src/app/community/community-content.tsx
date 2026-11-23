@@ -272,6 +272,9 @@ export default function CommunityContent() {
               onHoverItem={(item) => handleHoverItem(item, "left")}
               refreshKey={communityCanvases.map((canvas) => canvas.id).join("|")}
               regionRef={leftHalfRef}
+              // Visible-content fractions of the jar PNG, measured from
+              // its alpha channel (the img box has transparent margins).
+              visibleFrac={{ x0: 0.036, x1: 0.965, y0: 0.134, y1: 0.9 }}
             />
           )}
           <KettleNote kettle="jar" label="About the community canvases" side="left">
@@ -320,6 +323,9 @@ export default function CommunityContent() {
               onHoverItem={(item) => handleHoverItem(item, "right")}
               refreshKey={publications.map((publication) => publication.token).join("|")}
               regionRef={rightHalfRef}
+              // Visible-content fractions of the pitcher PNG, measured
+              // from its alpha channel.
+              visibleFrac={{ x0: 0.196, x1: 0.747, y0: 0.083, y1: 0.927 }}
             />
           )}
           <KettleNote kettle="pitcher" label="About the people's canvases" side="right">
