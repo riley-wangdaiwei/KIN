@@ -1,12 +1,18 @@
-/* The /artists split: the cover-style wheel (small jar + name column)
-   on the left, the active artist's photos on the right. The photos
-   take the wider share — substantially larger than the wheel side, but
-   still inside the page column with margins, never full-bleed. */
+/* The /artists split breaks out of the narrow editorial column
+   (.content is min(60vw, 55rem), which squeezed the jar, the name
+   column and the photos into the left ~60% of the page and left the
+   right third empty): the split spans gutter-to-gutter across the
+   viewport — the wheel centered in the left half, the photos in the
+   right half. The photos take the wider share and are substantially
+   larger than before, but still inside the page gutters, never
+   full-bleed. The .content box starts at the left gutter already,
+   so no negative margin is needed — only the wider width. */
 .split {
   display: grid;
-  grid-template-columns: 5fr 7fr;
+  grid-template-columns: 1fr 1fr;
   gap: 2.5rem;
   align-items: center;
+  width: calc(100vw - 2 * var(--kin-page-gutter));
   margin-top: 0.5rem;
 }
 
