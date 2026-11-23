@@ -1,0 +1,39 @@
+/* A ring of words circling a kettle: the community page's replacement
+   for the flowing waterfall. The layer covers its half and takes no
+   pointer events — only the words do. It sits above the kettle
+   (z-index 1) and the preview at the kettle spot (z-index 2), and below
+   the "?" (z-index 4). */
+.wheelLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* Slightly smaller than the waterfall's words (which run
+   clamp(1.15rem, 1.6vw, 1.7rem) on 28px rows): 20px, same sans, same
+   tight lowercase setting. Long labels truncate to one row. */
+.wheelWord {
+  position: absolute;
+  z-index: 3;
+  display: block;
+  max-width: min(10rem, 40vw);
+  overflow: hidden;
+  padding: 0;
+  color: var(--kin-white);
+  cursor: pointer;
+  font: 400 1.25rem/1.4 var(--kin-ui-sans);
+  letter-spacing: -0.04em;
+  pointer-events: auto;
+  text-decoration: none;
+  text-overflow: ellipsis;
+  text-transform: lowercase;
+  transform: translate(-50%, -50%);
+  user-select: none;
+  white-space: nowrap;
+}
+
+.wheelWord:hover,
+.wheelWord:focus-visible {
+  color: var(--kin-light-gray);
+}

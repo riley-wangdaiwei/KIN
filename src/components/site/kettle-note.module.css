@@ -1,0 +1,95 @@
+/* The "?" and its card cover the whole half but take no pointer events
+   themselves — only the "?" button and the card do, so the wheel words
+   keep their hover. The card is fixed, so it escapes the half's
+   overflow. */
+.noteWrap {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+}
+
+/* A small white "?" next to the kettle, on its inner side, where the
+   note used to sit. It shares the kettle's centering (top/left/right/
+   bottom with auto margins, so it sits on the kettle's center) and then
+   shifts out to the kettle's inner edge: half the kettle wide, plus a
+   breath. --kettle-size comes from the half, so it tracks the kettle at
+   every width. */
+.noteTrigger {
+  position: absolute;
+  top: 3rem;
+  right: 0;
+  bottom: 0;
+  left: 2rem;
+  z-index: 4;
+  width: 1.75rem;
+  height: 1.75rem;
+  margin: auto;
+  padding: 0;
+  border: 1px solid var(--kin-white);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--kin-white);
+  cursor: pointer;
+  font: 400 1rem/1.75rem var(--kin-ui-sans);
+  pointer-events: auto;
+  text-align: center;
+}
+
+.noteTrigger:hover,
+.noteTrigger:focus-visible {
+  background: var(--kin-white-wash);
+}
+
+.noteTriggerJar {
+  transform: translateX(calc(var(--kettle-size) / 2 + 1rem));
+}
+
+.noteTriggerPitcher {
+  transform: translateX(calc(-1 * (var(--kettle-size) / 2 + 1rem)));
+}
+
+/* The note as a normal horizontal paragraph — around 19rem wide, never
+   the old 7rem narrow column. A light-paper card, like the quiz result:
+   dark text on paper, so it reads on the purple. No border — the paper
+   itself separates it. */
+.noteCard {
+  position: fixed;
+  z-index: 20;
+  width: min(19rem, 86vw);
+  padding: 1rem 1.25rem;
+  background: var(--kin-paper);
+  color: #1c1c1c;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  pointer-events: auto;
+}
+
+.noteCardLeft {
+  text-align: left;
+}
+
+.noteCardRight {
+  text-align: right;
+}
+
+.noteCard a {
+  color: #1c1c1c;
+  text-decoration: underline;
+}
+
+.noteCard a:hover {
+  color: #555;
+}
+
+@media (max-width: 700px) {
+  /* Stacked: the kettles shift toward their outer sides, and the "?"
+     follows its kettle. */
+  .noteTriggerJar {
+    left: 8%;
+  }
+
+  .noteTriggerPitcher {
+    right: 8%;
+  }
+}

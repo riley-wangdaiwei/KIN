@@ -13,23 +13,32 @@
   grid-template-columns: 1fr 1fr;
 }
 
-/* One half per kettle. Each half holds a kettle, a note, and the shared
-   flowing waterfall — a narrow column, full page height, waterfall shape,
-   sitting left of its kettle (see the Waterfall props in
-   community-content.tsx). */
+/* One half per kettle. Each half holds a kettle, a wheel of words
+   circling it, a small "?" with the note behind it, and — while a wheel
+   word is hovered — a large preview of that canvas at the kettle's spot.
+   --kettle-size lives on the half, so the kettle, the "?" and the
+   preview all size from the same number. */
 .half {
   position: relative;
   min-height: 34rem;
   overflow: hidden;
 }
 
-/* The kettle is a waterfall obstacle, so it must sit where its rect says
-   it sits — no transform centering. Margin auto centers it instead, with
-   its size in --kettle-size. It sits a little toward the bottom-right:
-   top/left offsets shift its center down ~1.5rem and right ~1rem (the
-   margin-auto center moves half the offset). The right shift stays small
-   on purpose — the left kettle's right edge must clear the note beside
-   it (1rem of clearance left). */
+.half:first-child {
+  --kettle-size: min(20vw, 17rem);
+}
+
+.half:last-child {
+  --kettle-size: min(18vw, 15rem);
+}
+
+/* The kettle must sit where its rect says it sits — no transform
+   centering. Margin auto centers it instead, with its size in
+   --kettle-size. It sits a little toward the bottom-right: top/left
+   offsets shift its center down ~1.5rem and right ~1rem (the margin-auto
+   center moves half the offset). The right shift stays small on purpose
+   — the left kettle's right edge must clear the "?" beside it (1rem of
+   clearance left). */
 .kettle {
   position: absolute;
   top: 3rem;
@@ -43,47 +52,48 @@
   pointer-events: none;
 }
 
-.kettleJar {
-  --kettle-size: min(20vw, 17rem);
+/* While a wheel word is hovered, the kettle hides and the preview takes
+   its place (same spot, same size). Visibility — not display — so the
+   wheel keeps measuring the same center and the kettle returns exactly
+   where it was. */
+.kettleHidden {
+  visibility: hidden;
 }
 
-.kettlePitcher {
-  --kettle-size: min(18vw, 15rem);
-}
-
-/* The explanatory text beside each kettle: a narrow column, tall by
-   wrapping. Each note sits on its kettle's inner side. It is a waterfall
-   obstacle too, so the falling column steers around it — and, like the
-   kettle, it is centered without transforms (top/bottom 0 with auto
-   margins). */
-.sideNote {
+/* Hover preview: a large page-preview thumbnail of the hovered canvas,
+   at that side's kettle spot and roughly the kettle's size (the jar is
+   ~17rem wide, the pitcher ~15rem), keeping its 16:9 ratio. Same
+   margin-auto centering as the kettle, so it lands exactly where the
+   kettle was. It never takes the pointer — the wheel words keep their
+   clicks. The "?" beside the kettle stays visible above it. */
+.kettlePreview {
   position: absolute;
-  top: 0;
+  top: 3rem;
+  right: 0;
   bottom: 0;
-  z-index: 1;
-  width: 7rem;
+  left: 2rem;
+  z-index: 2;
+  width: var(--kettle-size);
   height: fit-content;
-  margin-top: auto;
-  margin-bottom: auto;
+  margin: auto;
+  pointer-events: none;
+}
+
+.kettlePreviewStatus {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  /* No frame around the preview — the loading box sits bare like it. */
+  border: 0;
+  background: rgb(255 255 255 / 6%);
   color: var(--kin-light-gray);
-  font-size: 0.85rem;
-  line-height: 1.5;
+  font-size: 0.9rem;
 }
 
-.half:first-child .sideNote {
-  left: calc(50% + 10rem);
-}
-
-.half:last-child .sideNote {
-  right: calc(50% + 9rem);
-}
-
-.sideNote a {
-  color: var(--kin-white);
-}
-
-.sideNote a:hover {
+.kettlePreviewCaption {
+  margin: 0.45rem 0 0;
   color: var(--kin-light-gray);
+  font: 400 var(--kin-caption-size)/1.4 var(--kin-micro-mono);
+  text-align: center;
 }
 
 .zoneStatus {
@@ -105,39 +115,6 @@
   font-size: 0.9rem;
 }
 
-/* Hover preview: a small rectangular thumbnail of the hovered canvas,
-   centered in the gap between the two kettles. The gap is narrow — at
-   desktop widths the notes sit inside it, leaving only ~150–230px
-   between them — so the width stays inside the note gap (the 10vw cap)
-   and never covers a kettle or a note. It never takes the pointer — the
-   waterfall links keep their clicks. On mobile the halves stack, so it
-   sits centered on screen instead, at a readable width. */
-.hoverPreview {
-  position: fixed;
-  left: 50%;
-  top: 50%;
-  z-index: 15;
-  width: min(14rem, 10vw, 86vw);
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-}
-
-.hoverPreviewStatus {
-  margin: 0;
-  padding: 0.75rem 1rem;
-  /* No frame around the preview — the loading box sits bare like it. */
-  border: 0;
-  background: rgb(255 255 255 / 6%);
-  color: var(--kin-light-gray);
-  font-size: 0.9rem;
-}
-
-.hoverPreviewCaption {
-  margin: 0.45rem 0 0;
-  color: var(--kin-light-gray);
-  font: 400 var(--kin-caption-size)/1.4 var(--kin-micro-mono);
-}
-
 .visuallyHidden {
   position: absolute;
   width: 1px;
@@ -149,37 +126,17 @@
 }
 
 @media (max-width: 1100px) {
-  .kettleJar {
+  .half:first-child {
     --kettle-size: min(28vw, 15rem);
   }
 
-  .kettlePitcher {
+  .half:last-child {
     --kettle-size: min(24vw, 13rem);
-  }
-
-  /* The half is too narrow here for a note beside the kettle — a 7rem
-     column at center + 10rem would run past the half's edge and be cut
-     off by its overflow: hidden. The note sits below the kettle instead,
-     and the falling column steers around it there. */
-  .sideNote {
-    top: auto;
-    right: 0;
-    bottom: 1.5rem;
-    left: 0;
-    width: min(20rem, 86%);
-    margin-right: auto;
-    margin-left: auto;
-  }
-
-  .half:first-child .sideNote,
-  .half:last-child .sideNote {
-    right: 0;
-    left: 0;
   }
 }
 
 @media (max-width: 700px) {
-  /* Stacked: one kettle and waterfall at a time. */
+  /* Stacked: one kettle and wheel at a time. */
   .halves {
     grid-template-columns: 1fr;
   }
@@ -188,22 +145,23 @@
     min-height: 100svh;
   }
 
-  /* Each kettle shifts slightly toward its outer side, as before. */
+  .half:first-child {
+    --kettle-size: min(46vw, 13rem);
+  }
+
+  .half:last-child {
+    --kettle-size: min(42vw, 12rem);
+  }
+
+  /* Each kettle shifts slightly toward its outer side, as before — and
+     the preview at its spot shifts with it (same classes). */
   .kettleJar {
     right: 0;
     left: 8%;
-    --kettle-size: min(46vw, 13rem);
   }
 
   .kettlePitcher {
     right: 8%;
     left: 0;
-    --kettle-size: min(42vw, 12rem);
-  }
-
-  /* The halves stack, so there is no gap between the kettles — the hover
-     preview floats centered on screen instead, at a readable width. */
-  .hoverPreview {
-    width: min(20rem, 86vw);
   }
 }

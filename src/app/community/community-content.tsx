@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import Waterfall, { type WaterfallTemplate } from "@/components/site/Waterfall";
+import WordWheel, { type WordWheelItem } from "@/components/site/WordWheel";
+import KettleNote from "@/components/site/KettleNote";
 import CanvasPreview from "@/components/canvas/CanvasPreview";
 import type {
   CanvasEntry,
@@ -64,8 +65,13 @@ export default function CommunityContent() {
   const [error, setError] = useState("");
   const leftHalfRef = useRef<HTMLElement>(null);
   const rightHalfRef = useRef<HTMLElement>(null);
+  const leftKettleRef = useRef<HTMLImageElement>(null);
+  const rightKettleRef = useRef<HTMLImageElement>(null);
   // Hover preview: fetched on hover, cached per canvas, never preloaded.
+  // It appears AT the hovered side's kettle spot, replacing the kettle
+  // while it shows — previewSide says which half it belongs to.
   const [preview, setPreview] = useState<PreviewData | null>(null);
+  const [previewSide, setPreviewSide] = useState<"left" | "right" | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
   const previewCacheRef = useRef(new Map<string, PreviewData>());
   const previewKeyRef = useRef<string | null>(null);
@@ -75,21 +81,23 @@ export default function CommunityContent() {
     previewKeyRef.current = null;
     setPreview(null);
     setPreviewLoading(false);
+    setPreviewSide(null);
   }, []);
 
   const handleHoverItem = useCallback(
-    (item: { label?: string; href?: string } | null) => {
+    (item: { label?: string; href?: string } | null, side: "left" | "right") => {
       if (previewClearTimerRef.current !== null) {
         window.clearTimeout(previewClearTimerRef.current);
         previewClearTimerRef.current = null;
       }
       const target = item ? previewTargetFromHref(item.href, item.label) : null;
       if (!target) {
-        // A short delay so moving between two falling words does not
-        // flicker the preview away and back.
+        // A short delay so moving between two words does not flicker the
+        // preview away and back.
         previewClearTimerRef.current = window.setTimeout(clearPreview, 120);
         return;
       }
+      setPreviewSide(side);
       const key =
         target.kind === "question"
           ? `question:${target.id}`
@@ -218,28 +226,23 @@ export default function CommunityContent() {
     };
   }, []);
 
-  // Each half runs the same flowing waterfall as the canvas: a narrow
-  // column, full page height, waterfall shape. Both falls sit LEFT of
-  // their kettle — the left one in a left-aligned region (left of the
-  // round jar, clear of the note beside it), the right one shifted left
-  // inside its right-aligned region (left of the pitcher, off the far
-  // right edge). Items are links to their canvases (click, not drag).
-  // The left waterfall shows each question's short title when it has one
-  // ("special gifts"), falling back to the truncated full question.
-  const questionTemplates: WaterfallTemplate[] = useMemo(
+  // Each half runs a wheel of words circling its kettle — the left one
+  // the community question titles, the right one the people's canvas
+  // names. The left wheel shows each question's short title when it has
+  // one ("special gifts"), falling back to the full question. The words
+  // are links to their canvases (click, not drag); hovering one pauses
+  // the ring and shows its preview at that side's kettle.
+  const questionItems: WordWheelItem[] = useMemo(
     () =>
       communityCanvases.map((canvas) => ({
-        kind: "word" as const,
         label: canvas.shortTitle ?? canvas.question,
         href: `/community/questions/${canvas.id}`,
-        truncate: true,
       })),
     [communityCanvases],
   );
-  const peopleTemplates: WaterfallTemplate[] = useMemo(
+  const peopleItems: WordWheelItem[] = useMemo(
     () =>
       publications.map((publication) => ({
-        kind: "word" as const,
         label: publication.name,
         href: `/canvas-share/${publication.token}`,
       })),
@@ -256,86 +259,98 @@ export default function CommunityContent() {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             alt=""
-            className={`${styles.kettle} ${styles.kettleJar}`}
-            data-canvas-obstacle
+            className={`${styles.kettle} ${styles.kettleJar} ${previewSide === "left" && (preview || previewLoading) ? styles.kettleHidden : ""}`.trim()}
+            ref={leftKettleRef}
             src="/jar-community-canvases.png"
           />
           {communityCanvases.length === 0 ? (
             <p className={styles.zoneStatus}>No community questions yet.</p>
           ) : (
-            <Waterfall
-              onHoverItem={handleHoverItem}
+            <WordWheel
+              items={questionItems}
+              kettleRef={leftKettleRef}
+              onHoverItem={(item) => handleHoverItem(item, "left")}
               refreshKey={communityCanvases.map((canvas) => canvas.id).join("|")}
-              regionAlign="left"
               regionRef={leftHalfRef}
-              shapeCenter={0.4}
-              templates={questionTemplates}
             />
           )}
-          <p className={styles.sideNote} data-canvas-obstacle>
+          <KettleNote kettle="jar" label="About the community canvases" side="left">
             To publish your own canvas, name it from{" "}
             <Link href="/canvas">your canvas</Link>. Every week a new question
             appears in your canvas waterfall — answer it there, and your answer
             joins the community canvas for that question.{" "}
             <Link href="/profile">Create your own canvas</Link>.
-          </p>
+          </KettleNote>
+          {previewSide === "left" && (preview || previewLoading) && (
+            <div
+              aria-hidden="true"
+              className={`${styles.kettlePreview} ${styles.kettleJar}`}
+              data-testid="community-hover-preview"
+            >
+              {previewLoading && !preview ? (
+                <p className={styles.kettlePreviewStatus}>Loading preview…</p>
+              ) : preview ? (
+                <>
+                  <CanvasPreview
+                    label={preview.label}
+                    people={preview.people}
+                    unsorted={preview.unsorted}
+                  />
+                  <p className={styles.kettlePreviewCaption}>{preview.label}</p>
+                </>
+              ) : null}
+            </div>
+          )}
         </section>
 
         <section aria-label="People's canvases" className={styles.half} ref={rightHalfRef}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             alt=""
-            className={`${styles.kettle} ${styles.kettlePitcher}`}
-            data-canvas-obstacle
+            className={`${styles.kettle} ${styles.kettlePitcher} ${previewSide === "right" && (preview || previewLoading) ? styles.kettleHidden : ""}`.trim()}
+            ref={rightKettleRef}
             src="/pitcher-peoples-canvases.png"
           />
           {publications.length === 0 ? (
             <p className={styles.zoneStatus}>No canvases published yet.</p>
           ) : (
-            <Waterfall
-              onHoverItem={handleHoverItem}
+            <WordWheel
+              items={peopleItems}
+              kettleRef={rightKettleRef}
+              onHoverItem={(item) => handleHoverItem(item, "right")}
               refreshKey={publications.map((publication) => publication.token).join("|")}
               regionRef={rightHalfRef}
-              shapeCenter={0.55}
-              templates={peopleTemplates}
             />
           )}
-          <p className={styles.sideNote} data-canvas-obstacle>
+          <KettleNote kettle="pitcher" label="About the people's canvases" side="right">
             Published canvases from the community, and the questions we&rsquo;re
             answering together. Open one to see how someone else keeps what they
             notice about the people they love.
-          </p>
+          </KettleNote>
+          {previewSide === "right" && (preview || previewLoading) && (
+            <div
+              aria-hidden="true"
+              className={`${styles.kettlePreview} ${styles.kettlePitcher}`}
+              data-testid="community-hover-preview"
+            >
+              {previewLoading && !preview ? (
+                <p className={styles.kettlePreviewStatus}>Loading preview…</p>
+              ) : preview ? (
+                <>
+                  <CanvasPreview
+                    label={preview.label}
+                    people={preview.people}
+                    unsorted={preview.unsorted}
+                  />
+                  <p className={styles.kettlePreviewCaption}>{preview.label}</p>
+                </>
+              ) : null}
+            </div>
+          )}
         </section>
       </div>
 
-      {/* Hover preview: a small rectangular page-preview thumbnail of the
-          hovered canvas, centered in the gap between the two kettles.
-          Hover-only — the waterfall links and their click behavior are
-          unchanged, and the preview never takes the pointer (it cannot be
-          clicked). On mobile the halves stack, so it sits centered on
-          screen instead. */}
-      {(preview || previewLoading) && (
-        <div
-          aria-hidden="true"
-          className={styles.hoverPreview}
-          data-testid="community-hover-preview"
-        >
-          {previewLoading && !preview ? (
-            <p className={styles.hoverPreviewStatus}>Loading preview…</p>
-          ) : preview ? (
-            <>
-              <CanvasPreview
-                label={preview.label}
-                people={preview.people}
-                unsorted={preview.unsorted}
-              />
-              <p className={styles.hoverPreviewCaption}>{preview.label}</p>
-            </>
-          ) : null}
-        </div>
-      )}
-
-      {/* The falling text is a browsing surface; this list is the same
+      {/* The circling text is a browsing surface; this list is the same
           canvases for keyboard and screen-reader access. */}
       <ul className={styles.visuallyHidden}>
         {publications.map((publication) => (
