@@ -18,17 +18,15 @@ import styles from "./artist-wheel.module.css";
 // from the center, and disappear at the column's top and bottom edges.
 // The list wraps, so it rolls forever.
 //
-// Rolling is manual on hover: scrolling the mouse wheel while hovering
+// Rolling is manual only: scrolling the mouse wheel while hovering
 // the wheel rolls the column by hand, and dragging it vertically spins
-// it too — so trackpads and touch can roll it. When the pointer is
-// not over the wheel it drifts on its own (one full pass through the
-// list in ~50s). Hovering or focusing a word pauses the drift, as
-// before. The jar turns as the list rolls (its frames are driven by
-// the same position, one full jar turn per full pass through the list).
-// Clicking a word tweens it to the center. Reduced motion: a static
-// list (manual rolling still works — it is the user's own input, not
-// auto-motion).
-const ROWS_PER_MS = 1 / 50000; // one full pass through the list in ~50s
+// it too — so trackpads and touch can roll it. The wheel never rolls
+// on its own: it rests on its initial name (Rhema Tan, so the page
+// loads showing her photos) until the user rolls it. The jar turns as
+// the list rolls (its frames are driven by the same position, one full
+// jar turn per full pass through the list). Clicking a word tweens it
+// to the center. Reduced motion: a static list (manual rolling still
+// works — it is the user's own input, not auto-motion).
 const TWEEN_MS = 500;
 const ROW_HEIGHT_PX = 34;
 // Mouse-wheel rolling: rows per pixel of scroll, clamped per event so
@@ -72,15 +70,12 @@ export default function ArtistWheel({
   // Position in rows (float). 0 puts the first item at the center, so
   // the page loads showing Rhema Tan's photos.
   const [position, setPosition] = useState(0);
-  const [paused, setPaused] = useState(false);
-  const [manual, setManual] = useState(false);
   const [reduced] = useState(isReducedMotion);
   const positionRef = useRef(0);
-  const pausedRef = useRef(false);
-  const manualRef = useRef(false);
   const tweenRef = useRef<{ from: number; to: number; start: number } | null>(
     null,
   );
+  const tweenRafRef = useRef(0);
   const dragRef = useRef<{
     lastY: number;
     moved: number;
@@ -110,14 +105,6 @@ export default function ArtistWheel({
   }, [activeIndex, items, onActiveChange]);
 
   useEffect(() => {
-    pausedRef.current = paused;
-  }, [paused]);
-
-  useEffect(() => {
-    manualRef.current = manual;
-  }, [manual]);
-
-  useEffect(() => {
     const column = columnRef.current;
     if (!column) return;
     const measure = () => setColumnHeight(column.clientHeight);
@@ -127,35 +114,32 @@ export default function ArtistWheel({
     return () => observer.disconnect();
   }, []);
 
-  // Auto-drift (time-based, so the speed holds on any frame rate). It
-  // runs only when the list is neither paused nor under manual
-  // control; a click tween takes precedence over it.
-  useEffect(() => {
-    if (reduced) return;
-    let raf = 0;
-    let last: number | null = null;
+  // Click tweens only — there is no auto-drift. The rAF loop runs
+  // only while a tween is active and stops itself when it finishes.
+  const runTween = useCallback(() => {
+    if (tweenRafRef.current) return;
     const tick = (now: number) => {
-      if (last === null) last = now;
-      const dt = now - last;
-      last = now;
       const tween = tweenRef.current;
-      if (tween) {
-        const t = Math.min(1, (now - tween.start) / TWEEN_MS);
-        const eased = 1 - Math.pow(1 - t, 3);
-        const next = tween.from + (tween.to - tween.from) * eased;
-        positionRef.current = next;
-        setPosition(next);
-        if (t >= 1) tweenRef.current = null;
-      } else if (!pausedRef.current && !manualRef.current) {
-        const next = positionRef.current + dt * ROWS_PER_MS * count;
-        positionRef.current = next;
-        setPosition(next);
+      if (!tween) {
+        tweenRafRef.current = 0;
+        return;
       }
-      raf = requestAnimationFrame(tick);
+      const t = Math.min(1, (now - tween.start) / TWEEN_MS);
+      const eased = 1 - Math.pow(1 - t, 3);
+      const next = tween.from + (tween.to - tween.from) * eased;
+      positionRef.current = next;
+      setPosition(next);
+      if (t >= 1) {
+        tweenRef.current = null;
+        tweenRafRef.current = 0;
+        return;
+      }
+      tweenRafRef.current = requestAnimationFrame(tick);
     };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [reduced, count]);
+    tweenRafRef.current = requestAnimationFrame(tick);
+  }, []);
+
+  useEffect(() => () => cancelAnimationFrame(tweenRafRef.current), []);
 
   const applyManualDelta = useCallback((deltaRows: number) => {
     tweenRef.current = null;
@@ -244,8 +228,9 @@ export default function ArtistWheel({
         to: positionRef.current + delta,
         start: performance.now(),
       };
+      runTween();
     },
-    [count, reduced],
+    [count, reduced, runTween],
   );
 
   if (count === 0) return null;
@@ -281,10 +266,6 @@ export default function ArtistWheel({
         className={`${styles.word} ${isActive ? styles.wordActive : ""}`}
         style={style}
         onClick={() => bringToFront(index)}
-        onMouseEnter={() => setPaused(true)}
-        onMouseLeave={() => setPaused(false)}
-        onFocus={() => setPaused(true)}
-        onBlur={() => setPaused(false)}
         aria-pressed={isActive}
         data-testid={`wheel-word-${item.id}`}
         data-active={isActive}
@@ -300,11 +281,7 @@ export default function ArtistWheel({
       ref={stageRef}
       className={styles.stage}
       data-testid="artist-wheel"
-      onPointerEnter={() => setManual(true)}
-      onPointerLeave={() => {
-        setManual(false);
-        endDrag();
-      }}
+      onPointerLeave={endDrag}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={endDrag}

@@ -12,14 +12,13 @@ import styles from "./cover-column.module.css";
 // The cover-style wheel: names in a vertical column beside the kettle,
 // rolling vertically like a slot machine. The name at the vertical
 // center of the column lights bright white; the names above and below
-// it dim toward the edges. The column rolls slowly on its own; hovering
-// it lets the user roll it by hand (mouse wheel, or drag with the
-// mouse). Hovering a name pauses the roll and reports it to the parent
-// (which shows its preview on the big screen); the parent also learns
-// the center name whenever it changes, and learns when the pointer
-// enters the column (so the big screen follows that column). Reduced
-// motion: a static column, first name centered; manual rolling still
-// works.
+// it dim toward the edges. The column never rolls on its own: it rests
+// on the first name until the user rolls it by hand (mouse wheel, or
+// drag with the mouse). Hovering a name reports it to the parent (which
+// shows its preview on the big screen); the parent also learns the
+// center name whenever it changes, and learns when the pointer enters
+// the column (so the big screen follows that column). Reduced motion:
+// a static column, first name centered; manual rolling still works.
 export type CoverColumnItem = {
   label: string;
   href: string;
@@ -35,9 +34,6 @@ type CoverColumnProps = {
 // One name's slot (px): the name's line-height, so the text sits
 // centered in its slot and neighbors sit a breath apart.
 const SLOT_HEIGHT_PX = 38;
-// The roll speed (px per ms): a name passes the center about every
-// five seconds — slow enough to read, fast enough to feel alive.
-const SPEED_PX_PER_MS = 0.008;
 // Opacity at the column's top/bottom edges (1 at the center).
 const OPACITY_EDGE = 0.45;
 // A pointer move shorter than this is a click, not a drag.
@@ -60,9 +56,6 @@ export default function CoverColumn({
   const [height, setHeight] = useState(0);
   const [offset, setOffset] = useState(0);
   const offsetRef = useRef(0);
-  const pausedRef = useRef(false);
-  const hoverColumnRef = useRef(false);
-  const hoverNameRef = useRef(false);
   const dragRef = useRef<{ startY: number; startOffset: number } | null>(
     null,
   );
@@ -84,15 +77,17 @@ export default function CoverColumn({
     return () => observer.disconnect();
   }, []);
 
-  // Start at a random point in the loop (set after mount, so the server
-  // and the first client render agree).
+  // Start with the first name centered (set after mount, once the
+  // height is measured, so the server and the first client render
+  // agree). The column does not roll on its own — it rests here until
+  // the user rolls it by hand.
   useEffect(() => {
-    if (startedRef.current || cycle === 0 || reducedMotion) return;
+    if (startedRef.current || cycle === 0 || height === 0) return;
     startedRef.current = true;
-    const start = Math.random() * cycle;
+    const start = SLOT_HEIGHT_PX / 2 - height / 2;
     offsetRef.current = start;
     setOffset(start);
-  }, [cycle, reducedMotion]);
+  }, [cycle, height]);
 
   // Reduced motion: keep the first name centered (recomputed when the
   // height is measured). The state sync is deferred to the next frame —
@@ -105,28 +100,6 @@ export default function CoverColumn({
     const frame = requestAnimationFrame(() => setOffset(start));
     return () => cancelAnimationFrame(frame);
   }, [reducedMotion, cycle, height]);
-
-  // The roll: time-based, so the speed holds on any frame rate. The
-  // offset is unbounded (it never wraps) — the rendered names are a
-  // window into the repeating list, so the motion stays continuous and
-  // no name ever remounts at a loop seam.
-  useEffect(() => {
-    if (reducedMotion) return;
-    let frame = 0;
-    let last: number | null = null;
-    const tick = (t: number) => {
-      if (last === null) last = t;
-      const dt = t - last;
-      last = t;
-      if (!pausedRef.current) {
-        offsetRef.current += dt * SPEED_PX_PER_MS;
-        setOffset(offsetRef.current);
-      }
-      frame = requestAnimationFrame(tick);
-    };
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
-  }, [reducedMotion]);
 
   // Rolling by hand: the mouse wheel over the column rolls it (the page
   // does not scroll while the pointer is over the column). A
@@ -184,13 +157,6 @@ export default function CoverColumn({
     }
   }, [centerItem, onCenterItem]);
 
-  const updatePaused = () => {
-    pausedRef.current =
-      hoverColumnRef.current ||
-      hoverNameRef.current ||
-      dragRef.current !== null;
-  };
-
   if (slots.length === 0) {
     return <div className={styles.column} ref={containerRef} />;
   }
@@ -206,17 +172,10 @@ export default function CoverColumn({
           startY: event.clientY,
           startOffset: offsetRef.current,
         };
-        pausedRef.current = true;
         event.currentTarget.setPointerCapture(event.pointerId);
       }}
       onPointerEnter={() => {
-        hoverColumnRef.current = true;
-        pausedRef.current = true;
         onEngage?.();
-      }}
-      onPointerLeave={() => {
-        hoverColumnRef.current = false;
-        updatePaused();
       }}
       onPointerMove={(event) => {
         const drag = dragRef.current;
@@ -229,7 +188,6 @@ export default function CoverColumn({
       }}
       onPointerUp={() => {
         dragRef.current = null;
-        updatePaused();
         window.setTimeout(() => {
           suppressClickRef.current = false;
         }, 0);
@@ -247,29 +205,25 @@ export default function CoverColumn({
             className={`${styles.columnName} ${slot.isActive ? styles.columnNameActive : ""}`.trim()}
             data-active={slot.isActive || undefined}
             data-slot={slot.k}
+            // Links are natively draggable: without this, a drag
+            // starts a link drag and the page stops receiving the
+            // pointermove events the hand-roll needs.
+            draggable={false}
             href={slot.item.href}
             key={slot.k}
             onBlur={() => {
-              hoverNameRef.current = false;
-              updatePaused();
               onHoverItem?.(null);
             }}
             onClick={(event) => {
               if (suppressClickRef.current) event.preventDefault();
             }}
             onFocus={() => {
-              hoverNameRef.current = true;
-              pausedRef.current = true;
               onHoverItem?.(slot.item);
             }}
             onMouseEnter={() => {
-              hoverNameRef.current = true;
-              pausedRef.current = true;
               onHoverItem?.(slot.item);
             }}
             onMouseLeave={() => {
-              hoverNameRef.current = false;
-              updatePaused();
               onHoverItem?.(null);
             }}
             style={style}
