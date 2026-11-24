@@ -55,6 +55,12 @@
   text-align: left;
   white-space: nowrap;
   opacity: var(--word-opacity, 0.55);
+  /* Scale about the left edge, not the center: the words sit at the
+     column's left edge (left: 0) and the column clips horizontally
+     (overflow: hidden), so scaling about the center pushes the first
+     letters out of the column and cuts them off. Scaling about the
+     left edge grows the word rightward into the empty space instead. */
+  transform-origin: left center;
 }
 
 .word:hover {
