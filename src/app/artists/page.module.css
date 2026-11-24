@@ -1,3 +1,10 @@
+/* No hero header on /artists: the content starts below the fixed
+   chrome with the same top clearance the hero used to give
+   (clamp(7rem, 12vh, 9rem) — see .playgroundPage .textHero). */
+.top {
+  padding-top: clamp(7rem, 12vh, 9rem);
+}
+
 .contactForm {
   display: grid;
   justify-items: start;
